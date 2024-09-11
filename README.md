@@ -2,8 +2,7 @@
 
 <div align="center">
 
-![image](https://github.com/user-attachments/assets/34dc8c1e-7c10-4d53-9619-e9fa27104acd)
-
+![image](https://github.com/user-attachments/assets/9ac06140-b55f-43e8-b5af-945ee4c200ba)
 
 # 🌍 ✈️ 배낭 💼📑
 
