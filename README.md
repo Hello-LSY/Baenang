@@ -25,9 +25,9 @@
 
 
 
-| <img src="https://github.com/Hello-LSY.png" width="80"> | <img src="https://github.com/kimdj4e.png" width="80"> | <img src="https://github.com/MyYeonbi.png" width="80"> | <img src="https://github.com/~~~.png" width="80"> | <img src="https://github.com/dlxodnd007.png" width="80"> | <img src="https://github.com/gwonnnns.png" width="80"> |
+| <img src="https://github.com/Hello-LSY.png" width="80"> | <img src="https://github.com/kimdj4e.png" width="80"> | <img src="https://github.com/MyYeonbi.png" width="80"> | <img src="https://github.com/pq5910.png" width="80"> | <img src="https://github.com/dlxodnd007.png" width="80"> | <img src="https://github.com/gwonnnns.png" width="80"> |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| [이신영](https://github.com/Hello-LSY) | [김동준](https://github.com/kimdj4e) | [김연비](https://github.com/MyYeonbi) | [김우정](https://github.com/~~~) | [이태웅](https://github.com/dlxodnd007) | [장형권](https://github.com/gwonnnns) |
+| [이신영](https://github.com/Hello-LSY) | [김동준](https://github.com/kimdj4e) | [김연비](https://github.com/MyYeonbi) | [김우정](https://github.com/pq5910) | [이태웅](https://github.com/dlxodnd007) | [장형권](https://github.com/gwonnnns) |
 | PM, DevOps, BE | FE, BE, UI | FE, BE | FE, BE, UI | FE, BE | FE, BE |
 
 
