@@ -42,7 +42,7 @@ public class MemberDetailsService implements UserDetailsService {
         Collection<? extends GrantedAuthority> authorities = member.getAuthorities();
 
         // 로그에 사용자 이름과 비밀번호를 기록 (디버그용)
-        log.debug("Loaded user: {}, password: {}", member.getUsername(), member.getPassword());
+        log.debug("Loaded user: {}", member.getUsername());
 
         // Spring Security의 User 객체를 생성하여 반환
         return new User(

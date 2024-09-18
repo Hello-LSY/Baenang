@@ -1,5 +1,6 @@
 package org.project.backend.config;
 
+import lombok.RequiredArgsConstructor;
 import org.project.backend.model.Member;
 import org.project.backend.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import javax.annotation.PostConstruct;
  * 여기서는 테스트용 사용자 계정 'user'를 생성한다.
  */
 @Component
+@RequiredArgsConstructor
 public class DataInitializer {
 
     private final MemberRepository memberRepository;
@@ -23,10 +25,6 @@ public class DataInitializer {
      * @param memberRepository Member 엔티티를 처리하는 레포지토리
      * @param passwordEncoder 비밀번호를 암호화하기 위한 인코더
      */
-    public DataInitializer(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     /**
      * 애플리케이션 시작 시 테스트용 사용자 'user'를 데이터베이스에 생성하는 메서드.

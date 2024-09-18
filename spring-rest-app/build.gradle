@@ -42,6 +42,9 @@ dependencies {
     implementation 'org.springframework.security:spring-security-web:5.7.7'
     implementation 'org.springframework.security:spring-security-config:5.7.7'
 
+    // jwt api
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
