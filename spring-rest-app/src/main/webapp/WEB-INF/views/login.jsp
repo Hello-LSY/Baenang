@@ -5,7 +5,7 @@
 </head>
 <body>
 <h2>로그인</h2>
-<form action="${pageContext.request.contextPath}/perform_login" method="post">
+<form action="${pageContext.request.contextPath}/login" method="post">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username">
     <label for="password">Password:</label>
