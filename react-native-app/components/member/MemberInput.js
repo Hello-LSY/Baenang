@@ -1,38 +1,35 @@
-// components/member/MemberInput.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import createAxiosInstance from '../../services/axiosInstance';
 
-const MemberInput = ({ route, navigation }) => {
-  const { token, member } = route.params || {};
-  const [username, setUsername] = useState(member ? member.username : '');
-  const [email, setEmail] = useState(member ? member.email : '');
-  const [loading, setLoading] = useState(false);
+const MemberInput = ({ navigation, route }) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState(''); // 비밀번호 상태 추가
+  const { token, fetchMembers } = route.params; // route.params에서 fetchMembers 가져오기
 
   const saveMember = async () => {
-    if (!username || !email) {
-      Alert.alert('Error', 'All fields are required.');
+    if (!username || !password) {  // username과 password가 비어 있는지 확인
+      Alert.alert('Error', 'Username and Password are required.');
       return;
     }
 
     try {
-      setLoading(true);
       const axiosInstance = createAxiosInstance(token);
-      if (member) {
-        // 회원 수정
-        await axiosInstance.put(`/api/members/${member.id}`, { username, email });
-        Alert.alert('Success', 'Member updated successfully.');
-      } else {
-        // 회원 추가
-        await axiosInstance.post('/api/members', { username, email });
-        Alert.alert('Success', 'Member added successfully.');
+      const response = await axiosInstance.post('/api/members', {
+        username,
+        password,
+      });
+      Alert.alert('Success', 'Member saved successfully');
+
+      // 리스트를 새로고침
+      if (fetchMembers) {
+        fetchMembers();
       }
-      navigation.goBack(); // 이전 화면으로 이동
+
+      navigation.navigate('MemberList'); // 저장 후 MemberList로 이동
     } catch (error) {
       console.error('Error saving member:', error);
-      Alert.alert('Error', 'Failed to save member.');
-    } finally {
-      setLoading(false);
+      Alert.alert('Error', 'Failed to save member');
     }
   };
 
@@ -46,24 +43,26 @@ const MemberInput = ({ route, navigation }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="Password"
+        value={password} // 비밀번호 입력 필드
+        onChangeText={setPassword} // 비밀번호 상태 업데이트
+        secureTextEntry
       />
-      <Button title={member ? 'Update Member' : 'Add Member'} onPress={saveMember} />
+      <Button title="Save Member" onPress={saveMember} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 16,
   },
   input: {
+    marginBottom: 12,
+    padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    marginBottom: 16,
-    padding: 8,
   },
 });
 

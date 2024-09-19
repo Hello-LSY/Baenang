@@ -1,12 +1,13 @@
-// components/member/MemberList.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Alert, ActivityIndicator, FlatList, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import createAxiosInstance from '../../services/axiosInstance';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const MemberList = ({ navigation, token }) => {
+const MemberList = ({ token, navigation }) => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 멤버 목록 조회 함수
   const fetchMembers = async () => {
     try {
       const axiosInstance = createAxiosInstance(token);
@@ -20,11 +21,12 @@ const MemberList = ({ navigation, token }) => {
     }
   };
 
+  // 멤버 삭제 함수
   const deleteMember = async (id) => {
     try {
       const axiosInstance = createAxiosInstance(token);
       await axiosInstance.delete(`/api/members/${id}`);
-      fetchMembers(); // 회원 삭제 후 목록 갱신
+      fetchMembers(); // 삭제 후 목록 갱신
     } catch (error) {
       console.error('Error deleting member:', error);
       Alert.alert('Error', 'Failed to delete member');
@@ -35,12 +37,16 @@ const MemberList = ({ navigation, token }) => {
     fetchMembers();
   }, []);
 
+  if (loading) {
+    return <ActivityIndicator size="large" />;
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Members List</Text>
       <Button
-        title="Add New Member"
-        onPress={() => navigation.navigate('MemberInput', { token })} // 회원 추가 화면으로 이동
+        title="Add Member"
+        onPress={() => navigation.navigate('MemberInput', { token, fetchMembers })} // 추가 화면으로 이동, fetchMembers 함수 전달
       />
       <FlatList
         data={members}
