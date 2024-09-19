@@ -1,45 +1,32 @@
-//HomeScreen.js
+// components/home/HomeScreen.js
+import React from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
 
-import React, { useEffect, useState } from 'react';
-import { View, Text, Alert, ActivityIndicator } from 'react-native';
-
-const HomeScreen = ({ axiosInstance }) => {
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        console.log('axiosInstance received in HomeScreen:', axiosInstance);
-        console.log('axiosInstance type:', typeof axiosInstance);
-
-        if (axiosInstance && typeof axiosInstance.get === 'function') {
-          const response = await axiosInstance.get('/api/members');
-          setMembers(response.data);
-        } else {
-          throw new Error('axiosInstance is undefined or not a function');
-        }
-      } catch (error) {
-        console.error('Error fetching members:', error);
-        Alert.alert('Error', 'Failed to fetch members');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMembers();
-  }, [axiosInstance]);
-
-  if (loading) {
-    return <ActivityIndicator size="large" />;
-  }
+const HomeScreen = ({ navigation, route }) => {
+  const { token } = route.params; // route.params에서 token 가져옴
 
   return (
-    <View>
-      <Text>Members List</Text>
-      {/* Render your members here */}
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome to Home Screen</Text>
+      <Button
+        title="Go to Member Management"
+        onPress={() => navigation.navigate('MemberNavigator', { token })} // token을 함께 전달
+      />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+});
 
 export default HomeScreen;
