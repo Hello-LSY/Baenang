@@ -30,6 +30,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Member findByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberNotFoundException("Member not found with username: " + username));
+    }
+
+    @Override
     public MemberDTO getMemberById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberNotFoundException("Member with id " + id + " not found"));
