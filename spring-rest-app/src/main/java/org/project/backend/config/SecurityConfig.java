@@ -54,16 +54,14 @@ public class SecurityConfig {
 
                 .logout()
                 .logoutUrl("/logout")
-                .logoutSuccessHandler(new CustomLogoutSuccessHandler())
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID");
+                .logoutSuccessHandler(new CustomLogoutSuccessHandler());
+//                .invalidateHttpSession(true)
+//                .deleteCookies("JSESSIONID");
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
