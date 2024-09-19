@@ -19,19 +19,19 @@
  ![React Native](https://img.shields.io/badge/React%20Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)  ![Spring Framework](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)  ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)  ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)  ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white)  
  ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)  ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)  ![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white) 
 
-</div>
 
 
 ## 👥 팀원 소개
 
 
 
-| <img src="https://github.com/Hello-LSY.png" width="80"> | <img src="https://github.com/~~~.png" width="80"> | <img src="https://github.com/MyYeonbi.png" width="80"> | <img src="https://github.com/~~~.png" width="80"> | <img src="https://github.com/dlxodnd007.png" width="80"> | <img src="https://github.com/gwonnnns.png" width="80"> |
+| <img src="https://github.com/Hello-LSY.png" width="80"> | <img src="https://github.com/kimdj4e.png" width="80"> | <img src="https://github.com/MyYeonbi.png" width="80"> | <img src="https://github.com/pq5910.png" width="80"> | <img src="https://github.com/dlxodnd007.png" width="80"> | <img src="https://github.com/gwonnnns.png" width="80"> |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| [이신영](https://github.com/Hello-LSY) | [김동준](https://github.com/~~~) | [김연비](https://github.com/MyYeonbi) | [김우정](https://github.com/~~~) | [이태웅](https://github.com/dlxodnd007) | [장형권](https://github.com/gwonnnns) |
+| [이신영](https://github.com/Hello-LSY) | [김동준](https://github.com/kimdj4e) | [김연비](https://github.com/MyYeonbi) | [김우정](https://github.com/pq5910) | [이태웅](https://github.com/dlxodnd007) | [장형권](https://github.com/gwonnnns) |
 | PM, DevOps, BE | FE, BE, UI | FE, BE | FE, BE, UI | FE, BE | FE, BE |
 
 
+</div>
 
 
 ## 📖 프로젝트 개요
