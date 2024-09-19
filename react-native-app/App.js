@@ -1,52 +1,61 @@
-//App.js
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+// App.js
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { View, ActivityIndicator, Button, StyleSheet, Alert } from 'react-native'; // Alert 추가
 import Login from './components/login/Login';
-import HomeScreen from './components/home/HomeScreen';
-import createAxiosInstance from './services/axiosInstance';
+import AppNavigator from './components/navigation/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
   const [token, setToken] = useState(null);
-  const [axiosInstance, setAxiosInstance] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const handleLoginSuccess = (token) => {
-  setToken(token);
-  const instance = createAxiosInstance(token);
-
-  if (instance instanceof Promise) {
-    console.error('Axios instance is a Promise, which is unexpected.');
-  } else {
-    console.log('Axios instance after login:', instance);
-    setAxiosInstance(instance);
-  }
-};
-
-
-
-  const handleLogout = () => {
-    setToken(null);
-    setAxiosInstance(null);
+  const handleLoginSuccess = async (token) => {
+    setToken(token);
+    await AsyncStorage.setItem('token', token);
   };
 
-  if (!token) {
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      setToken(null);
+      Alert.alert('Logged out', 'You have been logged out.');
+    } catch (error) {
+      console.error('Logout Error:', error);
+      Alert.alert('Error', 'Failed to log out');
+    }
+  };
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const savedToken = await AsyncStorage.getItem('token');
+      if (savedToken) {
+        setToken(savedToken);
+      }
+      setLoading(false);
+    };
+    checkToken();
+  }, []);
+
+  if (loading) {
     return (
       <View style={styles.container}>
-        <Login onLoginSuccess={handleLoginSuccess} />
+        <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {axiosInstance ? (
-        <>
-          <HomeScreen axiosInstance={axiosInstance} />
-          <Button title="Logout" onPress={handleLogout} />
-        </>
+    <NavigationContainer>
+      {token ? (
+        <AppNavigator token={token} />
       ) : (
-        <Text>Loading Axios instance...</Text>
+        <View style={styles.container}>
+          <Login onLoginSuccess={handleLoginSuccess} />
+        </View>
       )}
-    </View>
+      {token && <Button title="Logout" onPress={handleLogout} />}
+    </NavigationContainer>
   );
 }
 

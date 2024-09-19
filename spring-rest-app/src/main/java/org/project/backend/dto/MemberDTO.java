@@ -17,7 +17,6 @@ public class MemberDTO {
      * 데이터만 전송하며, 엔티티와 분리된 객체로 안전하게 데이터를 전달한다.
      */
 
-
     // 회원 고유 식별자
     private Long id;
 
