@@ -40,8 +40,8 @@ public class SecurityConfig {
 
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/register", "/login").permitAll()  // 로그인, 회원가입 등은 허용
-                .antMatchers("/api/members/**").authenticated()  // 인증된 사용자만 접근
+                .antMatchers("/", "/register", "/login", "/api/members").permitAll()  // 로그인, 회원가입 등은 허용
+                .antMatchers("/api/**").authenticated()  // 인증된 사용자만 접근
                 .anyRequest().authenticated()
                 .and()
 

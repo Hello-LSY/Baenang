@@ -5,6 +5,7 @@ import org.project.backend.model.Member;
 import org.project.backend.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 
@@ -31,6 +32,7 @@ public class DataInitializer {
      * 사용자가 존재하지 않을 경우에만 생성되며, 비밀번호는 암호화되어 저장된다.
      */
     @PostConstruct
+    @Transactional
     public void init() {
         // 'user'라는 이름의 사용자가 이미 존재하지 않을 경우에만 생성
         if (memberRepository.findByUsername("user").isEmpty()) {

@@ -43,7 +43,6 @@ public class Member implements UserDetails {
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BusinessCard businessCard;
 
-    // UserDetails 인터페이스 메서드 구현
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));

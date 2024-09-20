@@ -1,19 +1,21 @@
 package org.project.backend.model;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 @Table(name = "business_card") // 테이블명은 소문자로
 public class BusinessCard implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "card_id")
-    private Long cardId;
+    private String cardId;
 
     @OneToOne
     @JoinColumn(name = "member_id", referencedColumnName = "member_id")
@@ -36,4 +38,14 @@ public class BusinessCard implements Serializable {
 
     @Column(name = "qr", columnDefinition = "TEXT")
     private String qr;
+
+    // 엔티티의 상태를 변경하기 위한 update 메서드
+    public void update(String name, String country, String email, String sns, String introduction, String qr) {
+        this.name = name;
+        this.country = country;
+        this.email = email;
+        this.sns = sns;
+        this.introduction = introduction;
+        this.qr = qr;
+    }
 }

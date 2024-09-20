@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.backend.dto.MemberDTO;
 import org.project.backend.model.Member;
 import org.project.backend.service.MemberServiceImpl;
-import org.project.backend.exception.member.MemberNotFoundException;
+import org.project.backend.exception.member.GeneralMemberNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ public class MemberController {
         try {
             MemberDTO member = memberServiceImpl.getMemberById(id);
             return ResponseEntity.ok(member);  // 성공적으로 조회된 회원 정보를 반환
-        } catch (MemberNotFoundException e) {
+        } catch (GeneralMemberNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // 회원을 찾지 못했을 때 404 반환
         }
     }
@@ -54,7 +54,7 @@ public class MemberController {
         try {
             MemberDTO updatedMember = memberServiceImpl.updateMember(id, memberDetails);
             return ResponseEntity.ok(updatedMember);  // 성공적으로 업데이트된 정보를 반환
-        } catch (MemberNotFoundException e) {
+        } catch (GeneralMemberNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // 회원을 찾지 못했을 때 404 반환
         }
     }
@@ -65,7 +65,7 @@ public class MemberController {
         try {
             memberServiceImpl.deleteMember(id);
             return ResponseEntity.noContent().build();  // 회원 삭제 후 204 반환
-        } catch (MemberNotFoundException e) {
+        } catch (GeneralMemberNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found");  // 회원을 찾지 못했을 때 404 반환
         }
     }
