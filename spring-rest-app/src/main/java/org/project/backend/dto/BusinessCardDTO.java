@@ -4,9 +4,12 @@ import lombok.*;
 
 @Getter
 @Setter
-public class BusinessCardDTO  {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class BusinessCardDTO {
 
-    private Long cardId;
+    private String cardId;
     private Long memberId;
     private String name;
     private String country;

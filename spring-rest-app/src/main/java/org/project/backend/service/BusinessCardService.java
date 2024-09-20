@@ -5,8 +5,8 @@ import org.project.backend.dto.BusinessCardDTO;
 
 public interface BusinessCardService {
     BusinessCardDTO getBusinessCardByMemberId(Long memberId);
-    BusinessCardDTO getBusinessCardById(Long cardId);
-    BusinessCardDTO createBusinessCard(Long memberId, BusinessCardDTO businessCardDTO);
-    BusinessCardDTO updateBusinessCard(Long cardId, BusinessCardDTO businessCardDTO);
-    void deleteBusinessCard(Long cardId);
+    BusinessCardDTO getBusinessCardById(String cardId);
+    BusinessCardDTO createBusinessCard(Long memberId, BusinessCardDTO businessCardDTO) throws Exception;
+    BusinessCardDTO updateBusinessCard(String cardId, BusinessCardDTO businessCardDTO);
+    void deleteBusinessCard(String cardId);
 }

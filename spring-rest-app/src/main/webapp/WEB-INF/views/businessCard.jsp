@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,6 +22,11 @@
     .business-card p {
       margin: 5px 0;
     }
+    .business-card img {
+      margin-top: 10px;
+      width: 150px; /* QR 코드 이미지 크기 설정 */
+      height: 150px;
+    }
   </style>
 </head>
 <body>
@@ -30,7 +36,7 @@
   <p><strong>Email:</strong> ${businessCard.email}</p>
   <p><strong>SNS:</strong> ${businessCard.sns}</p>
   <p><strong>Introduction:</strong> ${businessCard.introduction}</p>
-  <img src="${businessCard.qr}" alt="QR Code" />
+  <img src="${pageContext.request.contextPath}/images/qr/${businessCard.qr}" alt="QR Code" />
 </div>
 </body>
 </html>

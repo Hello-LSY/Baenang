@@ -89,13 +89,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // /resources/** 경로에 대한 정적 자원 핸들링
+
         registry.addResourceHandler("/resources/**")
                 .addResourceLocations("/resources/")
-                .setCachePeriod(3600);  // 1시간 마다 캐시
+                .setCachePeriod(3600);
 
-        // /static/** 경로에 대한 정적 자원 핸들링
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/");
+
+        // 추가: C 드라이브에 저장된 이미지 경로를 정적 리소스로 설정
+        registry.addResourceHandler("/images/qr/**")
+                .addResourceLocations("file:///C:/upload/images/qr/")
+                .setCachePeriod(3600); // 캐시 설정 (1시간)
     }
+
 }
