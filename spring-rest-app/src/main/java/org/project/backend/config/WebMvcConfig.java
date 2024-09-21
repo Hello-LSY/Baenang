@@ -89,7 +89,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
         registry.addResourceHandler("/resources/**")
                 .addResourceLocations("/resources/")
                 .setCachePeriod(3600);
@@ -101,6 +100,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/images/qr/**")
                 .addResourceLocations("file:///C:/upload/images/qr/")
                 .setCachePeriod(3600); // 캐시 설정 (1시간)
+
+        // 추가: Swagger 리소스 경로 추가
+        registry.addResourceHandler("/swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
+
 
 }
