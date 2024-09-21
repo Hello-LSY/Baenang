@@ -1,5 +1,8 @@
 package org.project.backend.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.project.backend.dto.BusinessCardDTO;
 import org.project.backend.dto.SavedBusinessCardDTO;
@@ -12,38 +15,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/business-cards")
+@RequestMapping("/api")
 @RequiredArgsConstructor
+@Api(tags = "BusinessCard API", description = "전자 명함 관리 API") // 컨트롤러 설명
 public class BusinessCardController {
 
     private final BusinessCardService businessCardService;
     private final SavedBusinessCardService savedBusinessCardService;
 
-    // 특정 회원의 명함 정보를 조회하는 엔드포인트
-    @GetMapping("/member/{memberId}")
-    public ResponseEntity<BusinessCardDTO> getBusinessCardByMemberId(@PathVariable Long memberId) {
-        try {
-            BusinessCardDTO businessCardDTO = businessCardService.getBusinessCardByMemberId(memberId);
-            return ResponseEntity.ok(businessCardDTO);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 명함을 찾지 못했을 때 404 반환
-        }
-    }
+    // 명함 생성 및 관리 관련 엔드포인트
 
-    // 명함 ID로 명함 정보를 조회하는 엔드포인트
-    @GetMapping("/{cardId}")
-    public ResponseEntity<BusinessCardDTO> getBusinessCardById(@PathVariable String cardId) {
-        try {
-            BusinessCardDTO businessCardDTO = businessCardService.getBusinessCardById(cardId);
-            return ResponseEntity.ok(businessCardDTO);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 명함을 찾지 못했을 때 404 반환
-        }
-    }
-
-    // 새로운 명함을 생성하는 엔드포인트
-    @PostMapping("/member/{memberId}")
-    public ResponseEntity<BusinessCardDTO> createBusinessCard(@PathVariable Long memberId, @RequestBody BusinessCardDTO businessCardDTO) {
+    @ApiOperation(value = "회원 ID로 새로운 명함 생성", notes = "회원 ID를 사용하여 새로운 전자 명함을 생성합니다.")
+    @PostMapping("/business-cards/members/{memberId}")
+    public ResponseEntity<BusinessCardDTO> createBusinessCard(
+            @ApiParam(value = "회원 ID", required = true) @PathVariable Long memberId,
+            @ApiParam(value = "생성할 명함 정보", required = true) @RequestBody BusinessCardDTO businessCardDTO) {
         try {
             BusinessCardDTO createdBusinessCardDTO = businessCardService.createBusinessCard(memberId, businessCardDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBusinessCardDTO); // 명함 생성 후 201 반환
@@ -56,9 +42,35 @@ public class BusinessCardController {
         }
     }
 
-    // 기존 명함 정보를 업데이트하는 엔드포인트
-    @PutMapping("/{cardId}")
-    public ResponseEntity<BusinessCardDTO> updateBusinessCard(@PathVariable String cardId, @RequestBody BusinessCardDTO businessCardDTO) {
+    @ApiOperation(value = "명함 ID로 명함 정보 조회", notes = "명함 ID를 사용하여 전자 명함 정보를 조회합니다.")
+    @GetMapping("/business-cards/{cardId}")
+    public ResponseEntity<BusinessCardDTO> getBusinessCardById(
+            @ApiParam(value = "명함 ID", required = true) @PathVariable String cardId) {
+        try {
+            BusinessCardDTO businessCardDTO = businessCardService.getBusinessCardById(cardId);
+            return ResponseEntity.ok(businessCardDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 명함을 찾지 못했을 때 404 반환
+        }
+    }
+
+    @ApiOperation(value = "회원 ID로 명함 정보 조회", notes = "회원 ID를 사용하여 전자 명함 정보를 조회합니다.")
+    @GetMapping("/business-cards/members/{memberId}")
+    public ResponseEntity<BusinessCardDTO> getBusinessCardByMemberId(
+            @ApiParam(value = "회원 ID", required = true) @PathVariable Long memberId) {
+        try {
+            BusinessCardDTO businessCardDTO = businessCardService.getBusinessCardByMemberId(memberId);
+            return ResponseEntity.ok(businessCardDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 명함을 찾지 못했을 때 404 반환
+        }
+    }
+
+    @ApiOperation(value = "명함 정보 업데이트", notes = "명함 ID와 업데이트할 정보를 사용하여 전자 명함을 업데이트합니다.")
+    @PutMapping("/business-cards/{cardId}")
+    public ResponseEntity<BusinessCardDTO> updateBusinessCard(
+            @ApiParam(value = "명함 ID", required = true) @PathVariable String cardId,
+            @ApiParam(value = "업데이트할 명함 정보", required = true) @RequestBody BusinessCardDTO businessCardDTO) {
         try {
             BusinessCardDTO updatedBusinessCardDTO = businessCardService.updateBusinessCard(cardId, businessCardDTO);
             return ResponseEntity.ok(updatedBusinessCardDTO); // 성공적으로 업데이트된 정보를 반환
@@ -67,9 +79,10 @@ public class BusinessCardController {
         }
     }
 
-    // 명함 정보를 삭제하는 엔드포인트
-    @DeleteMapping("/{cardId}")
-    public ResponseEntity<String> deleteBusinessCard(@PathVariable String cardId) {
+    @ApiOperation(value = "명함 삭제", notes = "명함 ID를 사용하여 전자 명함을 삭제합니다.")
+    @DeleteMapping("/business-cards/{cardId}")
+    public ResponseEntity<String> deleteBusinessCard(
+            @ApiParam(value = "명함 ID", required = true) @PathVariable String cardId) {
         try {
             businessCardService.deleteBusinessCard(cardId);
             return ResponseEntity.noContent().build(); // 명함 삭제 후 204 반환
@@ -78,9 +91,12 @@ public class BusinessCardController {
         }
     }
 
-    // 명함 저장 기능을 추가하는 엔드포인트
-    @PostMapping("/save")
-    public ResponseEntity<SavedBusinessCardDTO> saveBusinessCard(@RequestBody SavedBusinessCardDTO savedBusinessCardDTO) {
+    // 명함 저장소 관련 엔드포인트 (저장된 명함 관리)
+
+    @ApiOperation(value = "명함 지갑에 명함 저장", notes = "회원 ID와 명함 ID를 사용하여 명함 지갑에 전자 명함을 저장합니다.")
+    @PostMapping("/saved-business-cards")
+    public ResponseEntity<SavedBusinessCardDTO> saveBusinessCard(
+            @ApiParam(value = "저장할 명함 정보", required = true) @RequestBody SavedBusinessCardDTO savedBusinessCardDTO) {
         try {
             SavedBusinessCardDTO savedCard = savedBusinessCardService.saveBusinessCard(savedBusinessCardDTO.getMemberId(), savedBusinessCardDTO.getBusinessCardId());
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCard); // 명함 저장 후 201 반환
@@ -90,9 +106,10 @@ public class BusinessCardController {
         }
     }
 
-    // 특정 회원이 저장한 명함 ID 목록 조회 엔드포인트
-    @GetMapping("/saved/{memberId}/ids")
-    public ResponseEntity<List<SavedBusinessCardDTO>> getSavedBusinessCardIds(@PathVariable Long memberId) {
+    @ApiOperation(value = "회원의 명함 ID 목록 조회", notes = "회원 ID를 사용하여 명함 지갑에 저장된 명함 ID 목록을 조회합니다.")
+    @GetMapping("/saved-business-cards/members/{memberId}/ids")
+    public ResponseEntity<List<SavedBusinessCardDTO>> getSavedBusinessCardIds(
+            @ApiParam(value = "회원 ID", required = true) @PathVariable Long memberId) {
         try {
             List<SavedBusinessCardDTO> savedCards = savedBusinessCardService.getSavedBusinessCardIds(memberId);
             return ResponseEntity.ok(savedCards);
@@ -102,9 +119,10 @@ public class BusinessCardController {
         }
     }
 
-    // 특정 회원이 저장한 명함 정보 조회 엔드포인트
-    @GetMapping("/saved/{memberId}/cards")
-    public ResponseEntity<List<BusinessCardDTO>> getSavedBusinessCards(@PathVariable Long memberId) {
+    @ApiOperation(value = "회원의 저장된 명함 정보 조회", notes = "회원 ID를 사용하여 명함 지갑에 저장된 전자 명함 정보를 조회합니다.")
+    @GetMapping("/saved-business-cards/members/{memberId}/cards")
+    public ResponseEntity<List<BusinessCardDTO>> getSavedBusinessCards(
+            @ApiParam(value = "회원 ID", required = true) @PathVariable Long memberId) {
         try {
             List<BusinessCardDTO> savedCards = savedBusinessCardService.getSavedBusinessCards(memberId);
             return ResponseEntity.ok(savedCards);

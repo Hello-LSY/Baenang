@@ -31,13 +31,13 @@ public class MemberDTO {
     private String username;
 
     // 비밀번호는 반드시 입력되어야 하며, 최소 8자 이상, 최대 255자
-    @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")
+//    @NotBlank(message = "Password is mandatory")
+//    @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")
     private String password;
 
     // 이메일 필드 추가 (필수, 형식 검사)
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Email should be valid")
+//    @NotBlank(message = "Email is mandatory")
+//    @Email(message = "Email should be valid")
     private String email;
 
     // 사용자 이름
@@ -52,7 +52,7 @@ public class MemberDTO {
     @Size(max = 10, message = "Gender must be at most 10 characters")
     private String gender;
 
-    // 프로필 ID
+    // 프로필 ID 추후 수정
     private Long profileId;
 
     @Builder
