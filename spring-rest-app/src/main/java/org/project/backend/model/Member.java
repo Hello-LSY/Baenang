@@ -40,6 +40,12 @@ public class Member implements UserDetails {
     @Column(name = "gender", length = 10)
     private String gender;
 
+    @Column(name = "email", length = 50)
+    private String email;
+
+    @Column(name = "birthdate")
+    private String birthdate;
+
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BusinessCard businessCard;
 

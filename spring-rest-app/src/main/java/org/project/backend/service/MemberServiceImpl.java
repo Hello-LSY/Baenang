@@ -43,6 +43,7 @@ public class MemberServiceImpl implements MemberService {
     public Member createMember(MemberDTO memberDTO) {
         validateMemberData(memberDTO);
 
+        // 비밀번호 암호화
         memberDTO.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
         Member member = convertToEntity(memberDTO);
         return memberRepository.save(member);
@@ -56,6 +57,9 @@ public class MemberServiceImpl implements MemberService {
         // Builder 패턴을 통해 엔티티의 상태를 변경
         member = member.toBuilder()
                 .username(memberDetails.getUsername())
+                .name(memberDetails.getName())
+                .nickname(memberDetails.getNickname())
+                .gender(memberDetails.getGender())
                 .password(memberDetails.getPassword() != null && !memberDetails.getPassword().isEmpty() ?
                         passwordEncoder.encode(memberDetails.getPassword()) : member.getPassword())
                 .build();
@@ -76,7 +80,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (memberRepository.existsByUsername(memberDTO.getUsername())) {
-            throw new InvalidMemberDataException("Member with the same name already exists");
+            throw new InvalidMemberDataException("Member with the same username already exists");
         }
     }
 
@@ -84,6 +88,9 @@ public class MemberServiceImpl implements MemberService {
         return MemberDTO.builder()
                 .id(member.getId())
                 .username(member.getUsername())
+                .name(member.getName())
+                .nickname(member.getNickname())
+                .gender(member.getGender())
                 .build();
     }
 
@@ -91,6 +98,9 @@ public class MemberServiceImpl implements MemberService {
         return Member.builder()
                 .username(dto.getUsername())
                 .password(dto.getPassword()) // 암호화된 비밀번호를 그대로 사용
+                .name(dto.getName())
+                .nickname(dto.getNickname())
+                .gender(dto.getGender())
                 .build();
     }
 }
