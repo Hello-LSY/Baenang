@@ -1,26 +1,29 @@
 package org.project.backend.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.project.backend.dto.BusinessCardDTO;
 import org.project.backend.dto.MemberDTO;
+import org.project.backend.model.Member;
+import org.project.backend.service.BusinessCardService;
+import org.project.backend.service.MemberService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
 
-@Controller  // 프론트단 없이 테스트를 하기위해 만든 컨트롤러
+@Controller
+@RequiredArgsConstructor
 public class TestController {
 
-    /**
-     * "index" 와 같이 설정해도 .jsp 까지 알아서 인식하는 이유?
-     *  WebMvcConfig 클래스에 뷰 리졸버를 정의하여 파일과(Prefix) 확장자(suffix)가 알아서 인식되게끔 해줌
-     *
-     *
-     */
+    private final BusinessCardService businessCardService;
+    private final MemberService memberService;
 
-    // 루트 경로("/")로 접속 시 호출되는 메서드
     @GetMapping("/")
     public String home(Model model, Principal principal) {
-        // JSP 페이지에서 사용할 "message" 속성에 값을 추가
         model.addAttribute("message", "Welcome to baenang");
 
         // 로그인된 사용자 정보를 모델에 추가
@@ -28,26 +31,63 @@ public class TestController {
             model.addAttribute("principal", principal);
         }
 
-        // "index.jsp"로 이동
         return "index";
     }
 
-
-    // "/login" 경로로 접속 시 로그인 페이지로 이동
     @GetMapping("/login")
     public String login() {
-        // "login.jsp"로 이동
         return "login";
     }
 
-    // "/register" 경로로 접속 시 회원가입 페이지로 이동
     @GetMapping("/register")
     public String register(Model model) {
-        // 회원가입 폼에서 사용할 DTO 객체를 모델에 추가
         model.addAttribute("memberDTO", new MemberDTO());
-        // "register.jsp"로 이동
         return "register";
     }
 
+    @GetMapping("/business-card/{memberId}")
+    public String showBusinessCard(@PathVariable Long memberId, Model model) {
+        BusinessCardDTO businessCardDTO = businessCardService.getBusinessCardByMemberId(memberId);
+        model.addAttribute("businessCard", businessCardDTO);
+        return "businessCard";
+    }
+
+
+    @GetMapping("/business-card/create")
+    public String showBusinessCardForm(Model model, Principal principal) {
+        if (principal != null) {
+            // 로그인된 사용자의 정보를 이용해 Member를 조회
+            Member member = memberService.findByUsername(principal.getName());
+            if (member != null) {
+                model.addAttribute("businessCardDTO", new BusinessCardDTO());
+                model.addAttribute("memberId", member.getId()); // memberId를 모델에 추가
+                return "businessCardForm";
+            }
+        }
+        return "redirect:/login";
+    }
+
+
+    @PostMapping("/business-card/save")
+    public String saveBusinessCard(@ModelAttribute("businessCardDTO") BusinessCardDTO businessCardDTO, Principal principal) {
+        if (principal != null) {
+            // 로그인된 사용자의 정보를 이용해 Member를 조회
+            Member member = memberService.findByUsername(principal.getName());
+            if (member != null) {
+                try {
+                    // 명함 저장
+                    businessCardService.createBusinessCard(member.getId(), businessCardDTO);
+                    return "redirect:/business-card/" + member.getId(); // 명함 상세 페이지로 리다이렉트
+                } catch (RuntimeException e) {
+                    e.printStackTrace(); // 런타임 예외 처리
+                    return "error"; // 예외 발생 시 에러 페이지로 리다이렉트 (또는 다른 경로 설정)
+                } catch (Exception e) {
+                    e.printStackTrace(); // 기타 예외 처리
+                    return "error"; // 예외 발생 시 에러 페이지로 리다이렉트 (또는 다른 경로 설정)
+                }
+            }
+        }
+        return "redirect:/login";
+    }
 
 }

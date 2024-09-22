@@ -63,4 +63,6 @@ public interface MemberService {
      * @param id 삭제할 회원의 ID
      */
     void deleteMember(Long id);
+    Member findByUsername(String username);  // 추가
+
 }

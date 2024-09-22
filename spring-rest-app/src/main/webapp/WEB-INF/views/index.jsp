@@ -13,6 +13,12 @@ Message : ${message}
         <!-- 로그인된 경우, 로그아웃 링크 표시 -->
         <p>안녕하세요, ${principal.name}님!</p>
         <a href="/logout">로그아웃</a>
+
+        <!-- 명함 등록 폼으로 이동하는 버튼 -->
+        <form action="/business-card/create" method="get" style="margin-top: 20px;">
+            <button type="submit">명함 등록하기</button>
+        </form>
+
     </c:when>
     <c:otherwise>
         <!-- 로그인되지 않은 경우, 로그인 및 회원가입 링크 표시 -->
