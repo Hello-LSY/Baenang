@@ -8,10 +8,15 @@ import org.project.backend.dto.BusinessCardDTO;
 import org.project.backend.dto.SavedBusinessCardDTO;
 import org.project.backend.service.BusinessCardService;
 import org.project.backend.service.SavedBusinessCardService;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -22,6 +27,8 @@ public class BusinessCardController {
 
     private final BusinessCardService businessCardService;
     private final SavedBusinessCardService savedBusinessCardService;
+
+    private static final String QR_IMAGE_PATH = "C:/upload/images/qr/";
 
     // 명함 생성 및 관리 관련 엔드포인트
 
@@ -129,6 +136,28 @@ public class BusinessCardController {
         } catch (RuntimeException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // 조회 실패 시 404 반환
+        }
+    }
+
+    // 이미지 파일 제공 엔드포인트
+    @ApiOperation(value = "QR 코드 이미지 제공", notes = "파일 이름을 통해 QR 코드 이미지를 제공합니다.")
+    @GetMapping("/qr-images/{fileName}")
+    public ResponseEntity<Resource> getQRCodeImage(
+            @ApiParam(value = "파일 이름", required = true) @PathVariable String fileName) {
+        try {
+            File file = new File(QR_IMAGE_PATH + fileName);
+            Resource resource = new FileSystemResource(file);
+
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                    .contentType(MediaType.IMAGE_PNG) // 이미지 MIME 타입 설정
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

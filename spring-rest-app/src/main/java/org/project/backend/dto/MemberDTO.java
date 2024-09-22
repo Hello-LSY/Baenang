@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+// import javax.validation.constraints.Email;
+// import javax.validation.constraints.NotBlank;
+// import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -26,39 +26,45 @@ public class MemberDTO {
     private Long id;
 
     // 사용자 이름은 반드시 입력되어야 하며, 최대 50자
-    @NotBlank(message = "Username is mandatory")
-    @Size(max = 50, message = "Username must be at most 50 characters")
+    // @NotBlank(message = "Username is mandatory")
+    // @Size(max = 50, message = "Username must be at most 50 characters")
     private String username;
 
     // 비밀번호는 반드시 입력되어야 하며, 최소 8자 이상, 최대 255자
-//    @NotBlank(message = "Password is mandatory")
-//    @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")
+    // @NotBlank(message = "Password is mandatory")
+    // @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")
     private String password;
 
     // 이메일 필드 추가 (필수, 형식 검사)
-//    @NotBlank(message = "Email is mandatory")
-//    @Email(message = "Email should be valid")
+    // @NotBlank(message = "Email is mandatory")
+    // @Email(message = "Email should be valid")
     private String email;
 
     // 사용자 이름
-    @Size(max = 50, message = "Name must be at most 50 characters")
+    // @Size(max = 50, message = "Name must be at most 50 characters")
     private String name;
 
     // 닉네임
-    @Size(max = 30, message = "Nickname must be at most 30 characters")
+    // @Size(max = 30, message = "Nickname must be at most 30 characters")
     private String nickname;
 
     // 성별
-    @Size(max = 10, message = "Gender must be at most 10 characters")
+    // @Size(max = 10, message = "Gender must be at most 10 characters")
     private String gender;
 
     // 프로필 ID 추후 수정
     private Long profileId;
 
+    // MemberDTO 빌더 패턴을 사용하기 위한 생성자
     @Builder
-    public MemberDTO(Long id, String username, String password) {
+    public MemberDTO(Long id, String username, String password, String email, String name, String nickname, String gender, Long profileId) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.email = email;
+        this.name = name;
+        this.nickname = nickname;
+        this.gender = gender;
+        this.profileId = profileId;
     }
 }

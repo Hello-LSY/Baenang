@@ -1,42 +1,33 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TOKEN_KEY = 'authToken';  // 토큰을 저장할 키 값
+const TOKEN_KEY = 'authToken';
+const MEMBER_ID_KEY = 'memberId';
 
 const tokenStorage = {
-  // 토큰 저장
-  async setToken(token) {
+  async setCredentials(token, memberId) {
     try {
       await AsyncStorage.setItem(TOKEN_KEY, token);
-      console.log("Token saved successfully");
+      await AsyncStorage.setItem(MEMBER_ID_KEY, String(memberId)); // memberId를 문자열로 저장
     } catch (error) {
-      console.error("Error saving token:", error);
+      console.error("Error saving credentials:", error);
     }
   },
-
-  // 토큰 가져오기
-  async getToken() {
+  async getCredentials() {
     try {
       const token = await AsyncStorage.getItem(TOKEN_KEY);
-      if (token !== null) {
-        console.log("Token retrieved:", token);
-        return token;
-      } else {
-        console.log("No token found");
-        return null;
-      }
+      const memberId = await AsyncStorage.getItem(MEMBER_ID_KEY);
+      return { token, memberId };
     } catch (error) {
-      console.error("Error retrieving token:", error);
-      return null;
+      console.error("Error getting credentials:", error);
+      return { token: null, memberId: null };
     }
   },
-
-  // 토큰 삭제
-  async clearToken() {
+  async clearCredentials() {
     try {
       await AsyncStorage.removeItem(TOKEN_KEY);
-      console.log("Token cleared successfully");
+      await AsyncStorage.removeItem(MEMBER_ID_KEY);
     } catch (error) {
-      console.error("Error clearing token:", error);
+      console.error("Error clearing credentials:", error);
     }
   }
 };

@@ -5,8 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 
-@Data
 @Entity
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
