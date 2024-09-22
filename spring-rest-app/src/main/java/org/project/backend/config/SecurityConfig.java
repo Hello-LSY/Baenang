@@ -37,11 +37,19 @@ public class SecurityConfig {
         http
                 .cors()
                 .and()
-
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/register", "/login").permitAll()  // 로그인, 회원가입 등은 허용
-                .antMatchers("/api/members/**").authenticated()  // 인증된 사용자만 접근
+                .antMatchers(
+                        "/swagger-ui.html",
+                        "/swagger-resources/**",
+                        "/v2/api-docs",
+                        "/v3/api-docs", // OpenAPI 3.0 경로
+                        "/webjars/**",
+                        "/api-docs/**"
+                ).permitAll()  // Swagger 관련 리소스는 모두 허용
+
+                .antMatchers("/", "/register", "/login", "/api/members").permitAll()  // 로그인, 회원가입 등은 허용
+                .antMatchers("/api/**").authenticated()  // 인증된 사용자만 접근
                 .anyRequest().authenticated()
                 .and()
 
@@ -55,8 +63,6 @@ public class SecurityConfig {
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessHandler(new CustomLogoutSuccessHandler());
-//                .invalidateHttpSession(true)
-//                .deleteCookies("JSESSIONID");
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 

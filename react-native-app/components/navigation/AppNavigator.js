@@ -1,24 +1,30 @@
 // components/navigation/AppNavigator.js
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import MemberList from '../member/MemberList';
-import MemberDetail from '../member/MemberDetail';
-import MemberInput from '../member/MemberInput';
+import HomeScreen from '../screens/HomeScreen';
+import BusinessCardScreen from '../screens/BusinessCardScreen';
+import CreateBusinessCard from '../screens/CreateBusinessCardScreen';
 
 const Stack = createStackNavigator();
 
-const AppNavigator = ({ token }) => {
+const AppNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="MemberList">
-      <Stack.Screen name="MemberList" options={{ title: 'Members' }}>
-        {(props) => <MemberList {...props} token={token} />}
-      </Stack.Screen>
-      <Stack.Screen name="MemberDetail" options={{ title: 'Member Detail' }}>
-        {(props) => <MemberDetail {...props} token={token} />}
-      </Stack.Screen>
-      <Stack.Screen name="MemberInput" options={{ title: 'Member Input' }}>
-        {(props) => <MemberInput {...props} token={token} />}
-      </Stack.Screen>
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ title: '홈 화면' }}
+      />
+      <Stack.Screen
+        name="BusinessCard"
+        component={BusinessCardScreen}
+        options={{ title: '명함 관리' }}
+      />
+      <Stack.Screen
+        name="CreateBusinessCard"
+        component={CreateBusinessCard}
+        options={{ title: '명함 등록' }}
+      />
     </Stack.Navigator>
   );
 };
