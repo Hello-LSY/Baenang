@@ -16,5 +16,4 @@ public class BusinessCardDTO {
     private String email;
     private String sns;
     private String introduction;
-    private String qr;
 }
