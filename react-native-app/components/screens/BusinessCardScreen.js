@@ -1,29 +1,30 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Button, Image } from 'react-native';
-import createAxiosInstance from '../../services/axiosInstance'; // axiosInstance 가져오기
-import { AuthContext } from '../../services/AuthContext'; // AuthContext 가져오기
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Button, Image, ActivityIndicator } from 'react-native';
+import createAxiosInstance from '../../services/axiosInstance';
+import { AuthContext } from '../../services/AuthContext';
 
 const BusinessCardScreen = ({ navigation }) => {
   const [businessCards, setBusinessCards] = useState([]); // 다른 사람 명함 목록
   const [myBusinessCard, setMyBusinessCard] = useState(null); // 내 명함 정보
   const [isModalVisible, setModalVisible] = useState(false); // QR 모달 제어
+  const [loading, setLoading] = useState(false); // 로딩 상태 관리
   const { token, memberId } = useContext(AuthContext); // AuthContext에서 token과 memberId 가져오기
+
+  // 환경 변수를 사용하는 방식으로 서버 IP를 관리
+  const serverIP = "10.0.2.2"; // 서버가 실행되는 PC의 IP 주소를 환경 변수로 관리 가능
 
   // 명함 등록 후 다시 데이터를 불러오도록 설정
   useEffect(() => {
     const focusListener = navigation.addListener('focus', () => {
-      // 화면이 다시 포커스를 받을 때 데이터를 불러오도록 설정
       fetchData();
     });
 
-    // 컴포넌트가 언마운트 될 때 이벤트 리스너 정리
     return () => {
       focusListener();
     };
   }, [navigation]);
 
   useEffect(() => {
-    // 토큰이나 멤버 ID가 변경될 때 데이터를 다시 불러옴
     if (token && memberId) {
       fetchData();
     }
@@ -33,22 +34,23 @@ const BusinessCardScreen = ({ navigation }) => {
   const fetchData = async () => {
     try {
       if (!token || !memberId) {
-        console.error('Token or Member ID is missing.', {token, memberId});
+        console.error('Token or Member ID is missing.', { token, memberId });
         return;
       }
-
-      // 데이터 조회 함수 호출
+      setLoading(true); // 데이터 불러오는 동안 로딩 상태 활성화
       await fetchMyBusinessCard(memberId, token);
       await fetchBusinessCards(memberId, token);
     } catch (error) {
       console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false); // 데이터 불러오기 완료 후 로딩 상태 비활성화
     }
   };
 
   // 내 명함 조회 함수
   const fetchMyBusinessCard = async (id, userToken) => {
     try {
-      const axiosInstance = createAxiosInstance(userToken); // axios 인스턴스 생성
+      const axiosInstance = createAxiosInstance(userToken);
       const response = await axiosInstance.get(`/api/business-cards/members/${id}`);
       setMyBusinessCard(response.data);
     } catch (error) {
@@ -60,7 +62,7 @@ const BusinessCardScreen = ({ navigation }) => {
   // 다른 사람 명함 목록 조회 함수
   const fetchBusinessCards = async (id, userToken) => {
     try {
-      const axiosInstance = createAxiosInstance(userToken); // axios 인스턴스 생성
+      const axiosInstance = createAxiosInstance(userToken);
       const response = await axiosInstance.get(`/api/saved-business-cards/members/${id}/cards`);
       setBusinessCards(response.data);
     } catch (error) {
@@ -73,8 +75,20 @@ const BusinessCardScreen = ({ navigation }) => {
     setModalVisible(!isModalVisible);
   };
 
+  // QR 코드 이미지 로드 오류 처리 함수
+  const handleImageError = () => {
+    console.error('Failed to load QR code image.');
+    alert('QR 코드 이미지를 불러오지 못했습니다.');
+  };
+
   return (
     <ScrollView style={styles.container}>
+      {/* 로딩 스피너 표시 */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
       {/* 내 명함 섹션 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>📇 나의 여행 명함</Text>
@@ -83,10 +97,15 @@ const BusinessCardScreen = ({ navigation }) => {
             <Text style={styles.cardName}>{myBusinessCard.name}</Text>
             <Text>{myBusinessCard.country}</Text>
             <Text>{myBusinessCard.email}</Text>
+            <Text>{myBusinessCard.introduction}</Text>
+            <Text>{myBusinessCard.sns}</Text>
             <Image
-              source={{ uri: `http://localhost:8080/api/qr-images/${myBusinessCard.qr}` }} // QR 코드 이미지 표시
-              style={styles.qrCode}
+                source={{ uri: `http://${serverIP}:8080/api/qr-images/${myBusinessCard.qr}` }}
+                style={styles.qrCode}
+                onError={() => console.error("Failed to load QR code image.")} // 오류 핸들러 추가
             />
+
+
           </View>
         ) : (
           <View style={styles.noCardContainer}>
@@ -125,7 +144,6 @@ const BusinessCardScreen = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>QR 코드로 명함 등록</Text>
-            {/* QR 스캐너 기능 추가 필요 */}
             <Button title="닫기" onPress={toggleModal} />
           </View>
         </View>
@@ -228,6 +246,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
