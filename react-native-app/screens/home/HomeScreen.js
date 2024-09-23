@@ -30,14 +30,30 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>📂 내 문서</Text>
         <View style={styles.documentList}>
-          <Text style={styles.documentItem}>주민등록증</Text>
-          <Text style={styles.documentItem}>운전면허증</Text>
-          <Text style={styles.documentItem}>여권</Text>
-          <Text style={styles.documentItem}>여행보험증명서</Text>
-          <Text style={styles.documentItem}>예방접종증명서</Text>
-          <Text style={styles.documentItem}>출입국사실증명서</Text>
-          <Text style={styles.documentItem}>국제학생증</Text>
-          <Text style={styles.documentItem}>여행보혐증명서</Text>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}>
+            <Text style={styles.documentText}>주민등록증</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#8BC34A' }]}>
+            <Text style={styles.documentText}>운전면허증</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#00BCD4' }]}>
+            <Text style={styles.documentText}>여권</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#FF9800' }]}>
+            <Text style={styles.documentText}>여행보험증명서</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#9C27B0' }]}>
+            <Text style={styles.documentText}>예방접종증명서</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#009688' }]}>
+            <Text style={styles.documentText}>출입국사실증명서</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#3F51B5' }]}>
+            <Text style={styles.documentText}>국제학생증</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#E91E63' }]}>
+            <Text style={styles.documentText}>여행보혐증명서</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -52,21 +68,6 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-
-      <View style={styles.section}>
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>커뮤니티</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>환율</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>여행 성향 테스트</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       {/* 외부 서비스 섹션 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>외부 서비스</Text>
@@ -184,8 +185,15 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   documentItem: {
+    padding: 15,
+    borderRadius: 8,
+    marginVertical: 8,
+    alignItems: 'center',
+  },
+  documentText: {
     fontSize: 16,
-    paddingVertical: 4,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   row: {
     flexDirection: 'row',
