@@ -28,6 +28,7 @@ const Login = ({ navigation }) => {
 
       if (token && memberId) {
         await login(token, memberId);
+        console.log('!!!!!!!!!!!!!!!!!!!!');
         Alert.alert("Success", "로그인 성공");
         navigation.navigate('Home');
       } else {
