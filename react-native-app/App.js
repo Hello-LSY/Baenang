@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, View } from 'react-native';
-import AppNavigator from './components/navigation/AppNavigator';
-import AuthNavigator from './components/navigation/AuthNavigator';
+import AppNavigator from './navigation/AppNavigator';
+import AuthNavigator from './navigation/AuthNavigator';
 import { AuthProvider, AuthContext } from './services/AuthContext';
 
 const App = () => {
