@@ -33,7 +33,7 @@ const BusinessCardScreen = ({ navigation }) => {
   const fetchData = async () => {
     try {
       if (!token || !memberId) {
-        console.error('Token or Member ID is missing.', {token, memberId});
+        console.error('Token or Member ID is missing.', { token, memberId });
         return;
       }
 
@@ -83,6 +83,9 @@ const BusinessCardScreen = ({ navigation }) => {
             <Text style={styles.cardName}>{myBusinessCard.name}</Text>
             <Text>{myBusinessCard.country}</Text>
             <Text>{myBusinessCard.email}</Text>
+            {/* 추가된 소개와 SNS 정보 표시 */}
+            <Text>{myBusinessCard.introduction}</Text>
+            <Text>{myBusinessCard.sns}</Text>
             <Image
               source={{ uri: `http://localhost:8080/api/qr-images/${myBusinessCard.qr}` }} // QR 코드 이미지 표시
               style={styles.qrCode}
