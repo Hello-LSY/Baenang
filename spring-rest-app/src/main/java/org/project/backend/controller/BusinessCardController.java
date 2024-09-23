@@ -145,19 +145,27 @@ public class BusinessCardController {
     public ResponseEntity<Resource> getQRCodeImage(
             @ApiParam(value = "파일 이름", required = true) @PathVariable String fileName) {
         try {
-            File file = new File(QR_IMAGE_PATH + fileName);
-            Resource resource = new FileSystemResource(file);
+            // 파일 경로 확인을 위해 로그 출력
+            String filePath = QR_IMAGE_PATH + fileName;
+            File file = new File(filePath);
+            System.out.println("Requested file path: " + filePath); // 파일 경로 로그 출력
 
-            if (!resource.exists()) {
+            // 파일이 존재하는지 확인
+            if (!file.exists()) {
+                System.out.println("File not found: " + filePath);
                 return ResponseEntity.notFound().build();
             }
 
+            Resource resource = new FileSystemResource(file);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
                     .contentType(MediaType.IMAGE_PNG) // 이미지 MIME 타입 설정
                     .body(resource);
         } catch (Exception e) {
+            // 예외 발생 시 상세 로그 출력
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
+
 }
