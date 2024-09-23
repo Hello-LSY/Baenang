@@ -36,16 +36,12 @@ public class BusinessCard implements Serializable {
     @Column(name = "introduction", length = 50)
     private String introduction;
 
-    @Column(name = "qr", columnDefinition = "TEXT")
-    private String qr;
 
-    // 엔티티의 상태를 변경하기 위한 update 메서드
-    public void update(String name, String country, String email, String sns, String introduction, String qr) {
+    public void update(String name, String country, String email, String sns, String introduction) {
         this.name = name;
         this.country = country;
         this.email = email;
         this.sns = sns;
         this.introduction = introduction;
-        this.qr = qr;
     }
 }
