@@ -1,9 +1,9 @@
 // components/navigation/AppNavigator.js
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/HomeScreen';
-import BusinessCardScreen from '../screens/BusinessCardScreen';
-import CreateBusinessCard from '../screens/CreateBusinessCardScreen';
+import HomeScreen from '../screens/home/HomeScreen';
+import BusinessCardScreen from '../screens/businessCard/BusinessCardScreen';
+import CreateBusinessCardScreen from '../screens/businessCard/CreateBusinessCardScreen';
 
 const Stack = createStackNavigator();
 
@@ -22,7 +22,7 @@ const AppNavigator = () => {
       />
       <Stack.Screen
         name="CreateBusinessCard"
-        component={CreateBusinessCard}
+        component={CreateBusinessCardScreen}
         options={{ title: '명함 등록' }}
       />
     </Stack.Navigator>

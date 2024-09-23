@@ -1,8 +1,8 @@
 // components/navigation/AuthNavigator.js
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import Login from '../login/Login';
-import Signup from '../signup/Signup';
+import Login from '../screens/login/Login';  // 경로 수정
+import Signup from '../screens/signup/Signup';  // 경로 수정
 
 const Stack = createStackNavigator();
 
