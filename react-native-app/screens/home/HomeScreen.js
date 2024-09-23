@@ -68,7 +68,6 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-
       {/* 외부 서비스 섹션 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>외부 서비스</Text>
