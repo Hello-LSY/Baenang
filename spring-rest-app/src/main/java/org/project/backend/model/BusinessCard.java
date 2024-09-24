@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Table(name = "business_card") // 테이블명은 소문자로
-public class BusinessCard implements Serializable {
+public class BusinessCard {
 
     @Id
     @Column(name = "card_id")
