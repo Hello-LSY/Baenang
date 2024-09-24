@@ -10,8 +10,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class InternationalStudentIdentityCardDTO {
-    private String ISIC;  //국제학생증 카드 번호
+    private Long documentId;  //문서 고유번호
 
+    private String ISIC;  //국제학생증 카드 번호
     private String schoolName;  //학교이름
     private String name;  //성명
     private LocalDate birth;  //생년월일

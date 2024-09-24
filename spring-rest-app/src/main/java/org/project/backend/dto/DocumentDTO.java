@@ -10,6 +10,7 @@ import lombok.*;
 public class DocumentDTO {
     private Long memberId;
 
+    private Long documentId;  //문서 고유번호
     private String RRN; //주민등록증 번호 (DTO)
     private String DLN; //운전면허증번호 (DTO)
     private String PN;  //여권 번호 (DTO)

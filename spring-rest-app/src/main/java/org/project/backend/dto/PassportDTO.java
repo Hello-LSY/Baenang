@@ -10,8 +10,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class PassportDTO {
-    private String PN;  //여권번호
+    private Long documentId;  //문서 고유번호
 
+    private String PN;  //여권번호
     private String imagePath;  //국가코드
     private String countryCode;  //이미지경로
     private String type;  //종류

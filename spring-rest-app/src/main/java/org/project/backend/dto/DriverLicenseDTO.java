@@ -10,8 +10,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class DriverLicenseDTO {
-    private String DLN; //운전면허증 번호
+    private Long documentId;  //문서 고유번호
 
+    private String DLN; //운전면허증 번호
     private String managementNumber;  //관리번호
     private String RRN;  //주민등록번호
     private String address;  //주소

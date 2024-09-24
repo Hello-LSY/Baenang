@@ -19,6 +19,9 @@ import java.time.LocalDate;
 @Table(name = "passport")
 public class Passport {
     @Id
+    @Column(name = "document_id", nullable = false, unique = true)
+    private Long documentId;  //문서 고유번호
+
     @Column(name = "pn", nullable = false, unique = true)
     private String PN;  //여권번호
 

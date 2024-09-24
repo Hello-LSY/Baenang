@@ -20,6 +20,9 @@ import java.time.LocalDate;
 public class ResidentRegistration {
 
     @Id
+    @Column(name = "document_id", nullable = false, unique = true)
+    private Long documentId;  //문서 고유번호
+
     @Column(name = "rrn", nullable = false, unique = true)
     private Long RRN;   //주민등록증 번호
 

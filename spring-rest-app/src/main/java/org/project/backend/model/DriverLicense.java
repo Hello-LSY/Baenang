@@ -18,15 +18,17 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 @Table(name = "driver_license")
 public class DriverLicense {
-
     @Id
+    @Column(name = "document_id", nullable = false, unique = true)
+    private Long documentId;  //문서 고유번호
+
     @Column(name = "dln", nullable = false, unique = true)
     private String DLN; //운전면허증 번호
 
-    @Column(name = "management_number", nullable = false, length = 50)
+    @Column(name = "management_number", nullable = false, length = 50, unique = true)
     private String managementNumber;  //관리번호
 
-    @Column(name = "rrn", nullable = false, length = 13)
+    @Column(name = "rrn", nullable = false, length = 13, unique = true)
     private String RRN;  //주민등록번호
 
     @Column(name = "address", nullable = false, length = 255)

@@ -18,7 +18,11 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 @Table(name = "international_student_identity_card")
 public class InternationalStudentIdentityCard {
+
     @Id
+    @Column(name = "document_id", nullable = false, unique = true)
+    private Long documentId;  //문서 고유번호
+
     @Column(name = "isic", nullable = false, unique = true)
     private String isic;   // 국제학생증 카드 번호, 기본 키 설정
 
