@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import createAxiosInstance from '../../services/axiosInstance';
 
-const MemberInput = ({ axiosInstance, onAddMember }) => {
+const MemberInput = ({ navigation, route }) => {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(''); // 비밀번호 상태 추가
+  const { token, fetchMembers } = route.params; // route.params에서 fetchMembers 가져오기
 
-  const addMemberHandler = async () => {
+  const saveMember = async () => {
+    if (!username || !password) {  // username과 password가 비어 있는지 확인
+      Alert.alert('Error', 'Username and Password are required.');
+      return;
+    }
+
     try {
-      const response = await axiosInstance.post('/api/members', { username, password });
-      onAddMember((prevMembers) => [...prevMembers, response.data]);
-      setUsername('');
-      setPassword('');
-      Alert.alert("Success", "Member added successfully.");
+      const axiosInstance = createAxiosInstance(token);
+      const response = await axiosInstance.post('/api/members', {
+        username,
+        password,
+      });
+      Alert.alert('Success', 'Member saved successfully');
+
+      // 리스트를 새로고침
+      if (fetchMembers) {
+        fetchMembers();
+      }
+
+      navigation.navigate('MemberList'); // 저장 후 MemberList로 이동
     } catch (error) {
-      Alert.alert("Error", "Failed to add member.");
+      console.error('Error saving member:', error);
+      Alert.alert('Error', 'Failed to save member');
     }
   };
 
@@ -28,23 +44,26 @@ const MemberInput = ({ axiosInstance, onAddMember }) => {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
+        value={password} // 비밀번호 입력 필드
+        onChangeText={setPassword} // 비밀번호 상태 업데이트
         secureTextEntry
       />
-      <Button title="Add Member" onPress={addMemberHandler} />
+      <Button title="Save Member" onPress={saveMember} />
     </View>
   );
 };
 
-export default MemberInput;
-
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    flex: 1,
+    padding: 16,
   },
   input: {
-    borderBottomWidth: 1,
     marginBottom: 12,
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 });
+
+export default MemberInput;

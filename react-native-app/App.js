@@ -1,59 +1,34 @@
-//App.js
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
-import Login from './components/login/Login';
-import HomeScreen from './components/home/HomeScreen';
-import createAxiosInstance from './services/axiosInstance';
+import React, { useContext, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { ActivityIndicator, View } from 'react-native';
+import AppNavigator from './navigation/AppNavigator';
+import AuthNavigator from './navigation/AuthNavigator';
+import { AuthProvider, AuthContext } from './services/AuthContext';
 
-export default function App() {
-  const [token, setToken] = useState(null);
-  const [axiosInstance, setAxiosInstance] = useState(null);
+const App = () => {
+  const { token, loading } = useContext(AuthContext);
 
-const handleLoginSuccess = (token) => {
-  setToken(token);
-  const instance = createAxiosInstance(token);
-
-  if (instance instanceof Promise) {
-    console.error('Axios instance is a Promise, which is unexpected.');
-  } else {
-    console.log('Axios instance after login:', instance);
-    setAxiosInstance(instance);
-  }
-};
-
-
-
-  const handleLogout = () => {
-    setToken(null);
-    setAxiosInstance(null);
-  };
-
-  if (!token) {
+  if (loading) {
     return (
-      <View style={styles.container}>
-        <Login onLoginSuccess={handleLoginSuccess} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {axiosInstance ? (
-        <>
-          <HomeScreen axiosInstance={axiosInstance} />
-          <Button title="Logout" onPress={handleLogout} />
-        </>
-      ) : (
-        <Text>Loading Axios instance...</Text>
-      )}
-    </View>
+    <NavigationContainer>
+      {/* 토큰 유무에 따라 네비게이터 선택 */}
+      {token ? <AppNavigator /> : <AuthNavigator />}
+    </NavigationContainer>
+  );
+};
+
+// AuthProvider로 App을 감싸서 전역 상태를 제공
+export default function AppWrapper() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-});
