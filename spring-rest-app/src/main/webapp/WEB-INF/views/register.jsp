@@ -18,6 +18,10 @@
     <input type="password" id="password" name="password" required>
   </div>
   <div>
+    <label for="email">이메일:</label>
+    <input type="email" id="email" name="email" required>
+  </div>
+  <div>
     <button type="submit">등록</button>
   </div>
 </form>
@@ -28,6 +32,7 @@
 
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
+    const email = document.getElementById('email').value; // 이메일 필드 추가
 
     fetch('/api/members', {
       method: 'POST',
@@ -35,21 +40,28 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        username: username, // 필드명을 username으로 맞춤
-        password: password
+        username: username,
+        password: password,
+        email: email // 이메일 필드 전송
       })
     })
-            .then(response => response.json())
+            .then(response => {
+              if (!response.ok) {
+                return response.json().then(errorData => {
+                  throw new Error(errorData.message || '회원 생성 실패');
+                });
+              }
+              return response.json();
+            })
             .then(data => {
               console.log('회원 생성 성공:', data);
               alert('회원이 성공적으로 생성되었습니다.');
             })
             .catch(error => {
               console.error('회원 생성 실패:', error);
-              alert('회원 생성에 실패했습니다.');
+              alert(`회원 생성에 실패했습니다. ${error.message}`);
             });
   });
 </script>
-
 </body>
 </html>

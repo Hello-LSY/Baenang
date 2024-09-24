@@ -42,6 +42,9 @@ dependencies {
     implementation 'org.springframework.security:spring-security-web:5.7.7'
     implementation 'org.springframework.security:spring-security-config:5.7.7'
 
+    // JWT API
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
@@ -55,7 +58,6 @@ dependencies {
     // Hibernate Validator
     implementation 'org.hibernate.validator:hibernate-validator:6.0.13.Final'
     implementation 'javax.validation:validation-api:2.0.1.Final'
-
 
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
@@ -74,9 +76,20 @@ dependencies {
     // JSON 처리 라이브러리
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
 
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3'
+
     // Hamcrest
     testImplementation 'org.hamcrest:hamcrest:2.2'
+
+    // QR 라이브러리
+    implementation 'com.google.zxing:core:3.5.1'
+    implementation 'com.google.zxing:javase:3.5.1'
+
+    // Swagger (SpringFox 2.9.2 버전)
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 }
+
 
 war {
     archiveFileName = 'backend.war'
