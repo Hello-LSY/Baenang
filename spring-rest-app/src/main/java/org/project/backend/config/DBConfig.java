@@ -66,7 +66,7 @@ public class DBConfig {
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl("jdbc:mysql://localhost:3306/baenang");
         config.setUsername("root");
-        config.setPassword("12341234");
+        config.setPassword("1234");
         config.setMaximumPoolSize(10); // 최대 커넥션 풀 크기
         return new HikariDataSource(config);
     }

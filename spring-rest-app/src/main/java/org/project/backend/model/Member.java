@@ -46,8 +46,15 @@ public class Member implements UserDetails {
     @Column(name = "birthdate")
     private String birthdate;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private BusinessCard businessCard;
+
+    // 관계 해제 메서드
+    public void removeBusinessCard() {
+        if (this.businessCard != null) {
+            this.businessCard = null;
+        }
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
