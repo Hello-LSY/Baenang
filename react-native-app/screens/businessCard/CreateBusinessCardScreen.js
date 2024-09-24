@@ -6,7 +6,6 @@ import tokenStorage from '../../services/tokenStorage'; // tokenStorage 가져�
 const CreateBusinessCard = ({ navigation }) => {
   const [token, setToken] = useState('');
   const [memberId, setMemberId] = useState('');
-
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [email, setEmail] = useState('');
@@ -31,12 +30,17 @@ const CreateBusinessCard = ({ navigation }) => {
     };
 
     fetchCredentials();
-  }, []);
+  }, [navigation]);
 
   const handleCreateCard = async () => {
     if (!token || !memberId) {
       alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
       console.log("Token or Member ID is missing.", { token, memberId });
+      return;
+    }
+
+    if (!name || !email) { // 필수 입력값 체크
+      alert('이름과 이메일을 입력해주세요.');
       return;
     }
 
@@ -49,7 +53,7 @@ const CreateBusinessCard = ({ navigation }) => {
 
       if (response) {
         alert('명함이 성공적으로 생성되었습니다.');
-        navigation.navigate('BusinessCard', { refresh: true });
+        navigation.navigate('BusinessCard', { refresh: true }); // 명함 생성 후 BusinessCardScreen으로 이동
       } else {
         alert('명함 생성에 실패했습니다.');
       }
@@ -64,7 +68,7 @@ const CreateBusinessCard = ({ navigation }) => {
       <Text style={styles.title}>명함 등록</Text>
       <TextInput
         style={styles.input}
-        placeholder="이름"
+        placeholder="이름 (필수)"
         value={name}
         onChangeText={setName}
       />
@@ -76,9 +80,10 @@ const CreateBusinessCard = ({ navigation }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="이메일"
+        placeholder="이메일 (필수)"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
       />
       <TextInput
         style={styles.input}
@@ -92,7 +97,11 @@ const CreateBusinessCard = ({ navigation }) => {
         value={introduction}
         onChangeText={setIntroduction}
       />
-      <Button title="명함 등록" onPress={handleCreateCard} />
+      <Button
+        title="명함 등록"
+        onPress={handleCreateCard}
+        disabled={!name || !email} // 필수 입력값이 없을 때 버튼 비활성화
+      />
     </View>
   );
 };
@@ -114,6 +123,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 15,
     paddingHorizontal: 10,
+    borderRadius: 5, 
   },
 });
 
