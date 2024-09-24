@@ -10,11 +10,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ExchangeRateDTO {
-
     private Long id;
     private String currencyCode;
     private String currencyName;
     private Double exchangeRateValue;
-    private LocalDateTime updatedAt;
-
+    private LocalDateTime recordedAt;
 }
