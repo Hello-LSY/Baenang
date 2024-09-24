@@ -92,7 +92,6 @@ public class SavedBusinessCardServiceImpl implements SavedBusinessCardService {
                 .email(businessCard.getEmail())
                 .sns(businessCard.getSns())
                 .introduction(businessCard.getIntroduction())
-                .qr(businessCard.getQr())
                 .build();
     }
 }
