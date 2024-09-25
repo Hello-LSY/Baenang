@@ -1,9 +1,5 @@
 // components/login/Login.js
-<<<<<<< HEAD
 import React, { useState, useContext, useEffect, useRef } from 'react';
-=======
-import React, { useState, useContext } from 'react';
->>>>>>> dev
 
 import {
   View,
@@ -14,7 +10,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-<<<<<<< HEAD
   Animated,
   Easing,
 } from 'react-native';
@@ -22,17 +17,11 @@ import axios from 'axios';
 import { AuthContext } from '../../services/AuthContext';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
-=======
-} from 'react-native';
-import axios from 'axios';
-import { AuthContext } from '../../services/AuthContext';
->>>>>>> dev
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
-<<<<<<< HEAD
   const floatAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -57,8 +46,6 @@ const Login = ({ navigation }) => {
     inputRange: [0, 1],
     outputRange: [0, 20],
   });
-=======
->>>>>>> dev
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -99,7 +86,6 @@ const Login = ({ navigation }) => {
       <View>
         <Text style={styles.title}>여행의 좋은 추억을 간직해요</Text>
       </View>
-<<<<<<< HEAD
       <Animated.View style={{ transform: [{ translateY: yOffset }] }}>
         <Image
           source={require('../../assets/images/baenang_logo.png')}
@@ -108,28 +94,16 @@ const Login = ({ navigation }) => {
       </Animated.View>
       <Text style={styles.login}>로그인</Text>
       <CustomInput
-=======
-      <View>
-        <Image source={require('../../assets/images/Saly-31.png')} />
-      </View>
-      <Text style={styles.login}>로그인</Text>
-      <TextInput
->>>>>>> dev
         style={styles.textInput}
         placeholder="ID"
         value={username}
         onChangeText={setUsername}
       />
-<<<<<<< HEAD
       <CustomInput
-=======
-      <TextInput
->>>>>>> dev
         style={styles.textInput}
         placeholder="PASSWORD"
         value={password}
         onChangeText={setPassword}
-<<<<<<< HEAD
         isPassword={true}
       />
       <CustomButton
@@ -137,13 +111,6 @@ const Login = ({ navigation }) => {
         onPress={handleLogin}
         title="로그인"
       />
-=======
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>LOGIN</Text>
-      </TouchableOpacity>
->>>>>>> dev
 
       <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
         <Text style={styles.signupText}>회원가입</Text>
@@ -194,34 +161,12 @@ const styles = StyleSheet.create({
   },
   textInput: {
     width: '80%',
-<<<<<<< HEAD
     borderColor: '#87CEFA',
     color: '#87CEFA',
   },
   loginButton: {
     fontSize: 16,
     width: '40%',
-=======
-    borderWidth: 1,
-    borderColor: '#87CEFA',
-    borderRadius: 100,
-    marginBottom: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: 'white',
-    color: '#87CEFA',
-  },
-  loginButton: {
-    backgroundColor: '#87CEFA',
-    borderRadius: 50,
-    width: '40%',
-    alignItems: 'center',
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 15,
-    paddingVertical: 10,
->>>>>>> dev
   },
   signupText: {
     color: '#87CEFA',
@@ -247,7 +192,6 @@ const styles = StyleSheet.create({
     height: 50,
     marginHorizontal: 10,
   },
-<<<<<<< HEAD
   logo: {
     width: 360,
     height: 180,
@@ -255,8 +199,3 @@ const styles = StyleSheet.create({
 });
 
 export default Login;
-=======
-});
-
-export default Login;
->>>>>>> dev
