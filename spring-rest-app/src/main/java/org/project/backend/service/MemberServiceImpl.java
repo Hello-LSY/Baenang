@@ -101,11 +101,8 @@ public class MemberServiceImpl implements MemberService {
                 .name(dto.getName())
                 .nickname(dto.getNickname())
                 .gender(dto.getGender())
-<<<<<<< HEAD
                 .birthdate(dto.getBirthdate())
                 .email(dto.getEmail())
-=======
->>>>>>> dev
                 .build();
     }
 }
