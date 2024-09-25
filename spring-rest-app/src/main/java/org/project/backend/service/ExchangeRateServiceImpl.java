@@ -45,6 +45,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                         Double dealBasR = parseDouble(rate.get("deal_bas_r"));
                         String currencyName = (String) rate.get("cur_nm");
 
+                        // KRW(한국 원화)는 저장하지 않음
                         if ("KRW".equals(currencyCode) || currencyCode == null || dealBasR == null || currencyName == null) {
                             logger.warn("Skipping data for currency: {}. Not a valid currency for storing.", currencyCode);
                             return null; // 필수 데이터가 없을 경우 건너뛰기
