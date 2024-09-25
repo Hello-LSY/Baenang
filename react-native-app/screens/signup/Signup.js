@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  Alert,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import axios from 'axios';
+import CustomButton from '../../components/CustomButton';
+import CustomInput from '../../components/CustomInput';
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -12,12 +22,14 @@ const Signup = ({ navigation }) => {
 
   const handleSignup = async () => {
     if (!username || !password || !name || !email || !gender || !birthdate) {
-      Alert.alert("Error", "모든 필드를 입력하세요.");
+      Alert.alert('Error', '모든 필드를 입력하세요.');
       return;
     }
 
     try {
       // 서버로 회원가입 요청 보내기
+      console.log('email : ' , email);
+      console.log('birthday : ' , birthdate);
       const response = await axios.post('http://10.0.2.2:8080/api/members', {
         username,
         password,
@@ -28,10 +40,10 @@ const Signup = ({ navigation }) => {
       });
 
       if (response.status === 201) {
-        Alert.alert("Success", "회원가입 성공");
+        Alert.alert('Success', '회원가입 성공');
         navigation.navigate('Login'); // 회원가입 후 로그인 화면으로 이동
       } else {
-        Alert.alert("Error", "회원가입 실패");
+        Alert.alert('Error', '회원가입 실패');
       }
     } catch (error) {
       console.error('Signup Error:', error);
@@ -41,56 +53,100 @@ const Signup = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>회원가입</Text>
-      <TextInput
+      <View style={styles.modalContainer}>
+        <Text style={styles.title}>회원가입</Text>
+        {/* <TextInput
         style={styles.input}
         placeholder="아이디"
         value={username}
         onChangeText={setUsername}
-      />
-      <TextInput
+      /> */}
+        <CustomInput
+          label="아이디"
+          value={username}
+          onChangeText={setUsername}
+        />
+        {/* <TextInput
         style={styles.input}
         placeholder="비밀번호"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="이름"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <View style={styles.genderContainer}>
-        <Text style={styles.genderLabel}>성별</Text>
-        <View style={styles.radioButtonContainer}>
-          <TouchableOpacity style={styles.radioButton} onPress={() => setGender('남자')}>
-            <View style={[styles.radioOuterCircle, gender === '남자' && styles.radioSelected]}>
-              <View style={[styles.radioInnerCircle, gender === '남자' && styles.radioSelectedInner]} />
-            </View>
-            <Text style={styles.radioText}>남자</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.radioButton} onPress={() => setGender('여자')}>
-            <View style={[styles.radioOuterCircle, gender === '여자' && styles.radioSelected]}>
-              <View style={[styles.radioInnerCircle, gender === '여자' && styles.radioSelectedInner]} />
-            </View>
-            <Text style={styles.radioText}>여자</Text>
-          </TouchableOpacity>
+      /> */}
+        <CustomInput
+          label="비밀번호"
+          value={password}
+          onChangeText={setPassword}
+          isPassword={true}
+        />
+        <CustomInput
+          style={styles.input}
+          label="이름"
+          value={name}
+          onChangeText={setName}
+        />
+        <CustomInput
+          label="이메일"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+        />
+        <View style={styles.genderContainer}>
+          <Text style={styles.genderLabel}>성별</Text>
+          <View style={styles.radioButtonContainer}>
+            <TouchableOpacity
+              style={styles.radioButton}
+              onPress={() => setGender('남자')}
+            >
+              <View
+                style={[
+                  styles.radioOuterCircle,
+                  gender === '남자' && styles.radioSelected,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.radioInnerCircle,
+                    gender === '남자' && styles.radioSelectedInner,
+                  ]}
+                />
+              </View>
+              <Text style={styles.radioText}>남자</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.radioButton}
+              onPress={() => setGender('여자')}
+            >
+              <View
+                style={[
+                  styles.radioOuterCircle,
+                  gender === '여자' && styles.radioSelected,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.radioInnerCircle,
+                    gender === '여자' && styles.radioSelectedInner,
+                  ]}
+                />
+              </View>
+              <Text style={styles.radioText}>여자</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+        <CustomInput
+          label="생년월일"
+          value={birthdate}
+          onChangeText={setBirthdate}
+          isDate={true}
+          style={styles.birthdateInput}
+        />
       </View>
-      <TextInput
-        style={styles.input}
-        placeholder="생년월일 (YYYY-MM-DD)"
-        value={birthdate}
-        onChangeText={setBirthdate}
+      <CustomButton
+        title="확 인"
+        onPress={handleSignup}
+        style={styles.validationButton}
       />
-      <Button title="확 인" onPress={handleSignup} />
     </View>
   );
 };
@@ -99,25 +155,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
     backgroundColor: '#f0f8ff',
   },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
   title: {
     fontSize: 24,
     marginBottom: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  input: {
-    width: '100%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
-    marginBottom: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 5,
-  },
-  genderContainer: {
-    marginVertical: 12,
   },
   genderLabel: {
     fontSize: 16,
@@ -149,13 +210,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f8ff',
   },
   radioSelected: {
-    borderColor: '#2196F3',
+    borderColor: '#87CEFA',
   },
   radioSelectedInner: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#87CEFA',
   },
   radioText: {
     fontSize: 16,
+  },
+  birthdateInput: {},
+  validationButton: {
+    width: '40%',
+    marginTop: 30,
   },
 });
 
