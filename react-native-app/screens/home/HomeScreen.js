@@ -63,11 +63,7 @@ const HomeScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('BusinessCard')}>
             <Text style={styles.iconText}>여행자 명함</Text>
           </TouchableOpacity>
-<<<<<<< HEAD
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("TravelCertificationMain")} >
-=======
           <TouchableOpacity style={styles.iconButton}>
->>>>>>> dev
             <Text style={styles.iconText}>여행 인증서</Text>
           </TouchableOpacity>
         </View>
