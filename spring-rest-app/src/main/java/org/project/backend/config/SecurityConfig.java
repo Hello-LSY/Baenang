@@ -50,6 +50,7 @@ public class SecurityConfig {
 
                 .antMatchers("/api/qr-images/**").permitAll() // QR 이미지 허용
                 .antMatchers("/", "/register", "/login", "/api/members").permitAll()  // 로그인, 회원가입 등은 허용
+                .antMatchers("/api/exchange/save/**").permitAll() // 환율 관련 API 호출은 모두 허용
                 .antMatchers("/api/**").authenticated()  // 인증된 사용자만 접근
                 .anyRequest().authenticated()
                 .and()
@@ -89,8 +90,5 @@ public class SecurityConfig {
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtTokenProvider(), memberDetailsService);
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> dev
 }
