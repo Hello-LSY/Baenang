@@ -5,8 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+<<<<<<< HEAD
 import java.time.LocalDate;
 
+=======
+>>>>>>> dev
 // import javax.validation.constraints.Email;
 // import javax.validation.constraints.NotBlank;
 // import javax.validation.constraints.Size;
@@ -57,8 +60,11 @@ public class MemberDTO {
     // 프로필 ID 추후 수정
     private Long profileId;
 
+<<<<<<< HEAD
     private String birthdate;
 
+=======
+>>>>>>> dev
     // MemberDTO 빌더 패턴을 사용하기 위한 생성자
     @Builder
     public MemberDTO(Long id, String username, String password, String email, String name, String nickname, String gender, Long profileId) {
