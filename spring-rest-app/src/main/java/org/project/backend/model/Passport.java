@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
@@ -19,8 +16,10 @@ import java.time.LocalDate;
 @Table(name = "passport")
 public class Passport {
     @Id
-    @Column(name = "document_id", nullable = false, unique = true)
-    private Long documentId;  //문서 고유번호
+    @OneToOne
+    @JoinColumn(name = "document_id")
+    @MapsId
+    private Document document;  // 문서 고유번호
 
     @Column(name = "pn", nullable = false, unique = true)
     private String PN;  //여권번호

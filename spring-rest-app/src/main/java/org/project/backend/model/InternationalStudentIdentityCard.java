@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
@@ -20,8 +17,10 @@ import java.time.LocalDate;
 public class InternationalStudentIdentityCard {
 
     @Id
-    @Column(name = "document_id", nullable = false, unique = true)
-    private Long documentId;  //문서 고유번호
+    @OneToOne
+    @JoinColumn(name = "document_id")
+    @MapsId
+    private Document document;  // 문서 고유번호
 
     @Column(name = "isic", nullable = false, unique = true)
     private String isic;   // 국제학생증 카드 번호, 기본 키 설정
