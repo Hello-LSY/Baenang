@@ -23,7 +23,7 @@ public class ExchangeRateController {
     @ApiOperation(value = "환율 데이터 저장", notes = "특정 날짜와 데이터 타입에 따라 환율 데이터를 저장합니다.")
     @GetMapping(value = "/save", produces = "application/json")
     public ResponseEntity<String> saveExchangeRates(
-            @ApiParam(value = "검색 요청 날짜", required = true, example = "20220101") @RequestParam String searchDate,
+            @ApiParam(value = "검색 요청 날짜", required = true, example = "20240924") @RequestParam String searchDate,
             @ApiParam(value = "검색 요청 API 타입", required = true, example = "AP01") @RequestParam String data) {
         try {
             exchangeRateService.saveExchangeRates(searchDate, data);
