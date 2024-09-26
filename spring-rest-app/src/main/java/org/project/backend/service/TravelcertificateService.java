@@ -28,6 +28,7 @@ public interface TravelcertificateService {
 
     /**
      * 새로운 여행 인증서를 생성한다.
+     * 위치 정보(위도, 경도)와 함께 여행 인증서를 생성한다.
      *
      * @param travelcertificateDTO 생성할 여행 인증서의 DTO
      * @return 생성된 여행 인증서의 엔티티
@@ -36,6 +37,7 @@ public interface TravelcertificateService {
 
     /**
      * 주어진 ID를 가진 여행 인증서 정보를 업데이트한다.
+     * 위치 정보(위도, 경도)를 포함한 업데이트 작업을 수행한다.
      *
      * @param id 업데이트할 여행 인증서의 ID
      * @param travelCertificateDetails 업데이트할 여행 인증서의 DTO
