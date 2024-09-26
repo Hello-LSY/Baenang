@@ -63,6 +63,10 @@ public class TravelcertificateServiceImpl implements TravelcertificateService {
         travelCertificate.setImagepath(travelcertificateDTO.getImagepath());
         travelCertificate.setTravledate(travelcertificateDTO.getTraveldate());
 
+        // 위치 정보 추가
+        travelCertificate.setLatitude(travelcertificateDTO.getLatitude());
+        travelCertificate.setLongitude(travelcertificateDTO.getLongitude());
+
         // 로그인한 사용자의 username 설정
         String username = getCurrentUsername();
         travelCertificate.setUsername(username);
@@ -85,6 +89,10 @@ public class TravelcertificateServiceImpl implements TravelcertificateService {
         travelCertificate.setVisitedcountry(travelCertificateDetails.getVisitedcountry());
         travelCertificate.setImagepath(travelCertificateDetails.getImagepath());
         travelCertificate.setTravledate(travelCertificateDetails.getTraveldate());
+
+        // 위치 정보 업데이트
+        travelCertificate.setLatitude(travelCertificateDetails.getLatitude());
+        travelCertificate.setLongitude(travelCertificateDetails.getLongitude());
 
         travelCertificateRepository.save(travelCertificate);
         return convertToDTO(travelCertificate);
@@ -143,6 +151,11 @@ public class TravelcertificateServiceImpl implements TravelcertificateService {
         dto.setVisitedcountry(travelCertificate.getVisitedcountry());
         dto.setImagepath(travelCertificate.getImagepath());
         dto.setTraveldate(travelCertificate.getTravledate());
+
+        // 위치 정보 변환
+        dto.setLatitude(travelCertificate.getLatitude());
+        dto.setLongitude(travelCertificate.getLongitude());
+
         return dto;
     }
 }
