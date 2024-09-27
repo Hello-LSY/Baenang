@@ -28,7 +28,7 @@ public class Document {
     @JoinColumn(name = "rrn", referencedColumnName = "rrn")
     private ResidentRegistration RRN; //주민등록증 번호
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "dln", referencedColumnName = "dln")
     private DriverLicense DLN; //운전면허증번호
 

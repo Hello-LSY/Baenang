@@ -194,8 +194,22 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void deleteDocumentByMemberId(Long memberId) {
+        // (1) memberId로 Document를 조회
         Document document = findDocumentByMemberId(memberId);
 
-        documentRepository.delete(document);
+        if (document != null) {
+            // (2) 기존 객체의 연관된 데이터를 null로 설정한 새로운 Document 객체 생성
+            Document updatedDocument = document.toBuilder()
+                    .DLN(null)   // 운전면허 정보 삭제
+                    .PN(null)    // 여권 정보 삭제
+                    .RRN(null)   // 주민등록증 정보 삭제
+                    .ISIC(null)  // 국제학생증 정보 삭제
+                    .build();
+
+            // (3) 연관된 데이터 해제 후 Document 삭제
+            documentRepository.delete(updatedDocument);
+        } else {
+            throw new DocumentNotFoundException("Document not found for member ID: " + memberId);
+        }
     }
 }

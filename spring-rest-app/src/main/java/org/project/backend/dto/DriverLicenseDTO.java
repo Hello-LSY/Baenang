@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class DriverLicenseDTO {
-    private Long documentId;  //문서 고유번호
+    private Long id;  //운전면허증 고유번호
 
     @NotNull(message = "Driver License Number is required")
     private String DLN; //운전면허증 번호
