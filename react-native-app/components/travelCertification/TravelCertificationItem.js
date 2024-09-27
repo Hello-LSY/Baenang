@@ -1,4 +1,3 @@
-// components/TravelCertificationItem.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -6,9 +5,9 @@ const TravelCertificationItem = ({ item, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={() => onPress(item)}>
       <View style={styles.infoContainer}>
-        <Text style={styles.countryText}>{item.country}</Text>
-        <Text style={styles.cityText}>{item.city}</Text>
-        <Text style={styles.dateText}>{item.date}</Text>
+        <Text style={styles.countryText}>{item.visitedcountry}</Text>
+        <Text style={styles.imageText}>이미지 경로: {item.imagepath}</Text>
+        <Text style={styles.dateText}>방문 날짜: {item.traveldate}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -36,7 +35,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  cityText: {
+  imageText: {
     fontSize: 16,
     color: '#666',
   },
