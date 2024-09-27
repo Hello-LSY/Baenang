@@ -1,11 +1,11 @@
-//services/tokenStorage.js
+// redux/authStorage.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOKEN_KEY = 'authToken';
 const MEMBER_ID_KEY = 'memberId';
 
-const tokenStorage = {
-  async setCredentials(token, memberId) {
+const authStorage = {
+  async storeCredentials(token, memberId) {
     try {
       await AsyncStorage.setItem(TOKEN_KEY, token);
       await AsyncStorage.setItem(MEMBER_ID_KEY, String(memberId)); // memberId를 문자열로 저장
@@ -33,4 +33,4 @@ const tokenStorage = {
   }
 };
 
-export default tokenStorage;
+export default authStorage;
