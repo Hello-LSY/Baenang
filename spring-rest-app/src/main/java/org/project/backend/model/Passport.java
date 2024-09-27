@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
@@ -14,12 +15,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Table(name = "passport")
-public class Passport {
+public class Passport implements Serializable {
+    // 기본 키
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
     @OneToOne
-    @JoinColumn(name = "document_id")
-    @MapsId
-    private Document document;  // 문서 고유번호
+    @JoinColumn(name = "document_id")  // 문서 고유번호와 연결
+    private Document document;
 
     @Column(name = "pn", nullable = false, unique = true)
     private String PN;  //여권번호

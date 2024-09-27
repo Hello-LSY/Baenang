@@ -10,20 +10,31 @@ import org.project.backend.repository.DocumentRepository;
 import org.project.backend.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
     private final MemberRepository memberRepository;
     private final DocumentConverter documentConverter;
 
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+    }
+
+    private Document findDocumentByMemberId(Long memberId) {
+        return documentRepository.findByMember_Id(memberId)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+    }
+
     //Creat
     @Override
     public DocumentDTO createDocument(Long memberId, DocumentDTO documentDTO) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
-
+        Member member = findMemberById(memberId);
         Document document = documentConverter.convertToEntity(documentDTO, null).toBuilder().member(member).build();
         Document savedDocument = documentRepository.save(document);
 
@@ -33,66 +44,56 @@ public class DocumentServiceImpl implements DocumentService {
     //Read
     @Override
     public DocumentDTO getDocumentByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
-
+        Document document = findDocumentByMemberId(memberId);
         return documentConverter.convertToDTO(document);
     }
 
     @Override
     public DriverLicense getDriverLicenseByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getDLN();
     }
 
     @Override
     public ResidentRegistration getResidentRegistrationByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getRRN();
     }
 
     @Override
     public Passport getPassportByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getPN();
     }
 
     @Override
     public InternationalStudentIdentityCard getISICByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getISIC();
     }
 
     @Override
     public String getTICByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getTicPath();
     }
 
     @Override
     public String getVCByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getVcPath();
     }
 
     @Override
     public String getICByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
         return document.getIcPath();
     }
 
     //Update
     @Override
     public DocumentDTO updateDriverLicense(Long memberId, DriverLicense updatedDriverLicense) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .DLN(updatedDriverLicense)
@@ -104,8 +105,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateResidentRegistration(Long memberId, ResidentRegistration updatedResidentRegistration) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .RRN(updatedResidentRegistration)
@@ -117,8 +117,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updatePassport(Long memberId, Passport updatedPassport) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .PN(updatedPassport)
@@ -130,8 +129,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateISIC(Long memberId, InternationalStudentIdentityCard updatedISIC) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .ISIC(updatedISIC)
@@ -143,8 +141,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateTIC(Long memberId, String updatedTicPath) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .ticPath(updatedTicPath)
@@ -156,8 +153,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateVC(Long memberId, String updatedVcPath) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .vcPath(updatedVcPath)
@@ -169,8 +165,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateIC(Long memberId, String updateIcPath) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         Document updatedDocument = document.toBuilder()
                 .icPath(updateIcPath)
@@ -182,10 +177,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void deleteDocumentByMemberId(Long memberId) {
-        Document document = documentRepository.findByMember_Id(memberId)
-                .orElseThrow(()->new DocumentNotFoundException("Document not found for member ID: " + memberId));
+        Document document = findDocumentByMemberId(memberId);
 
         documentRepository.delete(document);
     }
-
 }

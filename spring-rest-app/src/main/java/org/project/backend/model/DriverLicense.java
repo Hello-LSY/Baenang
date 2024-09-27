@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
@@ -14,12 +15,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Table(name = "driver_license")
-public class DriverLicense {
+public class DriverLicense implements Serializable {
+    // 기본 키
     @Id
-    @OneToOne
-    @JoinColumn(name = "document_id")
-    @MapsId
-    private Document document;  //문서 고유번호
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
+    private Document document;
 
     @Column(name = "dln", nullable = false, unique = true)
     private String DLN; //운전면허증 번호

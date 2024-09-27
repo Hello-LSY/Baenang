@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
@@ -14,13 +15,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Table(name = "international_student_identity_card")
-public class InternationalStudentIdentityCard {
+public class InternationalStudentIdentityCard implements Serializable {
 
+    // 기본 키
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
     @OneToOne
-    @JoinColumn(name = "document_id")
-    @MapsId
-    private Document document;  // 문서 고유번호
+    @JoinColumn(name = "document_id")  // 문서 고유번호와 연결
+    private Document document;
 
     @Column(name = "isic", nullable = false, unique = true)
     private String isic;   // 국제학생증 카드 번호, 기본 키 설정

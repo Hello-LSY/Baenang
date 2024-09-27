@@ -20,23 +20,23 @@ public class Document {
     @Column(name = "document_id")
     private Long documentId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", referencedColumnName = "member_id")
     private Member member;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)  // Lazy 로딩 및 cascade 옵션 추가
     @JoinColumn(name = "rrn", referencedColumnName = "rrn")
     private ResidentRegistration RRN; //주민등록증 번호
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "dln", referencedColumnName = "dln")
     private DriverLicense DLN; //운전면허증번호
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "pn", referencedColumnName = "pn")
     private Passport PN;  //여권 번호
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "isic", referencedColumnName = "isic")
     private InternationalStudentIdentityCard ISIC;// 국제 학생증 번호
 
