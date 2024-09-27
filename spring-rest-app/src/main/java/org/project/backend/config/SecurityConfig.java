@@ -9,6 +9,8 @@ import org.project.backend.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -49,22 +51,13 @@ public class SecurityConfig {
                 ).permitAll()  // Swagger 관련 리소스는 모두 허용
 
                 .antMatchers("/api/qr-images/**").permitAll() // QR 이미지 허용
-                .antMatchers("/", "/register", "/login", "/api/members").permitAll()  // 로그인, 회원가입 등은 허용
+                .antMatchers("/", "/register", "/api/auth/**", "/api/members").permitAll()  // 로그인, 회원가입 등은 허용
                 .antMatchers("/api/exchange/save/**").permitAll() // 환율 관련 API 호출은 모두 허용
                 .antMatchers("/api/**").authenticated()  // 인증된 사용자만 접근
                 .anyRequest().authenticated()
-                .and()
 
-                .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .successHandler(new CustomAuthenticationSuccessHandler(jwtTokenProvider()))
-                .failureHandler(new CustomAuthenticationFailureHandler())
                 .and()
-
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessHandler(new CustomLogoutSuccessHandler());
+                .formLogin().disable();
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -79,6 +72,11 @@ public class SecurityConfig {
         encoders.put("pbkdf2", new Pbkdf2PasswordEncoder());
 
         return new DelegatingPasswordEncoder(idForEncode, encoders);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
