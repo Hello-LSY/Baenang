@@ -22,8 +22,8 @@ public class Passport implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "document_id")  // 문서 고유번호와 연결
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
     private Document document;
 
     @Column(name = "pn", nullable = false, unique = true)

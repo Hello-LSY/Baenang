@@ -4,11 +4,11 @@ import org.project.backend.dto.InternationalStudentIdentityCardDTO;
 
 public interface InternationalStudentIdentityCardService {
     //create
-    InternationalStudentIdentityCardDTO createInternationalStudentIdentityCard(Long documentId, InternationalStudentIdentityCardDTO isic);
+    InternationalStudentIdentityCardDTO createOrUpdateISIC(Long documentId, InternationalStudentIdentityCardDTO isic);
 
     //read
-    InternationalStudentIdentityCardDTO getInternationalStudentIdentityCard(Long documentId);
+    InternationalStudentIdentityCardDTO getISICById(Long documentId);
 
     //delete
-    void deleteInternationalStudentIdentityCard(Long documentId);
+    void deleteISICById(Long documentId);
 }

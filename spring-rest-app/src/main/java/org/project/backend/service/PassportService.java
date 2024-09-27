@@ -4,7 +4,7 @@ import org.project.backend.dto.PassportDTO;
 
 public interface PassportService {
     //create
-    PassportDTO createPassport(Long documentId, PassportDTO passportDTO);
+    PassportDTO createOrUpdatePassport(Long documentId, PassportDTO passportDTO);
 
     //read
     PassportDTO getPassportById(Long documentId);

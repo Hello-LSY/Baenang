@@ -4,11 +4,11 @@ import org.project.backend.dto.ResidentRegistrationDTO;
 
 public interface ResidentRegistrationService {
     //create
-    ResidentRegistrationDTO createResidentRegistration(Long documentId, ResidentRegistrationDTO residentRegistrationDTO);
+    ResidentRegistrationDTO createOrUpdateResidentRegistration(Long documentId, ResidentRegistrationDTO residentRegistrationDTO);
 
     //read
     ResidentRegistrationDTO getResidentRegistration(Long documentId);
 
     //delete
-    void deleteDriverLicenseById(Long documentId);
+    void deleteResidentRegistrationById(Long documentId);
 }

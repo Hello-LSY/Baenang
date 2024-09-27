@@ -99,7 +99,7 @@ public class DocumentConverter {
 
     public DriverLicenseDTO convertToDriverLicenseDTO(DriverLicense driverLicense) {
         return DriverLicenseDTO.builder()
-                .documentId(driverLicense.getDocument().getDocumentId())
+                .id(driverLicense.getDocument().getDocumentId())
                 .DLN(driverLicense.getDLN())
                 .managementNumber(driverLicense.getManagementNumber())
                 .RRN(driverLicense.getRRN())
@@ -113,7 +113,7 @@ public class DocumentConverter {
 
     public InternationalStudentIdentityCardDTO convertToISICDTO(InternationalStudentIdentityCard isic) {
         return InternationalStudentIdentityCardDTO.builder()
-                .documentId(isic.getDocument().getDocumentId())
+                .id(isic.getDocument().getDocumentId())
                 .ISIC(isic.getIsic())
                 .schoolName(isic.getSchoolName())
                 .name(isic.getName())
@@ -126,7 +126,7 @@ public class DocumentConverter {
 
     public PassportDTO convertToPassportDTO(Passport passport) {
         return PassportDTO.builder()
-                .documentId(passport.getDocument().getDocumentId())
+                .id(passport.getDocument().getDocumentId())
                 .PN(passport.getPN())
                 .imagePath(passport.getImagePath())
                 .countryCode(passport.getCountryCode())
@@ -145,7 +145,7 @@ public class DocumentConverter {
 
     public ResidentRegistrationDTO convertToResidentRegistrationDTO(ResidentRegistration rrn) {
         return ResidentRegistrationDTO.builder()
-                .documentId(rrn.getDocument().getDocumentId())
+                .id(rrn.getDocument().getDocumentId())
                 .RRN(rrn.getRRN())
                 .name(rrn.getName())
                 .imagePath(rrn.getImagePath())

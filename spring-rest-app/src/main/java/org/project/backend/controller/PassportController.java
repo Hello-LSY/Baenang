@@ -5,31 +5,30 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.project.backend.dto.DocumentDTO;
-import org.project.backend.dto.DriverLicenseDTO;
+import org.project.backend.dto.PassportDTO;
 import org.project.backend.exception.document.DocumentNotFoundException;
 import org.project.backend.service.DocumentService;
-import org.project.backend.service.DriverLicenseService;
+import org.project.backend.service.PassportService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/driver-license")
+@RequestMapping("/passport")
 @RequiredArgsConstructor
-@Api(tags = "Driver License API", description = "운전면허증 관리 API")
-public class DriverLicenseController {
-
+@Api(tags = "Passport API", description = "여권 관리 API")
+public class PassportController {
     private final DocumentService documentService;
-    private final DriverLicenseService driverLicenseService;
+    private final PassportService passportService;
 
-    @ApiOperation(value = "회원 ID로 운전면허증 생성 또는 재등록", notes = "회원 ID를 사용하여 운전면허증을 생성 또는 재등록합니다.")
+    @ApiOperation(value = "회원 ID로 여권 생성 또는 재등록", notes = "회원 ID를 사용하여 여권 생성 또는 재등록합니다.")
     @PostMapping("/create-or-update/{memberId}")
-    public ResponseEntity<DriverLicenseDTO> createOrUpdateDriverLicense(
+    public ResponseEntity<PassportDTO> createOrUpdatePassword(
             @ApiParam(value = "회원 ID", required = true) @PathVariable Long memberId,
-            @ApiParam(value = "운전면허증 정보", required = true) @RequestBody DriverLicenseDTO driverLicenseDTO) {
+            @ApiParam(value = "여권 정보", required = true) @RequestBody PassportDTO passportDTO) {
         try {
-            DriverLicenseDTO createdDriverLicense = driverLicenseService.createOrUpdateDriverLicense(memberId, driverLicenseDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdDriverLicense);
+            PassportDTO createdPassport = passportService.createOrUpdatePassport(memberId, passportDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdPassport);
         } catch (DocumentNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Document를 찾지 못한 경우
         } catch (Exception e) {
@@ -37,9 +36,9 @@ public class DriverLicenseController {
         }
     }
 
-    @ApiOperation(value = "회원 ID로 운전면허증 조회", notes = "회원 ID를 사용하여 운전면허증 정보를 조회합니다.")
+    @ApiOperation(value = "회원 ID로 여권 조회", notes = "회원 ID를 사용하여 여권 정보를 조회합니다.")
     @GetMapping("/my-license/{memberId}")
-    public ResponseEntity<Object> getDriverLicense(@PathVariable Long memberId) {
+    public ResponseEntity<Object> getPassport(@PathVariable Long memberId) {
         try {
             // (1) memberId로 document 정보 조회
             DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
@@ -47,14 +46,14 @@ public class DriverLicenseController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found for the given member.");
             }
 
-            // (2) documentId로 DriverLicense 조회
-            DriverLicenseDTO driverLicenseDTO = documentDTO.getDLN();
-            if (driverLicenseDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver License not found.");
+            // (2) documentId로 Passport 조회
+            PassportDTO passportDTO = documentDTO.getPN();
+            if (passportDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Passport not found.");
             }
 
-            // 성공적으로 DriverLicense 조회 시
-            return ResponseEntity.ok(driverLicenseDTO);
+            // 성공적으로 Passport 조회 시
+            return ResponseEntity.ok(passportDTO);
         } catch (DocumentNotFoundException e) {
             // Document 조회 실패 시 예외 처리
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found.");
@@ -65,16 +64,16 @@ public class DriverLicenseController {
         }
     }
 
-    @ApiOperation(value = "운전면허증 삭제", notes = "회원 ID를 사용하여 운전면허증을 삭제합니다.")
+    @ApiOperation(value = "여권 삭제", notes = "회원 ID를 사용하여 여권을 삭제합니다.")
     @DeleteMapping("/delete/{memberId}")
-    public ResponseEntity<Void> deleteDriverLicense(@PathVariable Long memberId) {
+    public ResponseEntity<Void> deletePassport(@PathVariable Long memberId) {
         try {
             // (1) memberId로 document 정보 조회
             DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
             Long documentId = documentDTO.getDocumentId();
 
-            // (2) Driver License 삭제
-            driverLicenseService.deleteDriverLicenseById(documentId);
+            // (2) Passport 삭제
+            passportService.deletePassportById(documentId);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (Exception e) {
             e.printStackTrace();

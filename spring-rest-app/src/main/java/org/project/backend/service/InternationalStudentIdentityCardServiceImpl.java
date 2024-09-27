@@ -7,6 +7,7 @@ import org.project.backend.exception.document.DocumentNotFoundException;
 import org.project.backend.model.Document;
 import org.project.backend.model.InternationalStudentIdentityCard;
 import org.project.backend.repository.DocumentRepository;
+import org.project.backend.repository.InternationalStudentIdentityCardRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,26 +16,31 @@ public class InternationalStudentIdentityCardServiceImpl implements Internationa
 
     private final DocumentRepository documentRepository;
     private final DocumentConverter documentConverter;
+    private final InternationalStudentIdentityCardRepository isicRepository;
 
     @Override
-    public InternationalStudentIdentityCardDTO createInternationalStudentIdentityCard(Long documentId, InternationalStudentIdentityCardDTO isic) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(()->new DocumentNotFoundException("Document not found with ID: " + documentId));
+    public InternationalStudentIdentityCardDTO createOrUpdateISIC(Long documentId, InternationalStudentIdentityCardDTO isicDTO) {
+        Document document = findDocumentById(documentId);
 
-        InternationalStudentIdentityCard internationalStudentIdentityCard = documentConverter.convertToISICEntity(isic, document);
-        document = document.toBuilder().ISIC(internationalStudentIdentityCard).build();
+        InternationalStudentIdentityCard existingISIC = document.getISIC();
+        if(existingISIC != null){
+            isicRepository.delete(existingISIC);
+            document = document.toBuilder().ISIC(null).build();
+            documentRepository.save(document);
+        }
 
+        InternationalStudentIdentityCard isic = documentConverter.convertToISICEntity(isicDTO, document);
+        InternationalStudentIdentityCard savedISIC = isicRepository.save(isic);
+
+        document = document.toBuilder().ISIC(savedISIC).build();
         Document updatedDocument = documentRepository.save(document);
 
         return documentConverter.convertToISICDTO(updatedDocument.getISIC());
     }
 
     @Override
-    public InternationalStudentIdentityCardDTO getInternationalStudentIdentityCard(Long documentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(()->new DocumentNotFoundException("Document not found with ID: " + documentId));
-
-        InternationalStudentIdentityCard isic = document.getISIC();
+    public InternationalStudentIdentityCardDTO getISICById(Long documentId) {
+        InternationalStudentIdentityCard isic = findDocumentById(documentId).getISIC();
 
         if(isic==null){
             throw new DocumentNotFoundException("ISIC not found for Document ID: "+documentId);
@@ -44,11 +50,21 @@ public class InternationalStudentIdentityCardServiceImpl implements Internationa
     }
 
     @Override
-    public void deleteInternationalStudentIdentityCard(Long documentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + documentId));
+    public void deleteISICById(Long documentId) {
+        Document document = findDocumentById(documentId);
 
-        Document updatedDocument = document.toBuilder().ISIC(null).build();
-        documentRepository.save(updatedDocument);
+        if(document.getISIC() != null){
+            Long isicId = document.getISIC().getId();
+
+            Document updatedDocument = document.toBuilder().ISIC(null).build();
+            documentRepository.save(updatedDocument);
+
+            isicRepository.deleteById(isicId);
+        }
+    }
+
+    private Document findDocumentById(Long documentId) {
+        return documentRepository.findById(documentId)
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + documentId));
     }
 }

@@ -23,11 +23,11 @@ public class InternationalStudentIdentityCard implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "document_id")  // 문서 고유번호와 연결
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
     private Document document;
 
-    @Column(name = "isic", nullable = false, unique = true)
+    @Column(name = "isic", nullable = false)
     private String isic;   // 국제학생증 카드 번호, 기본 키 설정
 
     @Column(name = "school_name", nullable = false, length = 100)
