@@ -33,9 +33,26 @@ public class DocumentServiceImpl implements DocumentService {
 
     //Creat
     @Override
-    public DocumentDTO createDocument(Long memberId, DocumentDTO documentDTO) {
+    public DocumentDTO createDocument(Long memberId) {
         Member member = findMemberById(memberId);
-        Document document = documentConverter.convertToEntity(documentDTO, null).toBuilder().member(member).build();
+
+        // 이미 Document가 존재하는지 확인
+        if (documentRepository.findByMember_Id(memberId).isPresent()) {
+            throw new IllegalStateException("Member already has a document.");
+        }
+
+        /// Document 객체 생성, 나머지 필드는 null로 설정
+        Document document = Document.builder()
+                .member(member)
+                .DLN(null)  // 나머지 필드를 null로 설정
+                .RRN(null)
+                .PN(null)
+                .ISIC(null)
+                .ticPath(null)
+                .vcPath(null)
+                .icPath(null)
+                .build();
+
         Document savedDocument = documentRepository.save(document);
 
         return documentConverter.convertToDTO(savedDocument);

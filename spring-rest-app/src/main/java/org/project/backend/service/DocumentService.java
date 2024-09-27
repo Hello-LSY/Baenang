@@ -8,7 +8,7 @@ import org.project.backend.model.ResidentRegistration;
 
 public interface DocumentService {
     //create
-    DocumentDTO createDocument(Long memberId, DocumentDTO documentDTO);
+    DocumentDTO createDocument(Long memberId);
 
     //read
     DocumentDTO getDocumentByMemberId(Long memberId);

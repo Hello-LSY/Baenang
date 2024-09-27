@@ -32,7 +32,7 @@ public class DriverLicense implements Serializable {
     @Column(name = "management_number", nullable = false, length = 50, unique = true)
     private String managementNumber;  //관리번호
 
-    @Column(name = "rrn", nullable = false, length = 13, unique = true)
+    @Column(name = "rrn", nullable = false, length = 14, unique = true)
     private String RRN;  //주민등록번호
 
     @Column(name = "address", nullable = false, length = 255)

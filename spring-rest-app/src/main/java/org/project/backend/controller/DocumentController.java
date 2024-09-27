@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.project.backend.dto.DocumentDTO;
+import org.project.backend.exception.document.DocumentNotFoundException;
 import org.project.backend.service.DocumentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,17 +25,19 @@ public class DocumentController {
     @ApiOperation(value = "회원 ID로 새로운 문서 생성", notes = "회원 ID를 사용하여 새로운 전자 명함을 생성합니다.")
     @PostMapping("/create/{memberId}")
     public ResponseEntity<DocumentDTO> createDocument(
-            @ApiParam(value = "회원 ID", required=true) @PathVariable Long memberId,
-            @ApiParam(value = "생성할 문서", required=true) @RequestBody DocumentDTO documentDTO){
-        try{
-            DocumentDTO createdDocumentDTO = documentService.createDocument(memberId, documentDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdDocumentDTO);
-        } catch (RuntimeException e) {
-            e.printStackTrace(); // 예외 로그 출력
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 오류 발생 시 400 반환
+            @ApiParam(value = "회원 ID", required=true) @PathVariable Long memberId){
+        try {
+            DocumentDTO createdDocument = documentService.createDocument(memberId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdDocument);
+        } catch (IllegalStateException e) {
+            // 중복된 Document가 있는 경우
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        } catch (DocumentNotFoundException e) {
+            // 회원이 존재하지 않거나 Document를 찾을 수 없는 경우
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
-            e.printStackTrace(); // 예외 로그 출력
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 내부 서버 오류 시 500 반환
+            // 그 외 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

@@ -41,9 +41,9 @@ public class DriverLicenseController {
     }
 
     // Driver License 생성
-    @PostMapping("/create")
+    @PostMapping("/create/{memberId}")
     public ResponseEntity<DriverLicenseDTO> createDriverLicense(
-            @RequestParam Long memberId,
+            @PathVariable  Long memberId,
             @Valid @RequestBody DriverLicenseDTO driverLicenseDTO) {
 
         System.out.println("dldididiidjfald;jf");
