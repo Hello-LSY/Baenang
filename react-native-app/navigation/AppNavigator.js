@@ -7,7 +7,8 @@ import CreateBusinessCardScreen from "../screens/businessCard/CreateBusinessCard
 import TravelCertificationMain from "../screens/travelCertification/TravelCertificationMain";
 import TravelCertificationList from "../screens/travelCertification/TravelCertificationList";
 import TravelCertificationDetail from "../components/travelCertification/TravelCertificationDetail";
-import TravelCertificationProcess from '../components/travelCertification/TravelCertificationProcess';
+import TravelCertificationEdit from "../components/travelCertification/TravelCertificationEdit";
+import TravelCertificationProcess from "../components/travelCertification/TravelCertificationProcess";
 
 const Stack = createStackNavigator();
 
@@ -45,9 +46,14 @@ const AppNavigator = () => {
         options={{ title: "여행 인증서" }}
       />
       <Stack.Screen
+        name="TravelCertificationEdit"
+        component={TravelCertificationEdit}
+        options={{ title: "여행 인증서 수정" }}
+      />
+      <Stack.Screen
         name="TravelCertificationProcess"
         component={TravelCertificationProcess}
-        options={{ title: "여행 인증 과정" }}
+        options={{ title: "여행 인증서 등록 과정" }}
       />
     </Stack.Navigator>
   );

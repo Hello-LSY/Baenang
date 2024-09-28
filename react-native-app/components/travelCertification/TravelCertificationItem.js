@@ -5,8 +5,9 @@ const TravelCertificationItem = ({ item, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={() => onPress(item)}>
       <View style={styles.infoContainer}>
-        <Text style={styles.countryText}>{item.visitedcountry}</Text>
-        <Text style={styles.imageText}>이미지 경로: {item.imagepath}</Text>
+        <Text style={styles.countryText}>{item.visitedcountry.split('-')[0]}</Text>
+        <Text style={styles.countryText}>{item.visitedcountry.split('-')[1]}</Text>
+        {/* <Text style={styles.imageText}>이미지 경로: {item.imagepath}</Text> */}
         <Text style={styles.dateText}>방문 날짜: {item.traveldate}</Text>
       </View>
     </TouchableOpacity>
