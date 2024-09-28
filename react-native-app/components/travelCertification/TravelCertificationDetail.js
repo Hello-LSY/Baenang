@@ -10,7 +10,7 @@ const TravelCertificationDetail = ({ route, navigation }) => {
       <Text style={styles.title}>여행확인서</Text>
       <View style={styles.infoContainer}>
         <Text style={styles.infoText}>이름: {item.username}</Text>
-        <Text style={styles.infoText}>지역: {item.visitedcountry}</Text>
+        <Text style={styles.infoText}>지역: {item.visitedcountry.split('-')[0]} {item.visitedcountry.split('-')[1]}</Text>
         <Text style={styles.infoText}>일자: {item.traveldate}</Text>
       </View>
 

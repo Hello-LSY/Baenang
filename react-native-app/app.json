@@ -15,6 +15,7 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "이 앱은 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "이 앱은 사진을 저장하고 가져오기 위해 사진 라이브러리 접근 권한이 필요합니다.",
         "NSLocationWhenInUseUsageDescription": "이 앱은 여행지 인증을 위해 현재 위치 정보가 필요합니다."
       }
     },
@@ -26,7 +27,9 @@
       "package": "org.project.frontend",
       "permissions": [
         "CAMERA",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
