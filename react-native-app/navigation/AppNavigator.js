@@ -9,6 +9,8 @@ import TravelCertificationList from "../screens/travelCertification/TravelCertif
 import TravelCertificationDetail from "../components/travelCertification/TravelCertificationDetail";
 import TravelCertificationEdit from "../components/travelCertification/TravelCertificationEdit";
 import TravelCertificationProcess from "../components/travelCertification/TravelCertificationProcess";
+import ExchangeRateListScreen from "../screens/exchangeRate/ExchangeRateListScreen"; 
+import ExchangeRateDetailScreen from "../screens/exchangeRate/ExchangeRateDetailScreen.js"; 
 
 const Stack = createStackNavigator();
 
@@ -54,6 +56,16 @@ const AppNavigator = () => {
         name="TravelCertificationProcess"
         component={TravelCertificationProcess}
         options={{ title: "여행 인증서 등록 과정" }}
+      />
+      <Stack.Screen
+        name="ExchangeRateList"
+        component={ExchangeRateListScreen}
+        options={{ title: "환율 정보" }}
+      />
+      <Stack.Screen
+        name="ExchangeRateDetail"
+        component={ExchangeRateDetailScreen}
+        options={{ title: "환율 상세" }}
       />
     </Stack.Navigator>
   );
