@@ -26,5 +26,5 @@ public class ExchangeRate {
     private Double exchangeRateValue; // 환율 값
 
     @Column(name = "recorded_at", nullable = false)
-    private LocalDateTime recordedAt; // 환율 갱신 시간
+    private LocalDateTime recordedAt; // 해당일 환율 일자
 }

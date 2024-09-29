@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/api/exchange")
 @RequiredArgsConstructor
@@ -45,6 +46,31 @@ public class ExchangeRateController {
             return ResponseEntity.ok(exchangeRates); // 성공적으로 조회된 데이터를 반환
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 오류 발생 시 500 반환
+        }
+    }
+
+    @ApiOperation(value = "환율이 가장 많이 감소한 상위 5개 국가 조회", notes = "어제와 오늘의 환율을 비교하여 가장 많이 감소한 상위 5개 국가를 조회합니다.")
+    @GetMapping(value = "/top5-decreasing", produces = "application/json")
+    public ResponseEntity<List<ExchangeRateDTO>> getTop5DecreasingRates() {
+        try {
+            List<ExchangeRateDTO> decreasingRates = exchangeRateService.getTop5DecreasingRates();
+            return ResponseEntity.ok(decreasingRates);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @ApiOperation(value = "특정 통화 코드의 환율 기록 조회", notes = "특정 통화 코드의 환율 변동 기록을 조회합니다.")
+    @GetMapping(value = "/{currencyCode}", produces = "application/json")
+    public ResponseEntity<List<ExchangeRateDTO>> getExchangeRateByCurrencyCode(
+            @ApiParam(value = "통화 코드", required = true) @PathVariable String currencyCode) {
+        try {
+            List<ExchangeRateDTO> exchangeRates = exchangeRateService.getExchangeRateByCurrencyCode(currencyCode);
+            return ResponseEntity.ok(exchangeRates);
+        } catch (ExchangeRateNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

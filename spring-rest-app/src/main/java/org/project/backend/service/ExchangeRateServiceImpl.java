@@ -13,9 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.time.format.DateTimeFormatter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -82,6 +83,56 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ExchangeRateDTO> getTop5DecreasingRates() {
+        // 어제 날짜 구하기
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+
+        // 오늘 날짜 구하기
+        LocalDate today = LocalDate.now();
+
+        // 어제와 오늘의 환율 데이터 가져오기
+        List<ExchangeRate> todayRates = fetchRatesWithFallback(today);
+        List<ExchangeRate> yesterdayRates = fetchRatesWithFallback(yesterday);
+
+        // 어제와 오늘의 환율을 비교하여 환율이 감소한 국가 목록 추출
+        Map<String, Double> yesterdayRateMap = yesterdayRates.stream()
+                .collect(Collectors.toMap(ExchangeRate::getCurrencyCode, ExchangeRate::getExchangeRateValue));
+
+        List<ExchangeRateDTO> decreasingRates = todayRates.stream()
+                .filter(todayRate -> yesterdayRateMap.containsKey(todayRate.getCurrencyCode()) &&
+                        todayRate.getExchangeRateValue() < yesterdayRateMap.get(todayRate.getCurrencyCode())) // 환율 감소한 경우 필터링
+                .map(this::convertToDTO)
+                .sorted(Comparator.comparingDouble(ExchangeRateDTO::getExchangeRateValue)) // 가장 큰 감소순으로 정렬
+                .limit(5) // 상위 5개만 선택
+                .collect(Collectors.toList());
+
+        return decreasingRates;
+    }
+
+    private List<ExchangeRate> fetchRatesWithFallback(LocalDate date) {
+        List<ExchangeRate> rates = exchangeRateRepository.findByRecordedAtBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+
+        // 만약 데이터가 없다면 이전 날짜로 계속 조회
+        while (rates.isEmpty()) {
+            date = date.minusDays(1);  // 전날로 이동
+            rates = exchangeRateRepository.findByRecordedAtBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+        }
+
+        return rates;
+    }
+
+    @Override
+    public List<ExchangeRateDTO> getExchangeRateByCurrencyCode(String currencyCode) {
+        List<ExchangeRate> exchangeRates = exchangeRateRepository.findByCurrencyCode(currencyCode);
+        if (exchangeRates.isEmpty()) {
+            throw new ExchangeRateNotFoundException("No exchange rate data found for currency code: " + currencyCode);
+        }
+        return exchangeRates.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     // 엔티티 -> DTO 변환 메서드
     private ExchangeRateDTO convertToDTO(ExchangeRate exchangeRate) {
         return ExchangeRateDTO.builder()
@@ -124,5 +175,4 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             throw new ExchangeRateNotFoundException("Error occurred while fetching exchange rates: " + e.getMessage());
         }
     }
-
 }
