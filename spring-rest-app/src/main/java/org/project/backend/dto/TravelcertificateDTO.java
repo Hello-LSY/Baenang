@@ -19,7 +19,7 @@ public class TravelcertificateDTO {
     private String imagepath;
 
     // 여행 날짜
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date traveldate;
 
     // 위도 (latitude)

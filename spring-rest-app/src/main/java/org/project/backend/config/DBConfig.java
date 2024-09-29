@@ -61,15 +61,22 @@ public class DBConfig {
      * @return DataSource 객체 (HikariDataSource)
      */
     @Bean
-    public DataSource dataSource() {
+    public DataSource dataSource(
+            @Value("${spring.datasource.url}") String url,
+            @Value("${spring.datasource.username}") String username,
+            @Value("${spring.datasource.password}") String password,
+            @Value("${spring.datasource.driver-class-name}") String driverClassName,
+            @Value("${spring.datasource.hikari.maximum-pool-size}") int maxPoolSize) {
+
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/baenang");
-        config.setUsername("root");
-        config.setPassword("1234");
-        config.setMaximumPoolSize(10); // 최대 커넥션 풀 크기
+        config.setDriverClassName(driverClassName);
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setMaximumPoolSize(maxPoolSize);
         return new HikariDataSource(config);
     }
+
 
     /**
      * 트랜잭션 매니저를 설정한다.

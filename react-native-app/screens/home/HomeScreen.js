@@ -1,10 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Button } from 'react-native';
-import { AuthContext } from '../../services/AuthContext'; // AuthContext 불러오기
+import { useAuth } from '../../redux/authState'; // useAuth 훅 import
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const { logout } = useContext(AuthContext); // 로그아웃 함수 가져오기
+  const { logout } = useAuth(); // useAuth 훅에서 logout 함수 가져오기
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
@@ -13,6 +13,7 @@ const HomeScreen = ({ navigation }) => {
   const handleLogout = () => {
     logout(); // 로그아웃 함수 호출
     toggleModal(); // 모달 닫기
+    navigation.navigate('Login'); // 로그아웃 후 로그인 화면으로 이동
   };
 
   return (

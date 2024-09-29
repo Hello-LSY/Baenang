@@ -1,10 +1,7 @@
 // components/login/Login.js
-import React, { useState, useContext, useEffect, useRef } from 'react';
-
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  TextInput,
-  Button,
   Alert,
   Text,
   TouchableOpacity,
@@ -13,16 +10,17 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import axios from 'axios';
-import { AuthContext } from '../../services/AuthContext';
+import { useAuth } from '../../redux/authState';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useContext(AuthContext);
+  const { login, auth } = useAuth();
+
   const floatAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -47,38 +45,21 @@ const Login = ({ navigation }) => {
     outputRange: [0, 20],
   });
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    if (auth.token) {
+      Alert.alert('Success', '로그인 성공');
+      navigation.navigate('Home');
+    } else if (auth.error) {
+      Alert.alert('Error', auth.error || '로그인 실패');
+    }
+  }, [auth.token, auth.error, navigation]);
+
+  const handleLogin = () => {
     if (!username || !password) {
       Alert.alert('Error', '아이디와 비밀번호를 입력하세요.');
       return;
     }
-
-    try {
-      const response = await axios.post(
-        'http://10.0.2.2:8080/login',
-        { username, password },
-        {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        }
-      );
-
-      const { token, memberId } = response.data;
-
-      if (token && memberId) {
-        await login(token, memberId);
-        Alert.alert('Success', '로그인 성공');
-        navigation.navigate('Home');
-      } else {
-        throw new Error('로그인 응답에 필수 정보가 없습니다.');
-      }
-    } catch (error) {
-      console.error('Login Error:', error);
-      Alert.alert('Error', '로그인 실패');
-    }
-  };
-  const handleSocialLogin = (platform) => {
-    // 소셜 로그인 로직 구현
-    console.log(`${platform} 로그인 시도`);
+    login(username, password);
   };
 
   return (
@@ -111,34 +92,9 @@ const Login = ({ navigation }) => {
         onPress={handleLogin}
         title="로그인"
       />
-
       <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
         <Text style={styles.signupText}>회원가입</Text>
       </TouchableOpacity>
-      <View style={styles.socialLoginContainer}>
-        <Text style={styles.socialLoginText}>소셜 계정으로 로그인</Text>
-        <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity onPress={() => handleSocialLogin('Naver')}>
-            <Image
-              source={require('../../assets/icons/naver_login.png')}
-              style={styles.socialButton}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => handleSocialLogin('Kakao')}>
-            <Image
-              source={require('../../assets/icons/kakao_login.png')}
-              style={styles.socialButton}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleSocialLogin('Google')}>
-            <Image
-              source={require('../../assets/icons/google_login.png')}
-              style={styles.socialButton}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
     </View>
   );
 };
@@ -172,25 +128,6 @@ const styles = StyleSheet.create({
     color: '#87CEFA',
     marginTop: 15,
     fontSize: 16,
-  },
-  socialLoginContainer: {
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  socialLoginText: {
-    fontSize: 14,
-    color: '#777777',
-    marginBottom: 10,
-  },
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  socialButton: {
-    width: 50,
-    height: 50,
-    marginHorizontal: 10,
   },
   logo: {
     width: 360,

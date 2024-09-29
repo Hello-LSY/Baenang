@@ -1,34 +1,39 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { ActivityIndicator, View } from 'react-native';
+import { Text, ActivityIndicator, View } from 'react-native';
+import { Provider } from 'react-redux';
+import storeConfig from './redux/storeConfig';
+import { useAuth } from './redux/authState';
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
-import { AuthProvider, AuthContext } from './services/AuthContext';
 
-const App = () => {
-  const { token, loading } = useContext(AuthContext);
+const MainApp = () => {
+  const { auth, initializeAuth } = useAuth();
 
-  if (loading) {
+  useEffect(() => {
+    initializeAuth(); 
+  }, []);
+
+  if (auth.loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
+        <Text>Loading...</Text>
       </View>
     );
   }
 
   return (
     <NavigationContainer>
-      {/* 토큰 유무에 따라 네비게이터 선택 */}
-      {token ? <AppNavigator /> : <AuthNavigator />}
+      {auth.token ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };
 
-// AuthProvider로 App을 감싸서 전역 상태를 제공
 export default function AppWrapper() {
   return (
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <Provider store={storeConfig}>
+      <MainApp />
+    </Provider>
   );
 }

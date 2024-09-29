@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  ScrollView,
+  Text,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import axios from "axios";
 
@@ -40,9 +47,9 @@ const TravelCertificationMain = ({ navigation }) => {
   const uniqueCountries = new Set(
     locations.map((loc) => {
       if (loc.visitedcountry) {
-        return loc.visitedcountry.trim().toLowerCase(); // 대소문자 구분 제거, 공백 제거
+        return loc.visitedcountry.trim().toLowerCase().split("-")[0]; // 대소문자 구분 제거, 공백 제거
       }
-      return ''; // visitedcountry가 null이거나 undefined일 경우 빈 문자열로 처리
+      return ""; // visitedcountry가 null이거나 undefined일 경우 빈 문자열로 처리
     })
   );
 
@@ -77,86 +84,100 @@ const TravelCertificationMain = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>여행 인증서</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate("TravelCertificationProcess")}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        {/* 방문 지역 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>방문 지역</Text>
+          <Text style={styles.infoText}>• 개수 : {locations.length}개</Text>
+        </View>
 
-      {/* 방문 지역 섹션 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>방문 지역</Text>
-        <Text style={styles.infoText}>• 개수 : {locations.length}개</Text>
-      </View>
+        {/* 방문 국가 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>방문 국가</Text>
+          <Text style={styles.infoText}>• 국가 : {uniqueCountries.size}개</Text>
+        </View>
 
-      {/* 방문 국가 섹션 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>방문 국가</Text>
-        <Text style={styles.infoText}>• 국가 : {uniqueCountries.size}개</Text>
-      </View>
+        <View>
+          <View>
+            <Text style={styles.title}>여행 인증서</Text>
+          </View>
+          <View flexDirection="row" justifyContent="flex-end">
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate("TravelCertificationProcess")}
+            >
+              <Text style={styles.addButtonText}>추가</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      {/* 여행 인증서 지도 섹션 */}
-      <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          region={region} // 지도 상태로 설정
-        >
-          {locations.length > 0 ? (
-            locations.map((location) => (
-              <Marker
-                key={location.travelid} // 여행 인증서 고유 ID를 키로 사용
-                coordinate={{
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                }}
-                title={location.visitedcountry} // 방문한 국가 정보
-                description={`방문 날짜: ${location.traveldate}`} // 여행 날짜 정보
-              />
-            ))
+        {/* 여행 인증서 지도 섹션 */}
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            region={region}
+            zoomEnabled={true} // 지도 확대/축소 가능
+            scrollEnabled={true} // 지도 스크롤 가능
+            pitchEnabled={true} // 지도 기울기 변경 가능
+            rotateEnabled={true} // 지도 회전 가능 // 지도 상태로 설정
+          >
+            {locations.length > 0 ? (
+              locations.map((location) => (
+                <Marker
+                  key={location.travelid} // 여행 인증서 고유 ID를 키로 사용
+                  coordinate={{
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                  }}
+                  title={location.visitedcountry} // 방문한 국가 정보
+                  description={`방문 날짜: ${location.traveldate}`} // 여행 날짜 정보
+                />
+              ))
+            ) : (
+              <Text>마커가 없습니다.</Text> // 데이터가 없을 때의 처리
+            )}
+          </MapView>
+        </View>
+
+        {/* 해외 지도 보기 버튼 */}
+        <View style={styles.buttonContainer}>
+          <Button
+            title={region.latitude === 36.5 ? "해외 지도" : "한국 지도"}
+            onPress={toggleWorldMap}
+          />
+        </View>
+
+        {/* 최근 여행지 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>최근 여행지</Text>
+          {locations.length > 0 ? ( // 배열이 비어있지 않은 경우에만 렌더링
+            <View style={styles.recentTravel}>
+              <Text style={styles.travelText}>
+                {locations[locations.length - 1].visitedcountry.split("-")[0]}{" "}
+                {locations[locations.length - 1].visitedcountry.split("-")[1]} -{" "}
+                {locations[locations.length - 1].traveldate}
+              </Text>
+            </View>
           ) : (
-            <Text>마커가 없습니다.</Text> // 데이터가 없을 때의 처리
+            <Text>방문한 여행지가 없습니다.</Text> // 배열이 비어있을 때의 처리
           )}
-        </MapView>
-      </View>
+        </View>
 
-      {/* 해외 지도 보기 버튼 */}
-      <View style={styles.buttonContainer}>
+        {/* 여행 인증서 리스트로 이동 버튼 */}
         <Button
-          title={region.latitude === 36.5 ? "해외 지도" : "한국 지도"}
-          onPress={toggleWorldMap}
+          title="여행 인증서 리스트 보기"
+          onPress={() => navigation.navigate("TravelCertificationList")}
         />
       </View>
-
-      {/* 최근 여행지 섹션 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>최근 여행지</Text>
-        {locations.length > 0 ? ( // 배열이 비어있지 않은 경우에만 렌더링
-          <View style={styles.recentTravel}>
-            <Text style={styles.travelText}>
-              {locations[locations.length - 1].visitedcountry} -{" "}
-              {locations[locations.length - 1].traveldate}
-            </Text>
-          </View>
-        ) : (
-          <Text>방문한 여행지가 없습니다.</Text> // 배열이 비어있을 때의 처리
-        )}
-      </View>
-
-      {/* 여행 인증서 리스트로 이동 버튼 */}
-      <Button
-        title="여행 인증서 리스트 보기"
-        onPress={() => navigation.navigate("TravelCertificationList")}
-      />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    paddingBottom: 20, // 스크롤 가능 영역 확보
+  },
   container: {
     flex: 1,
     backgroundColor: "#f0f8ff",
