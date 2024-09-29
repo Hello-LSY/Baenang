@@ -109,10 +109,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
-    // RestTemplate 빈 등록
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
+
 
 }

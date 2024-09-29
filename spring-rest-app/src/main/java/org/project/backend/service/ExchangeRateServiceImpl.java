@@ -104,18 +104,25 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     // API로부터 환율 데이터를 가져오는 메서드
     private List<Map<String, Object>> fetchExchangeRates(String searchDate, String data) {
-        String url = UriComponentsBuilder.fromHttpUrl(EXCHANGE_RATE_API_URL)
-                .queryParam("authkey", AUTH_KEY)
-                .queryParam("searchdate", searchDate)
-                .queryParam("data", data)
-                .toUriString();
+        try {
+            String url = UriComponentsBuilder.fromHttpUrl(EXCHANGE_RATE_API_URL)
+                    .queryParam("authkey", AUTH_KEY)
+                    .queryParam("searchdate", searchDate)
+                    .queryParam("data", data)
+                    .toUriString();
 
-        ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+            ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new ExchangeRateNotFoundException("Failed to fetch exchange rates, status code: " + response.getStatusCode());
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                logger.error("Failed to fetch exchange rates, status code: " + response.getStatusCode());
+                throw new ExchangeRateNotFoundException("Failed to fetch exchange rates, status code: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            logger.error("Error occurred while fetching exchange rates: ", e);
+            throw new ExchangeRateNotFoundException("Error occurred while fetching exchange rates: " + e.getMessage());
         }
     }
+
 }
