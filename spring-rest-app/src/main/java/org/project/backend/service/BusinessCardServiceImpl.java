@@ -9,9 +9,15 @@ import org.project.backend.model.Member;
 import org.project.backend.repository.BusinessCardRepository;
 import org.project.backend.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BusinessCardServiceImpl implements BusinessCardService {
@@ -42,12 +48,17 @@ public class BusinessCardServiceImpl implements BusinessCardService {
             throw new RuntimeException("Member already has a business card");
         }
 
-        String cardId = java.util.UUID.randomUUID().toString();
+        String cardId = UUID.randomUUID().toString();
 
-        BusinessCard businessCard = convertToEntity(businessCardDTO)
-                .toBuilder()
+        BusinessCard businessCard = BusinessCard.builder()
                 .cardId(cardId)
                 .member(member)
+                .name(businessCardDTO.getName())
+                .country(businessCardDTO.getCountry())
+                .email(businessCardDTO.getEmail())
+                .sns(businessCardDTO.getSns())
+                .introduction(businessCardDTO.getIntroduction())
+                .imageUrl(businessCardDTO.getImageUrl()) // 프론트엔드에서 전달된 이미지 URL
                 .build();
 
         BusinessCard savedBusinessCard = businessCardRepository.save(businessCard);
@@ -55,37 +66,22 @@ public class BusinessCardServiceImpl implements BusinessCardService {
     }
 
     @Override
-    public BusinessCardDTO updateBusinessCard(String cardId, BusinessCardDTO businessCardDTO) {
+    public BusinessCardDTO updateBusinessCard(String cardId, BusinessCardDTO businessCardDTO) throws Exception {
         BusinessCard businessCard = businessCardRepository.findById(cardId)
                 .orElseThrow(() -> new BusinessCardNotFoundException("BusinessCard not found with ID: " + cardId));
 
-        businessCard.update(
-                businessCardDTO.getName(),
-                businessCardDTO.getCountry(),
-                businessCardDTO.getEmail(),
-                businessCardDTO.getSns(),
-                businessCardDTO.getIntroduction()
-        );
+        // 기존 엔티티를 업데이트하기 위해 새로운 엔티티를 빌더 패턴으로 생성
+        BusinessCard updatedBusinessCard = businessCard.toBuilder()
+                .name(businessCardDTO.getName())
+                .country(businessCardDTO.getCountry())
+                .email(businessCardDTO.getEmail())
+                .sns(businessCardDTO.getSns())
+                .introduction(businessCardDTO.getIntroduction())
+                .imageUrl(businessCardDTO.getImageUrl())  // 새로운 이미지 URL 갱신
+                .build();
 
-        BusinessCard updatedBusinessCard = businessCardRepository.save(businessCard);
+        businessCardRepository.save(updatedBusinessCard);
         return convertToDTO(updatedBusinessCard);
-    }
-
-    @Transactional
-    @Override
-    public void deleteBusinessCard(String cardId) {
-        BusinessCard businessCard = businessCardRepository.findById(cardId)
-                .orElseThrow(() -> new BusinessCardNotFoundException("BusinessCard not found with ID: " + cardId));
-
-        // Member에서 연관 관계 해제 메서드 호출
-        Member member = businessCard.getMember();
-        if (member != null) {
-            member.removeBusinessCard(); // Member에서 연관관계 해제
-            memberRepository.save(member); // 변경 사항 저장
-        }
-
-        // BusinessCard 삭제
-        businessCardRepository.delete(businessCard); // DB에서 BusinessCard 완전히 삭제
     }
 
     // DTO 변환 메서드
@@ -98,18 +94,7 @@ public class BusinessCardServiceImpl implements BusinessCardService {
                 .email(businessCard.getEmail())
                 .sns(businessCard.getSns())
                 .introduction(businessCard.getIntroduction())
-                .build();
-    }
-
-    // 엔티티 변환 메서드
-    private BusinessCard convertToEntity(BusinessCardDTO dto) {
-        return BusinessCard.builder()
-                .cardId(dto.getCardId())
-                .name(dto.getName())
-                .country(dto.getCountry())
-                .email(dto.getEmail())
-                .sns(dto.getSns())
-                .introduction(dto.getIntroduction())
+                .imageUrl(businessCard.getImageUrl()) // 이미지 URL 반환
                 .build();
     }
 }
