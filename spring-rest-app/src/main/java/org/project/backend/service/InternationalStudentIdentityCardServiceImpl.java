@@ -18,25 +18,25 @@ public class InternationalStudentIdentityCardServiceImpl implements Internationa
     private final DocumentConverter documentConverter;
     private final InternationalStudentIdentityCardRepository isicRepository;
 
-    @Override
-    public InternationalStudentIdentityCardDTO createOrUpdateISIC(Long documentId, InternationalStudentIdentityCardDTO isicDTO) {
-        Document document = findDocumentById(documentId);
-
-        InternationalStudentIdentityCard existingISIC = document.getISIC();
-        if(existingISIC != null){
-            isicRepository.delete(existingISIC);
-            document = document.toBuilder().ISIC(null).build();
-            documentRepository.save(document);
-        }
-
-        InternationalStudentIdentityCard isic = documentConverter.convertToISICEntity(isicDTO, document);
-        InternationalStudentIdentityCard savedISIC = isicRepository.save(isic);
-
-        document = document.toBuilder().ISIC(savedISIC).build();
-        Document updatedDocument = documentRepository.save(document);
-
-        return documentConverter.convertToISICDTO(updatedDocument.getISIC());
-    }
+//    @Override
+//    public InternationalStudentIdentityCardDTO createOrUpdateISIC(Long documentId, InternationalStudentIdentityCardDTO isicDTO) {
+//        Document document = findDocumentById(documentId);
+//
+//        InternationalStudentIdentityCard existingISIC = document.getISIC();
+//        if(existingISIC != null){
+//            isicRepository.delete(existingISIC);
+//            document = document.toBuilder().ISIC(null).build();
+//            documentRepository.save(document);
+//        }
+//
+//        InternationalStudentIdentityCard isic = documentConverter.convertToISICEntity(isicDTO, document);
+//        InternationalStudentIdentityCard savedISIC = isicRepository.save(isic);
+//
+//        document = document.toBuilder().ISIC(savedISIC).build();
+//        Document updatedDocument = documentRepository.save(document);
+//
+//        return documentConverter.convertToISICDTO(updatedDocument.getISIC());
+//    }
 
     @Override
     public InternationalStudentIdentityCardDTO getISICById(Long documentId) {
@@ -49,19 +49,19 @@ public class InternationalStudentIdentityCardServiceImpl implements Internationa
         return documentConverter.convertToISICDTO(isic);
     }
 
-    @Override
-    public void deleteISICById(Long documentId) {
-        Document document = findDocumentById(documentId);
-
-        if(document.getISIC() != null){
-            Long isicId = document.getISIC().getId();
-
-            Document updatedDocument = document.toBuilder().ISIC(null).build();
-            documentRepository.save(updatedDocument);
-
-            isicRepository.deleteById(isicId);
-        }
-    }
+//    @Override
+//    public void deleteISICById(Long documentId) {
+//        Document document = findDocumentById(documentId);
+//
+//        if(document.getISIC() != null){
+//            Long isicId = document.getISIC().getId();
+//
+//            Document updatedDocument = document.toBuilder().ISIC(null).build();
+//            documentRepository.save(updatedDocument);
+//
+//            isicRepository.deleteById(isicId);
+//        }
+//    }
 
     private Document findDocumentById(Long documentId) {
         return documentRepository.findById(documentId)

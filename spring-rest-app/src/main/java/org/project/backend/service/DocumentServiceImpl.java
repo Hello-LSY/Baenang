@@ -27,7 +27,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private Document findDocumentByMemberId(Long memberId) {
-        return documentRepository.findByMember_Id(memberId)
+        return documentRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
     }
 
@@ -37,7 +37,7 @@ public class DocumentServiceImpl implements DocumentService {
         Member member = findMemberById(memberId);
 
         // 이미 Document가 존재하는지 확인
-        if (documentRepository.findByMember_Id(memberId).isPresent()) {
+        if (documentRepository.findByMemberId(memberId).isPresent()) {
             throw new IllegalStateException("Member already has a document.");
         }
 
