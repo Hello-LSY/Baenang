@@ -2,17 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Button, FlatList } from 'react-native';
 import { useAuth } from '../../redux/authState'; // useAuth 훅 import
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
-import React, { useState, useContext } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-  Button,
-} from 'react-native';
-import { AuthContext } from '../../services/AuthContext'; // AuthContext 불러오기
 import DocumentCard from '../../components/DocumentCard';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
@@ -241,7 +230,6 @@ const HomeScreen = ({ navigation }) => {
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -306,7 +294,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-
   servicecontainer: {
     flexDirection: 'row',
     paddingHorizontal: 10,
@@ -316,25 +303,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 10,
   },
-
-  exchangeInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  exchangeList: {
+    marginTop: 12,
+  },
+  exchangeItem: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginRight: 10,
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   exchangeText: {
     fontSize: 16,
-  },
-  exchangeRate: {
-    fontSize: 16,
     fontWeight: 'bold',
   },
+  exchangeRate: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4caf50', // 환율 값에 대한 스타일
+    marginTop: 5,
+  },
   exchangeChange: {
-    fontSize: 16,
-    color: 'red',
+    fontSize: 14,
+    color: 'red', // 변화율에 대한 스타일
+    marginTop: 3,
   },
   sectionSubtitle: {
     fontSize: 12,
@@ -350,7 +347,6 @@ const styles = StyleSheet.create({
   cscenterText: {
     color: 'white',
   },
-
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
