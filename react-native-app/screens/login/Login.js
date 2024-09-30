@@ -92,9 +92,35 @@ const Login = ({ navigation }) => {
         onPress={handleLogin}
         title="로그인"
       />
-      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-        <Text style={styles.signupText}>회원가입</Text>
-      </TouchableOpacity>
+      <CustomButton
+        style={styles.signupButton}
+        onPress={() => navigation.navigate('Signup')}
+        title="회원가입"
+      />
+      <View style={styles.socialLoginContainer}>
+        <Text style={styles.socialLoginText}>소셜 계정으로 로그인</Text>
+        <View style={styles.socialButtonsContainer}>
+          <TouchableOpacity onPress={() => handleSocialLogin('Naver')}>
+            <Image
+              source={require('../../assets/icons/naver_login.png')}
+              style={styles.socialButton}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => handleSocialLogin('Kakao')}>
+            <Image
+              source={require('../../assets/icons/kakao_login.png')}
+              style={styles.socialButton}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleSocialLogin('Google')}>
+            <Image
+              source={require('../../assets/icons/google_login.png')}
+              style={styles.socialButton}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -121,8 +147,13 @@ const styles = StyleSheet.create({
     color: '#87CEFA',
   },
   loginButton: {
-    fontSize: 16,
     width: '40%',
+    backgroundColor: '#87CEFA',
+  },
+  signupButton: {
+    fontSize: 5,
+    marginTop: 0,
+    paddingTop: 0,
   },
   signupText: {
     color: '#87CEFA',
