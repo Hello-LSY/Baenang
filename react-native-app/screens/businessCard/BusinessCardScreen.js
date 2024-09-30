@@ -1,35 +1,25 @@
+// screens/businessCard/BusinessCardScreen.js
+
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchBusinessCard, deleteBusinessCard, clearBusinessCard } from '../../redux/businessCardSlice'; 
-import QRCode from 'react-native-qrcode-svg'; 
+import { fetchBusinessCard, clearBusinessCard } from '../../redux/businessCardSlice';
+import QRCode from 'react-native-qrcode-svg';
 
 const BusinessCardScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.auth); 
-  const { businessCard, loading, error } = useSelector((state) => state.businessCard); 
+  const auth = useSelector((state) => state.auth);
+  const { businessCard, loading, error } = useSelector((state) => state.businessCard);
 
   useEffect(() => {
     if (auth.token && auth.memberId) {
-      dispatch(fetchBusinessCard(auth.memberId)); 
+      dispatch(fetchBusinessCard(auth.memberId));
     }
 
     return () => {
       dispatch(clearBusinessCard());
     };
   }, [auth.token, auth.memberId, dispatch]);
-
-  const confirmDelete = () => {
-    Alert.alert(
-      '명함 삭제',
-      '정말로 명함을 삭제하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        { text: '삭제', onPress: () => dispatch(deleteBusinessCard(businessCard.businessCardId)) },
-      ],
-      { cancelable: true }
-    );
-  };
 
   return (
     <ScrollView style={styles.container}>
@@ -49,8 +39,11 @@ const BusinessCardScreen = ({ navigation }) => {
                 <Text style={styles.infoText}>이메일: {businessCard.email}</Text>
                 <Text style={styles.infoText}>SNS: {businessCard.sns}</Text>
                 <Text style={styles.infoText}>소개: {businessCard.introduction}</Text>
-                <TouchableOpacity style={styles.deleteButton} onPress={confirmDelete}>
-                  <Text style={styles.deleteButtonText}>명함 삭제</Text>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => navigation.navigate('UpdateBusinessCard', { businessCard })}
+                >
+                  <Text style={styles.editButtonText}>명함 수정</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -98,14 +91,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
-  deleteButton: {
-    backgroundColor: 'red',
+  editButton: {
+    backgroundColor: 'green',
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
     alignItems: 'center',
   },
-  deleteButtonText: {
+  editButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',

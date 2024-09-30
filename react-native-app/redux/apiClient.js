@@ -1,3 +1,5 @@
+// redux/apiClient.js
+
 import axios from 'axios';
 
 const API_BASE_URL = 'http://10.0.2.2:8080'; // 로컬 환경에 맞게 설정
