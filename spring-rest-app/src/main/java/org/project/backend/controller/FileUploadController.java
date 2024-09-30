@@ -14,21 +14,23 @@ import java.nio.file.Paths;
 @RequestMapping("/api")
 public class FileUploadController {
 
-    private static final String UPLOAD_DIR = "uploads/";
+    // 파일을 저장할 로컬 경로 (예: C:/uploads)
+    private static final String UPLOAD_DIR = "C:/uploads/";
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            // 파일을 저장할 경로 설정
+            // 프론트에서 임의로 파일명을 생성하여 보냈으므로, 파일 이름은 file.getOriginalFilename() 대신 클라이언트에서 온 파일명을 그대로 사용
             String fileName = file.getOriginalFilename();
             Path filePath = Paths.get(UPLOAD_DIR + fileName);
 
+            // 파일 저장 디렉터리 생성
+            Files.createDirectories(filePath.getParent());
             // 파일 저장
-            Files.createDirectories(filePath.getParent());  // 디렉터리 생성
             Files.write(filePath, file.getBytes());
 
-            // 이미지 URL 반환
-            String fileUrl = "/uploads/" + fileName;
+            // 이미지 URL 반환 (파일 경로로 접근 가능하도록)
+            String fileUrl = "http://localhost:8080/uploads/" + fileName;
             return ResponseEntity.ok().body("{\"imageUrl\": \"" + fileUrl + "\"}");
 
         } catch (IOException e) {
