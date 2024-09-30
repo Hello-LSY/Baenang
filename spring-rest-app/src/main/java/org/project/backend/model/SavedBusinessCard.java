@@ -8,6 +8,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "saved_business_card")
 public class SavedBusinessCard {
 
     @Id

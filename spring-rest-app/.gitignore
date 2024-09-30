@@ -38,5 +38,5 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-# Ignore application.properties for security
-application.properties
+# application.properties 파일 제외
+spring-rest-app/src/main/resources/application.properties

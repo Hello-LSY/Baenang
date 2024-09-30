@@ -3,7 +3,6 @@ package org.project.backend.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Getter
@@ -36,12 +35,7 @@ public class BusinessCard {
     @Column(name = "introduction", length = 50)
     private String introduction;
 
+    @Column(name = "image_url")
+    private String imageUrl;
 
-    public void update(String name, String country, String email, String sns, String introduction) {
-        this.name = name;
-        this.country = country;
-        this.email = email;
-        this.sns = sns;
-        this.introduction = introduction;
-    }
 }
