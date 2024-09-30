@@ -1,6 +1,29 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Button } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Button,
+} from 'react-native';
 import { AuthContext } from '../../services/AuthContext'; // AuthContext 불러오기
+import DocumentCard from '../../components/DocumentCard';
+import ServiceButton from '../../components/ServiceButton';
+import BussinessCard from '../../assets/icons/ID.png';
+import TravelCertification from '../../assets/icons//MAP.png';
+import Community from '../../assets/icons/INFORM.png';
+import Exchange from '../../assets/icons/FINANCE.png';
+import TravelTest from '../../assets/icons/PACKAGE.png';
+import ExternalServiceButton from '../../components/ExternalServiceButton';
+import kbs from '../../assets/icons/kb손해보험.png';
+import kbc from '../../assets/icons/kb차차차.png';
+import tmg from '../../assets/icons/티머니고.png';
+import agoda from '../../assets/icons/아고다.png';
+import booking from '../../assets/icons/부킹닷컴.png';
+import airbnb from '../../assets/icons/에어비앤비.png';
+import CustomButton from '../../components/CustomButton';
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -30,66 +53,113 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>📂 내 문서</Text>
         <View style={styles.documentList}>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}>
+          <DocumentCard
+            title="주민등록증"
+            subtitle="123456-1234567"
+            color1="#4158D0"
+            color2="#C850C0"
+          />
+
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}
+          >
             <Text style={styles.documentText}>주민등록증</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#8BC34A' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#8BC34A' }]}
+          >
             <Text style={styles.documentText}>운전면허증</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#00BCD4' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#00BCD4' }]}
+          >
             <Text style={styles.documentText}>여권</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#FF9800' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#FF9800' }]}
+          >
             <Text style={styles.documentText}>여행보험증명서</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#9C27B0' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#9C27B0' }]}
+          >
             <Text style={styles.documentText}>예방접종증명서</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#009688' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#009688' }]}
+          >
             <Text style={styles.documentText}>출입국사실증명서</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#3F51B5' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#3F51B5' }]}
+          >
             <Text style={styles.documentText}>국제학생증</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.documentItem, { backgroundColor: '#E91E63' }]}>
+          <TouchableOpacity
+            style={[styles.documentItem, { backgroundColor: '#E91E63' }]}
+          >
             <Text style={styles.documentText}>여행보혐증명서</Text>
           </TouchableOpacity>
         </View>
       </View>
-
       {/* 여행자 명함, 여행 인증서 섹션 */}
-      <View style={styles.section}>
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('BusinessCard')}>
-            <Text style={styles.iconText}>여행자 명함</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={() =>navigation.navigate('TravelCertificationMain') }>
-            <Text style={styles.iconText}>여행 인증서</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.servicecontainer}>
+        <ServiceButton
+          style={styles.serviceButton}
+          title="여행자 명함"
+          subtitle="여행 중 만난 인연을 이 안에 넣어요"
+          imgSrc={BussinessCard}
+          imgSize={75}
+          onPress={() => navigation.navigate('BusinessCard')}
+        />
+        <ServiceButton
+          style={styles.serviceButton}
+          title="여행 인증서"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요"
+          imgSrc={TravelCertification}
+          imgSize={75}
+          onPress={() => navigation.navigate('TravelCertificationMain')}
+        />
       </View>
+      <View style={styles.servicecontainer2}>
+        <ServiceButton
+          title="커뮤니티"
+          imgSrc={Community}
+          imgSize={60}
+          onPress={() => navigation.navigate('Community')}
+        />
+        <ServiceButton
+          title="환율"
+          imgSrc={Exchange}
+          imgSize={60}
+          onPress={() => navigation.navigate('Community')}
+        />
+        <ServiceButton
+          title="여행자 테스트"
+          imgSrc={TravelTest}
+          imgSize={60}
+          onPress={() => navigation.navigate('Community')}
+        />
+      </View>
+
       {/* 외부 서비스 섹션 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>외부 서비스</Text>
         <View style={styles.row}>
-          <TouchableOpacity style={styles.serviceButton}>
-            <Text style={styles.serviceText}>KB 차차차</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.serviceButton}>
-            <Text style={styles.serviceText}>에어비앤비</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.serviceButton}>
-            <Text style={styles.serviceText}>티머니고</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.serviceButton}>
-            <Text style={styles.serviceText}>부킹닷컴</Text>
-          </TouchableOpacity>
+          <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
+          <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
+        </View>
+        <View style={styles.row}>
+          <ExternalServiceButton title="에어비앤비" imgSrc={airbnb} />
+          <ExternalServiceButton title="티머니고" imgSrc={tmg} />
+        </View>
+        <View style={styles.row}>
+          <ExternalServiceButton title="부킹닷컴" imgSrc={booking} />
+          <ExternalServiceButton title="아고다" imgSrc={agoda} />
         </View>
       </View>
-
       {/* 환율 정보 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>환율 정보</Text>
+        <Text style={styles.sectionTitle}>환율 좋은 날</Text>
         <View style={styles.exchangeInfo}>
           <Text style={styles.exchangeText}>뉴질랜드 NZD</Text>
           <Text style={styles.exchangeRate}>821.05</Text>
@@ -99,20 +169,36 @@ const HomeScreen = ({ navigation }) => {
 
       {/* 고객센터 섹션 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>고객센터</Text>
+        <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
+        <Text style={styles.sectionSubtitle}>
+          {
+            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'
+          }
+        </Text>
+
         <View style={styles.row}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>자주하는 질문</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>공지사항</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>사용 가이드</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>챗봇 상담</Text>
-          </TouchableOpacity>
+          <CustomButton
+            title="자주 묻는 질문"
+            style={styles.cscenter}
+            textStyle={styles.cscenterText}
+          />
+          <CustomButton
+            title="공지사항"
+            style={styles.cscenter}
+            textStyle={styles.cscenterText}
+          />
+        </View>
+        <View style={styles.row}>
+          <CustomButton
+            title="사용 가이드"
+            style={styles.cscenter}
+            textStyle={styles.cscenterText}
+          />
+          <CustomButton
+            title="챗봇 상담"
+            style={styles.cscenter}
+            textStyle={styles.cscenterText}
+          />
         </View>
       </View>
 
@@ -200,30 +286,17 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  iconButton: {
-    width: '45%',
-    backgroundColor: '#e3f2fd',
-    padding: 12,
-    marginVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
+
+  servicecontainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    width: '100%',
   },
-  iconText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  servicecontainer2: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
   },
-  serviceButton: {
-    width: '45%',
-    backgroundColor: '#e3f2fd',
-    padding: 12,
-    marginVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  serviceText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
+
   exchangeInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -243,6 +316,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'red',
   },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: '#777',
+    marginBottom: 8,
+  },
+  cscenter: {
+    width: '48%',
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#87CEFA',
+  },
+  cscenterText: {
+    color: 'white',
+  },
+
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
