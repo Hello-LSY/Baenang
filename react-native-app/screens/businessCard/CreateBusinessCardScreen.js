@@ -1,33 +1,41 @@
-// screens/businessCard/CreateBusinessCardScreen.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useAuth } from '../../redux/authState';
-import { useBusinessCard } from '../../redux/businessCardState';
+import { useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 
-const CreateBusinessCard = ({ navigation, route }) => {
-  const { auth } = useAuth(); 
-  const { createCard, updateCard } = useBusinessCard(); 
-  const editing = route.params?.businessCard != null;
-  const existingCard = route.params?.businessCard || {};
+// 이미지 업로드 함수
+const uploadImage = async (imageUri) => {
+  const formData = new FormData();
+  formData.append('file', {
+    uri: imageUri,
+    name: 'businessCardImage.jpg',
+    type: 'image/jpeg',
+  });
 
-  const [name, setName] = useState(existingCard.name || '');
-  const [country, setCountry] = useState(existingCard.country || '');
-  const [email, setEmail] = useState(existingCard.email || '');
-  const [sns, setSns] = useState(existingCard.sns || '');
-  const [introduction, setIntroduction] = useState(existingCard.introduction || '');
-  const [image, setImage] = useState(null); 
-  const [isReady, setIsReady] = useState(false);
+  // 로컬 서버로 이미지 업로드 요청
+  const response = await fetch('http://10.0.2.2:8080/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
 
-  useEffect(() => {
-    if (auth.token && auth.memberId) {
-      setIsReady(true);
-    } else {
-      alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
-      navigation.navigate('Login');
-    }
-  }, [auth.token, auth.memberId]);
+  if (!response.ok) {
+    throw new Error('이미지 업로드 실패');
+  }
+
+  const data = await response.json();
+  return data.imageUrl;  // 서버로부터 받은 이미지 URL을 반환
+};
+
+const CreateBusinessCardScreen = ({ navigation }) => {
+  const [name, setName] = useState('');
+  const [country, setCountry] = useState('');
+  const [email, setEmail] = useState('');
+  const [sns, setSns] = useState('');
+  const [introduction, setIntroduction] = useState('');
+  const [image, setImage] = useState(null);
+
+  // Redux에서 memberId 및 토큰 가져오기
+  const { memberId, token } = useSelector((state) => state.auth);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -42,90 +50,67 @@ const CreateBusinessCard = ({ navigation, route }) => {
     }
   };
 
-  const handleSubmitCard = () => {
-    if (!isReady) {
-      alert('로그인 정보를 불러오는 중입니다.');
-      return;
-    }
-
+  const handleSubmitCard = async () => {
     if (!name || !email) {
       alert('이름과 이메일을 입력해주세요.');
       return;
     }
 
-    const businessCardData = { 
-      businessCardDTO: { name, country, email, sns, introduction },
-      image: {
-        uri: image,
-        name: 'businessCardImage.jpg',
-        type: 'image/jpeg',
-      },
+    let imageUrl = null;
+    if (image) {
+      try {
+        // 이미지 업로드 후 URL 받기
+        imageUrl = await uploadImage(image);
+      } catch (error) {
+        console.error('이미지 업로드 실패:', error);
+        alert('이미지 업로드 중 오류가 발생했습니다.');
+        return;
+      }
+    }
+
+    const businessCardData = {
+      name,
+      country,
+      email,
+      sns,
+      introduction,
+      imageUrl,  // 업로드된 이미지의 URL만 백엔드로 보냄
     };
 
-    if (editing) {
-      updateCard(existingCard.businessCardId, businessCardData)
-        .then(() => {
-          alert('명함이 성공적으로 수정되었습니다.');
-          navigation.navigate('BusinessCard');
-        })
-        .catch((error) => {
-          console.error('명함 수정 중 오류:', error);
-          alert('명함 수정 중 오류가 발생했습니다.');
-        });
-    } else {
-      createCard(auth.memberId, businessCardData)
-        .then(() => {
-          alert('명함이 성공적으로 생성되었습니다.');
-          navigation.navigate('BusinessCard');
-        })
-        .catch((error) => {
-          console.error('명함 생성 중 오류:', error);
-          alert('명함 생성 중 오류가 발생했습니다.');
-        });
+    // 명함 생성 API 호출
+    try {
+      const response = await fetch(`http://10.0.2.2:8080/api/business-cards/members/${memberId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`  // 토큰 추가
+        },
+        body: JSON.stringify(businessCardData),
+      });
+
+      if (response.ok) {
+        alert('명함이 성공적으로 생성되었습니다.');
+        navigation.goBack();
+      } else {
+        alert('명함 생성 실패');
+      }
+    } catch (error) {
+      console.error('명함 생성 중 오류:', error);
+      alert('명함 생성 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{editing ? '명함 수정' : '명함 등록'}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="이름 (필수)"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="국가"
-        value={country}
-        onChangeText={setCountry}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="이메일 (필수)"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="SNS"
-        value={sns}
-        onChangeText={setSns}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="소개"
-        value={introduction}
-        onChangeText={setIntroduction}
-      />
+      <Text style={styles.title}>명함 생성</Text>
+      <TextInput style={styles.input} placeholder="이름" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="국가" value={country} onChangeText={setCountry} />
+      <TextInput style={styles.input} placeholder="이메일" value={email} onChangeText={setEmail} keyboardType="email-address" />
+      <TextInput style={styles.input} placeholder="SNS" value={sns} onChangeText={setSns} />
+      <TextInput style={styles.input} placeholder="소개" value={introduction} onChangeText={setIntroduction} />
       <Button title="이미지 선택" onPress={pickImage} />
-      {image && <Text>이미지 선택됨</Text>}
-      <Button
-        title={editing ? '명함 수정' : '명함 등록'}
-        onPress={handleSubmitCard}
-        disabled={!isReady || !name || !email} 
-      />
+      {image && <Text>이미지 선택됨: {image}</Text>}
+      <Button title="명함 등록" onPress={handleSubmitCard} />
     </View>
   );
 };
@@ -147,8 +132,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 15,
     paddingHorizontal: 10,
-    borderRadius: 5, 
+    borderRadius: 5,
   },
 });
 
-export default CreateBusinessCard;
+export default CreateBusinessCardScreen;

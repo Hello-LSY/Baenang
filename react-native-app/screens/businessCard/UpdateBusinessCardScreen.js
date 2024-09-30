@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateBusinessCard } from '../../redux/businessCardSlice';
+import { updateBusinessCard, fetchBusinessCard } from '../../redux/businessCardSlice'; // fetchBusinessCard import 추가
 
 const UpdateBusinessCardScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -19,10 +19,14 @@ const UpdateBusinessCardScreen = ({ route, navigation }) => {
   const handleUpdateCard = () => {
     const updatedBusinessCardData = { name, country, email, sns, introduction };
 
+    // 수정이 완료된 후에 다시 명함 정보를 불러오도록 개선
     dispatch(updateBusinessCard({ cardId: businessCard.cardId, businessCardData: updatedBusinessCardData }))
       .then(() => {
-        alert('명함이 성공적으로 수정되었습니다.');
-        navigation.goBack();
+        dispatch(fetchBusinessCard(auth.memberId))  // 수정 후 명함 정보 다시 불러오기
+        .then(() => {
+          alert('명함이 성공적으로 수정되었습니다.');
+          navigation.goBack();
+        });
       })
       .catch((error) => {
         console.error('명함 수정 중 오류:', error);
