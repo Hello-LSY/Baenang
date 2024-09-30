@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -6,42 +6,30 @@ import {
   Button,
   StyleSheet,
   TouchableOpacity,
-} from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import axios from "axios";
+} from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchTravelCertificates } from '../../redux/travelCertificatesSlice';
 
 const TravelCertificationMain = ({ navigation }) => {
-  const [locations, setLocations] = useState([]); // 초기 상태를 빈 배열로 설정
-  const [region, setRegion] = useState({
+  const dispatch = useDispatch();
+
+  // Redux state에서 상태를 가져옴
+  const { list: locations, status, error } = useSelector((state) => state.travelCertificates);
+
+  const [region, setRegion] = React.useState({
     latitude: 36.5, // 대한민국의 중앙 위치
     longitude: 127.8,
     latitudeDelta: 3, // 대한민국일 때의 줌 레벨
     longitudeDelta: 3,
   });
-  const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
-  // Spring REST API로부터 방문 지역 데이터를 가져옴
+  // 컴포넌트가 로드되면 Redux 액션을 디스패치하여 데이터를 불러옴
   useEffect(() => {
-    axios
-      .get("http://10.0.2.2:8080/api/travel-certificates/all")
-      .then((response) => {
-        const data = response.data;
-        if (Array.isArray(data)) {
-          setLocations(data); // 응답이 배열이면 상태에 저장
-          console.log("data : ", data);
-        } else {
-          console.error("API 응답이 배열이 아닙니다.");
-          setLocations([]); // 오류 방지용으로 빈 배열로 설정
-        }
-      })
-      .catch((error) => {
-        console.error("API 요청 오류:", error);
-        setLocations([]);
-      })
-      .finally(() => {
-        setLoading(false); // 데이터 로드 완료 후 로딩 상태 업데이트
-      });
-  }, []);
+    if (status === 'idle') {
+      dispatch(fetchTravelCertificates());
+    }
+  }, [status, dispatch]);
 
   // 방문한 국가 개수 구하기 (Set을 이용해 중복 제거)
   const uniqueCountries = new Set(
@@ -75,10 +63,19 @@ const TravelCertificationMain = ({ navigation }) => {
   };
 
   // 로딩 상태 처리
-  if (loading) {
+  if (status === 'loading') {
     return (
       <View style={styles.container}>
         <Text>데이터를 불러오는 중입니다...</Text>
+      </View>
+    );
+  }
+
+  // 오류 처리
+  if (status === 'failed') {
+    return (
+      <View style={styles.container}>
+        <Text>오류가 발생했습니다: {error}</Text>
       </View>
     );
   }
@@ -117,25 +114,25 @@ const TravelCertificationMain = ({ navigation }) => {
           <MapView
             style={styles.map}
             region={region}
-            zoomEnabled={true} // 지도 확대/축소 가능
-            scrollEnabled={true} // 지도 스크롤 가능
-            pitchEnabled={true} // 지도 기울기 변경 가능
-            rotateEnabled={true} // 지도 회전 가능 // 지도 상태로 설정
+            zoomEnabled={true}
+            scrollEnabled={true}
+            pitchEnabled={true}
+            rotateEnabled={true}
           >
             {locations.length > 0 ? (
               locations.map((location) => (
                 <Marker
-                  key={location.travelid} // 여행 인증서 고유 ID를 키로 사용
+                  key={location.travelid}
                   coordinate={{
                     latitude: location.latitude,
                     longitude: location.longitude,
                   }}
-                  title={location.visitedcountry} // 방문한 국가 정보
-                  description={`방문 날짜: ${location.traveldate}`} // 여행 날짜 정보
+                  title={location.visitedcountry}
+                  description={`방문 날짜: ${location.traveldate}`}
                 />
               ))
             ) : (
-              <Text>마커가 없습니다.</Text> // 데이터가 없을 때의 처리
+              <Text>마커가 없습니다.</Text>
             )}
           </MapView>
         </View>
@@ -151,16 +148,16 @@ const TravelCertificationMain = ({ navigation }) => {
         {/* 최근 여행지 섹션 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>최근 여행지</Text>
-          {locations.length > 0 ? ( // 배열이 비어있지 않은 경우에만 렌더링
+          {locations.length > 0 ? (
             <View style={styles.recentTravel}>
               <Text style={styles.travelText}>
-                {locations[locations.length - 1].visitedcountry.split("-")[0]}{" "}
-                {locations[locations.length - 1].visitedcountry.split("-")[1]} -{" "}
-                {locations[locations.length - 1].traveldate}
+                {locations[0].visitedcountry.split("-")[0]}{" "}
+                {locations[0].visitedcountry.split("-")[1]} -{" "}
+                {locations[0].traveldate}
               </Text>
             </View>
           ) : (
-            <Text>방문한 여행지가 없습니다.</Text> // 배열이 비어있을 때의 처리
+            <Text>방문한 여행지가 없습니다.</Text>
           )}
         </View>
 
@@ -176,7 +173,7 @@ const TravelCertificationMain = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    paddingBottom: 20, // 스크롤 가능 영역 확보
+    paddingBottom: 20,
   },
   container: {
     flex: 1,
