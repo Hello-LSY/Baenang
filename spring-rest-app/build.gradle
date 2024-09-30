@@ -92,6 +92,10 @@ dependencies {
     // http 관련 라이브러리
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 
+    // 파일 업로드 관련 라이브러리
+    implementation 'commons-fileupload:commons-fileupload:1.4'
+
+
 }
 
 
