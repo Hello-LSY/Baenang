@@ -1,30 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, Button, Alert, TouchableOpacity, Text } from 'react-native';
-import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux'; // Redux 관련 hooks 추가
+import { fetchTravelCertificates, deleteCertificate } from '../../redux/travelCertificatesSlice';
 import TravelCertificationItem from '../../components/travelCertification/TravelCertificationItem';
+import axios from 'axios';
+
 
 const TravelCertificationList = ({ navigation }) => {
-  const [certifications, setCertifications] = useState([]);
+  const dispatch = useDispatch();
+  const { list: certifications, status, error } = useSelector((state) => state.travelCertificates); // Redux 상태 선택
+
   const [visibleMenuIndex, setVisibleMenuIndex] = useState(null); // 어떤 항목의 메뉴가 보이는지 관리
 
   useEffect(() => {
-    fetchCertifications();
-  }, []);
-
-  const fetchCertifications = () => {
-    axios.get('http://10.0.2.2:8080/api/travel-certificates/all')
-      .then(response => {
-        const sortedData = response.data.sort((a, b) => new Date(b.traveldate) - new Date(a.traveldate));
-        setCertifications(sortedData);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  };
+    if (status === 'idle') {
+      dispatch(fetchTravelCertificates()); // 여행 인증서 목록을 가져오는 액션 디스패치
+    }
+  }, [status, dispatch]);
 
   const handlePressItem = (item) => {
-    // 클릭 시 해당 item을 여행확인서 페이지로 전달
-    navigation.navigate('TravelCertificationDetail', { item });
+    navigation.navigate('TravelCertificationDetail', { item }); // 클릭 시 해당 item을 여행확인서 페이지로 전달
   };
 
   const handleDeleteItem = (id) => {
@@ -39,7 +34,7 @@ const TravelCertificationList = ({ navigation }) => {
             axios.delete(`http://10.0.2.2:8080/api/travel-certificates/delete/${id}`)
               .then(() => {
                 Alert.alert('삭제 완료', '여행 인증서가 삭제되었습니다.');
-                fetchCertifications(); // 삭제 후 목록 갱신
+                dispatch(deleteCertificate(id)); // Redux 상태에서 인증서 삭제
               })
               .catch(error => {
                 console.error('삭제 오류:', error);
@@ -52,8 +47,7 @@ const TravelCertificationList = ({ navigation }) => {
   };
 
   const handleEditItem = (item) => {
-    // 수정 페이지로 이동하면서 아이템 정보를 전달
-    navigation.navigate('TravelCertificationEdit', { item });
+    navigation.navigate('TravelCertificationEdit', { item }); // 수정 페이지로 이동하면서 아이템 정보를 전달
   };
 
   const toggleMenu = (index) => {
@@ -64,6 +58,24 @@ const TravelCertificationList = ({ navigation }) => {
     }
   };
 
+  // 로딩 상태 표시
+  if (status === 'loading') {
+    return (
+      <View style={styles.container}>
+        <Text>로딩 중...</Text>
+      </View>
+    );
+  }
+
+  // 에러가 있을 경우
+  if (status === 'failed') {
+    return (
+      <View style={styles.container}>
+        <Text>오류가 발생했습니다: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -71,7 +83,7 @@ const TravelCertificationList = ({ navigation }) => {
         keyExtractor={(item) => item.travelid.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.itemContainer}>
-            <TravelCertificationItem item={item} onPress={handlePressItem} />
+            <TravelCertificationItem item={item} onPress={() => handlePressItem(item)} />
             
             {/* '...' 버튼 및 수정/삭제 메뉴 */}
             <TouchableOpacity style={styles.moreButton} onPress={() => toggleMenu(index)}>
