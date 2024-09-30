@@ -1,7 +1,7 @@
 // screens/businessCard/BusinessCardScreen.js
 
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBusinessCard, clearBusinessCard } from '../../redux/businessCardSlice';
 import QRCode from 'react-native-qrcode-svg';
@@ -21,6 +21,8 @@ const BusinessCardScreen = ({ navigation }) => {
     };
   }, [auth.token, auth.memberId, dispatch]);
 
+  console.log('Business Card Loaded:', businessCard); // 명함 정보 로그
+
   return (
     <ScrollView style={styles.container}>
       {loading ? (
@@ -33,6 +35,16 @@ const BusinessCardScreen = ({ navigation }) => {
           {businessCard ? (
             <>
               <QRCode value={JSON.stringify(businessCard)} size={200} />
+              {/* 이미지 표시 */}
+              {businessCard.imageUrl ? (
+                <Image 
+                  source={{ uri: businessCard.imageUrl.replace('localhost', '10.0.2.2') }} // IP 수정
+                  style={styles.businessCardImage} 
+                  resizeMode="contain" 
+                />
+              ) : (
+                <Text style={styles.errorText}>이미지가 없습니다.</Text>
+              )}
               <View style={styles.businessCardInfo}>
                 <Text style={styles.infoText}>이름: {businessCard.name}</Text>
                 <Text style={styles.infoText}>국가: {businessCard.country}</Text>
@@ -76,6 +88,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
+  businessCardImage: {
+    width: 200, // 원하는 크기로 조정
+    height: 200, // 원하는 크기로 조정
+    marginVertical: 20,
+  },
   businessCardInfo: {
     marginTop: 20,
     backgroundColor: '#ffffff',
@@ -114,6 +131,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10,
   },
 });
 

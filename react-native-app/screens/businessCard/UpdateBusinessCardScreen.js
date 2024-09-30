@@ -1,10 +1,3 @@
-// screens/businessCard/UpdateBusinessCardScreen.js
-
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateBusinessCard, fetchBusinessCard } from '../../redux/businessCardSlice'; // fetchBusinessCard import 추가
-
 const UpdateBusinessCardScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { businessCard } = route.params;
@@ -15,23 +8,46 @@ const UpdateBusinessCardScreen = ({ route, navigation }) => {
   const [email, setEmail] = useState(businessCard.email || '');
   const [sns, setSns] = useState(businessCard.sns || '');
   const [introduction, setIntroduction] = useState(businessCard.introduction || '');
+  const [image, setImage] = useState(null); // 선택한 이미지 URI 상태
+  const [imageUrl, setImageUrl] = useState(businessCard.imageUrl || null); // 기존 이미지 URL 초기화
 
-  const handleUpdateCard = () => {
+  const handleUpdateCard = async () => {
     const updatedBusinessCardData = { name, country, email, sns, introduction };
 
-    // 수정이 완료된 후에 다시 명함 정보를 불러오도록 개선
-    dispatch(updateBusinessCard({ cardId: businessCard.cardId, businessCardData: updatedBusinessCardData }))
-      .then(() => {
-        dispatch(fetchBusinessCard(auth.memberId))  // 수정 후 명함 정보 다시 불러오기
-        .then(() => {
-          alert('명함이 성공적으로 수정되었습니다.');
-          navigation.goBack();
-        });
-      })
-      .catch((error) => {
-        console.error('명함 수정 중 오류:', error);
-        alert('명함 수정 중 오류가 발생했습니다.');
-      });
+    try {
+      // 이미지가 선택된 경우에만 업로드
+      if (image) {
+        const uploadedImageUrl = await uploadImage(image, auth.memberId);
+        updatedBusinessCardData.imageUrl = uploadedImageUrl; // 업로드된 이미지 URL 추가
+      } else {
+        updatedBusinessCardData.imageUrl = imageUrl; // 기존 이미지 URL 사용
+      }
+
+      // 수정이 완료된 후에 다시 명함 정보를 불러오도록 개선
+      await dispatch(updateBusinessCard({ cardId: businessCard.cardId, businessCardData: updatedBusinessCardData }));
+      await dispatch(fetchBusinessCard(auth.memberId)); // 수정 후 명함 정보 다시 불러오기
+      Alert.alert('성공', '명함이 성공적으로 수정되었습니다.');
+      navigation.goBack();
+    } catch (error) {
+      console.error('명함 수정 중 오류:', error);
+      Alert.alert('오류', '명함 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+      console.log('이미지 선택됨:', result.uri);
+    } else {
+      console.log('이미지 선택 취소');
+    }
   };
 
   return (
@@ -68,30 +84,9 @@ const UpdateBusinessCardScreen = ({ route, navigation }) => {
         value={introduction}
         onChangeText={setIntroduction}
       />
+      <Button title="이미지 선택" onPress={pickImage} />
+      {image && <Text>선택된 이미지: {String(image)}</Text>}
       <Button title="명함 수정" onPress={handleUpdateCard} />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f0f8ff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    borderRadius: 5, 
-  },
-});
-
-export default UpdateBusinessCardScreen;
