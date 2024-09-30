@@ -1,4 +1,3 @@
-//redux/businessCardSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiClient } from './apiClient';
 
@@ -32,15 +31,15 @@ export const createBusinessCard = createAsyncThunk(
   }
 );
 
-// 명함 삭제
-export const deleteBusinessCard = createAsyncThunk(
-  'businessCard/deleteBusinessCard',
-  async (cardId, { getState, rejectWithValue }) => {
+// 명함 수정
+export const updateBusinessCard = createAsyncThunk(
+  'businessCard/updateBusinessCard',
+  async ({ cardId, businessCardData }, { getState, rejectWithValue }) => {
     const token = getState().auth.token;
     try {
       const apiClient = getApiClient(token);
-      await apiClient.delete(`/api/business-cards/${cardId}`);
-      return cardId;
+      const response = await apiClient.put(`/api/business-cards/${cardId}`, businessCardData);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data : 'Network error');
     }
@@ -86,17 +85,17 @@ const businessCardSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Failed to create business card';
       })
-      .addCase(deleteBusinessCard.pending, (state) => {
+      .addCase(updateBusinessCard.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteBusinessCard.fulfilled, (state, action) => {
+      .addCase(updateBusinessCard.fulfilled, (state, action) => {
         state.loading = false;
-        state.businessCard = null;
+        state.businessCard = action.payload;
       })
-      .addCase(deleteBusinessCard.rejected, (state, action) => {
+      .addCase(updateBusinessCard.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to delete business card';
+        state.error = action.payload || 'Failed to update business card';
       });
   },
 });

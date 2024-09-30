@@ -1,9 +1,6 @@
 package org.project.backend.config;
 
 import org.project.backend.security.MemberDetailsService;
-import org.project.backend.security.handler.CustomAuthenticationFailureHandler;
-import org.project.backend.security.handler.CustomAuthenticationSuccessHandler;
-import org.project.backend.security.handler.CustomLogoutSuccessHandler;
 import org.project.backend.security.jwt.JwtAuthenticationFilter;
 import org.project.backend.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
