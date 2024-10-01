@@ -1,33 +1,50 @@
-// screens/businessCard/CreateBusinessCardScreen.js
-
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useAuth } from '../../redux/authState';
-import { useBusinessCard } from '../../redux/businessCardState';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux'; // useDispatch 추가
 import * as ImagePicker from 'expo-image-picker';
+import { fetchBusinessCard } from '../../redux/businessCardSlice'; // Redux 액션 임포트
 
-const CreateBusinessCard = ({ navigation, route }) => {
-  const { auth } = useAuth(); 
-  const { createCard, updateCard } = useBusinessCard(); 
-  const editing = route.params?.businessCard != null;
-  const existingCard = route.params?.businessCard || {};
+// 이미지 업로드 함수 (이미지 파일명을 반환하도록 수정)
+const uploadImage = async (imageUri, memberId) => {
+  try {
+    const formData = new FormData();
+    const fileName = `${memberId}_${Date.now()}.jpg`;
 
-  const [name, setName] = useState(existingCard.name || '');
-  const [country, setCountry] = useState(existingCard.country || '');
-  const [email, setEmail] = useState(existingCard.email || '');
-  const [sns, setSns] = useState(existingCard.sns || '');
-  const [introduction, setIntroduction] = useState(existingCard.introduction || '');
-  const [image, setImage] = useState(null); 
-  const [isReady, setIsReady] = useState(false);
+    formData.append('file', {
+      uri: imageUri,
+      name: fileName,
+      type: 'image/jpeg',
+    });
 
-  useEffect(() => {
-    if (auth.token && auth.memberId) {
-      setIsReady(true);
-    } else {
-      alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
-      navigation.navigate('Login');
+    const response = await fetch('http://10.0.2.2:8080/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('이미지 업로드 실패');
     }
-  }, [auth.token, auth.memberId]);
+
+    const data = await response.json();
+    return data.fileName;  // 파일 이름만 반환
+  } catch (error) {
+    console.error('이미지 업로드 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+const CreateBusinessCardScreen = ({ navigation }) => {
+  const dispatch = useDispatch();  // useDispatch로 dispatch 가져오기
+  const [name, setName] = useState('');
+  const [country, setCountry] = useState('');
+  const [email, setEmail] = useState('');
+  const [sns, setSns] = useState('');
+  const [introduction, setIntroduction] = useState('');
+  const [image, setImage] = useState(null);
+  const [imageFileName, setImageFileName] = useState(null); // 이미지 파일 이름만 저장
+
+  // Redux에서 memberId 및 토큰 가져오기
+  const { memberId, token } = useSelector((state) => state.auth);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -37,94 +54,86 @@ const CreateBusinessCard = ({ navigation, route }) => {
       quality: 1,
     });
 
-    if (!result.cancelled) {
-      setImage(result.uri);
+    if (!result.cancelled && result.assets && result.assets.length > 0) {
+      const selectedImage = result.assets[0]; // assets 배열에서 첫 번째 이미지 선택
+      setImage(selectedImage.uri); // 이미지 URI 설정
+      console.log('이미지 선택됨:', selectedImage.uri);
+
+      try {
+        // 이미지 업로드 후 파일명 받기
+        const uploadedFileName = await uploadImage(selectedImage.uri, memberId);
+        setImageFileName(uploadedFileName); // 파일명을 상태로 설정
+        console.log('이미지 업로드 성공:', uploadedFileName);
+      } catch (error) {
+        console.error('이미지 업로드 실패:', error);
+        Alert.alert('이미지 업로드 실패', '이미지 업로드 중 오류가 발생했습니다.');
+      }
+    } else {
+      console.log('이미지 선택 취소');
     }
   };
 
-  const handleSubmitCard = () => {
-    if (!isReady) {
-      alert('로그인 정보를 불러오는 중입니다.');
+  const handleSubmitCard = async () => {
+    if (!name || !email || !imageFileName) {
+      Alert.alert('입력 오류', '이름, 이메일, 이미지를 모두 입력해주세요.');
       return;
     }
 
-    if (!name || !email) {
-      alert('이름과 이메일을 입력해주세요.');
-      return;
-    }
-
-    const businessCardData = { 
-      businessCardDTO: { name, country, email, sns, introduction },
-      image: {
-        uri: image,
-        name: 'businessCardImage.jpg',
-        type: 'image/jpeg',
-      },
+    const businessCardData = {
+      name,
+      country,
+      email,
+      sns,
+      introduction,
+      imageUrl: imageFileName, // 이미지 파일명만 백엔드로 보냄
     };
 
-    if (editing) {
-      updateCard(existingCard.businessCardId, businessCardData)
-        .then(() => {
-          alert('명함이 성공적으로 수정되었습니다.');
-          navigation.navigate('BusinessCard');
-        })
-        .catch((error) => {
-          console.error('명함 수정 중 오류:', error);
-          alert('명함 수정 중 오류가 발생했습니다.');
-        });
-    } else {
-      createCard(auth.memberId, businessCardData)
-        .then(() => {
-          alert('명함이 성공적으로 생성되었습니다.');
-          navigation.navigate('BusinessCard');
-        })
-        .catch((error) => {
-          console.error('명함 생성 중 오류:', error);
-          alert('명함 생성 중 오류가 발생했습니다.');
-        });
+    console.log('명함 데이터 전송:', businessCardData); // 전송할 데이터 로그 출력
+
+    // 명함 생성 API 호출
+    try {
+      const response = await fetch(`http://10.0.2.2:8080/api/business-cards/members/${memberId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // 토큰 추가
+        },
+        body: JSON.stringify(businessCardData),
+      });
+
+      if (response.ok) {
+        console.log('명함 생성 성공');
+        
+        // 명함 생성 후 Redux 상태를 즉시 업데이트
+        await dispatch(fetchBusinessCard(memberId));
+
+        Alert.alert('성공', '명함이 성공적으로 생성되었습니다.');
+        navigation.goBack();
+      } else {
+        console.error('명함 생성 실패');
+        Alert.alert('실패', '명함 생성 실패');
+      }
+    } catch (error) {
+      console.error('명함 생성 중 오류:', error); // 명함 생성 실패 시 로그 출력
+      Alert.alert('오류', '명함 생성 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{editing ? '명함 수정' : '명함 등록'}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="이름 (필수)"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="국가"
-        value={country}
-        onChangeText={setCountry}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="이메일 (필수)"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="SNS"
-        value={sns}
-        onChangeText={setSns}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="소개"
-        value={introduction}
-        onChangeText={setIntroduction}
-      />
+      <Text style={styles.title}>명함 생성</Text>
+      <TextInput style={styles.input} placeholder="이름" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="국가" value={country} onChangeText={setCountry} />
+      <TextInput style={styles.input} placeholder="이메일" value={email} onChangeText={setEmail} keyboardType="email-address" />
+      <TextInput style={styles.input} placeholder="SNS" value={sns} onChangeText={setSns} />
+      <TextInput style={styles.input} placeholder="소개" value={introduction} onChangeText={setIntroduction} />
       <Button title="이미지 선택" onPress={pickImage} />
-      {image && <Text>이미지 선택됨</Text>}
+      {image && <Text>이미지 선택됨: {String(image)}</Text>}
+      {imageFileName && <Text>업로드된 이미지 파일명: {String(imageFileName)}</Text>}
       <Button
-        title={editing ? '명함 수정' : '명함 등록'}
+        title="명함 등록"
         onPress={handleSubmitCard}
-        disabled={!isReady || !name || !email} 
+        disabled={!name || !email || !imageFileName} // 파일명 기반으로 버튼 활성화 여부 결정
       />
     </View>
   );
@@ -147,8 +156,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 15,
     paddingHorizontal: 10,
-    borderRadius: 5, 
+    borderRadius: 5,
   },
 });
 
-export default CreateBusinessCard;
+export default CreateBusinessCardScreen;

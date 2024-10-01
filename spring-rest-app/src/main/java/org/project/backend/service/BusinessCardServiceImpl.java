@@ -39,14 +39,11 @@ public class BusinessCardServiceImpl implements BusinessCardService {
         return convertToDTO(businessCard);
     }
 
+    @Transactional
     @Override
     public BusinessCardDTO createBusinessCard(Long memberId, BusinessCardDTO businessCardDTO) throws Exception {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessCardMemberNotFoundException("Member not found with ID: " + memberId));
-
-        if (businessCardRepository.findByMember_Id(memberId).isPresent()) {
-            throw new RuntimeException("Member already has a business card");
-        }
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
         String cardId = UUID.randomUUID().toString();
 
@@ -58,14 +55,25 @@ public class BusinessCardServiceImpl implements BusinessCardService {
                 .email(businessCardDTO.getEmail())
                 .sns(businessCardDTO.getSns())
                 .introduction(businessCardDTO.getIntroduction())
-                .imageUrl(businessCardDTO.getImageUrl()) // 프론트엔드에서 전달된 이미지 URL
+                .imageUrl(businessCardDTO.getImageUrl())  // 이미지 URL 저장
                 .build();
 
-        BusinessCard savedBusinessCard = businessCardRepository.save(businessCard);
-        return convertToDTO(savedBusinessCard);
+        businessCardRepository.save(businessCard);
+
+        return BusinessCardDTO.builder()
+                .cardId(businessCard.getCardId())
+                .name(businessCard.getName())
+                .country(businessCard.getCountry())
+                .email(businessCard.getEmail())
+                .sns(businessCard.getSns())
+                .introduction(businessCard.getIntroduction())
+                .imageUrl(businessCard.getImageUrl())
+                .build();
     }
 
+
     @Override
+    @Transactional
     public BusinessCardDTO updateBusinessCard(String cardId, BusinessCardDTO businessCardDTO) throws Exception {
         BusinessCard businessCard = businessCardRepository.findById(cardId)
                 .orElseThrow(() -> new BusinessCardNotFoundException("BusinessCard not found with ID: " + cardId));
@@ -83,6 +91,7 @@ public class BusinessCardServiceImpl implements BusinessCardService {
         businessCardRepository.save(updatedBusinessCard);
         return convertToDTO(updatedBusinessCard);
     }
+
 
     // DTO 변환 메서드
     private BusinessCardDTO convertToDTO(BusinessCard businessCard) {
