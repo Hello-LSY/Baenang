@@ -1,5 +1,3 @@
-// screens/businessCard/BusinessCardScreen.js
-
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -35,10 +33,10 @@ const BusinessCardScreen = ({ navigation }) => {
           {businessCard ? (
             <>
               <QRCode value={JSON.stringify(businessCard)} size={200} />
-              {/* 이미지 표시 */}
+              {/* 이미지 표시 (DB에는 이미지명만 저장됨) */}
               {businessCard.imageUrl ? (
                 <Image 
-                  source={{ uri: businessCard.imageUrl.replace('localhost', '10.0.2.2') }} // IP 수정
+                  source={{ uri: `http://10.0.2.2:8080/uploads/${businessCard.imageUrl}` }} // 이미지명에 기반해 URL 생성
                   style={styles.businessCardImage} 
                   resizeMode="contain" 
                 />
