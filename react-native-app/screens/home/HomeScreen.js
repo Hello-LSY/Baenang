@@ -155,7 +155,7 @@ const HomeScreen = ({ navigation }) => {
           title="환율"
           imgSrc={Exchange}
           imgSize={60}
-          onPress={() => navigation.navigate('Community')}
+          onPress={() => navigation.navigate('ExchangeRateList')}
         />
         <ServiceButton
           title="여행자 테스트"
