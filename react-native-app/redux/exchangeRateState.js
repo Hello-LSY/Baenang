@@ -1,7 +1,6 @@
-// redux/exchangeRateState.js
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiClient } from './apiClient';
+import { useSelector, useDispatch } from 'react-redux';
 
 // 모든 환율 데이터 조회
 export const fetchAllExchangeRates = createAsyncThunk(
@@ -16,20 +15,32 @@ export const fetchAllExchangeRates = createAsyncThunk(
 // 어제보다 환율이 하락한 상위 5개 통화 조회
 export const fetchTop5DecreasingRates = createAsyncThunk(
   'exchangeRate/fetchTop5DecreasingRates',
-  async () => {
-    const apiClient = getApiClient();
+  async (_, { getState }) => {
+    const { auth } = getState(); // auth 상태에서 토큰을 가져옴
+    const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
     const response = await apiClient.get('/api/exchange/top5-decreasing');
     return response.data;
   }
 );
 
-// 특정 통화의 환율 히스토리 조회
+// 특정 통화의 환율 히스토리 조회 
 export const fetchExchangeRateHistory = createAsyncThunk(
   'exchangeRate/fetchExchangeRateHistory',
-  async (currencyCode) => {
-    const apiClient = getApiClient();
+  async (currencyCode, { getState }) => {
+    const { auth } = getState(); // auth 상태에서 토큰을 가져옴
+    const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
     const response = await apiClient.get(`/api/exchange/history/${currencyCode}`);
     return { currencyCode, history: response.data }; // 통화 코드와 함께 반환
+  }
+);
+
+// 최신 환율 데이터 조회
+export const fetchLatestExchangeRates = createAsyncThunk(
+  'exchangeRate/fetchLatestExchangeRates',
+  async () => {
+    const apiClient = getApiClient();
+    const response = await apiClient.get('/api/exchange/latest');
+    return response.data;
   }
 );
 
@@ -39,6 +50,7 @@ const exchangeRateSlice = createSlice({
     allExchangeRates: [],
     top5Rates: [], // 하락한 상위 5개 통화
     exchangeRateHistory: {}, // 통화별 환율 히스토리
+    latestExchangeRates: [], // 최신 환율 정보
     loading: false,
     error: null,
   },
@@ -83,18 +95,33 @@ const exchangeRateSlice = createSlice({
       .addCase(fetchExchangeRateHistory.rejected, (state) => {
         state.loading = false;
         state.error = 'Failed to fetch exchange rate history';
+      })
+
+      // 최신 환율 데이터
+      .addCase(fetchLatestExchangeRates.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchLatestExchangeRates.fulfilled, (state, action) => {
+        state.loading = false;
+        state.latestExchangeRates = action.payload;
+      })
+      .addCase(fetchLatestExchangeRates.rejected, (state) => {
+        state.loading = false;
+        state.error = 'Failed to fetch latest exchange rates';
       });
   },
 });
 
-// useExchangeRate Hook 정의
-import { useSelector, useDispatch } from 'react-redux';
-
 export const useExchangeRate = () => {
   const dispatch = useDispatch();
-  const { allExchangeRates, top5Rates, exchangeRateHistory, loading, error } = useSelector(
-    (state) => state.exchangeRate
-  );
+  const { 
+    allExchangeRates, 
+    top5Rates, 
+    exchangeRateHistory, 
+    latestExchangeRates, 
+    loading, 
+    error 
+  } = useSelector((state) => state.exchangeRate);
 
   const fetchAllRates = () => {
     dispatch(fetchAllExchangeRates());
@@ -108,15 +135,21 @@ export const useExchangeRate = () => {
     dispatch(fetchExchangeRateHistory(currencyCode));
   };
 
+  const fetchLatestRates = () => {
+    dispatch(fetchLatestExchangeRates());
+  };
+
   return {
     allExchangeRates,
     top5Rates,
     exchangeRateHistory,
+    latestExchangeRates,
     loading,
     error,
     fetchAllRates,
     fetchTop5Rates,
     fetchRateHistory,
+    fetchLatestRates,
   };
 };
 
