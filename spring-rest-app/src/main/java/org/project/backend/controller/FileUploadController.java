@@ -20,7 +20,7 @@ public class FileUploadController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            // 프론트에서 임의로 파일명을 생성하여 보냈으므로, 파일 이름은 file.getOriginalFilename() 대신 클라이언트에서 온 파일명을 그대로 사용
+            // 파일 이름은 클라이언트에서 온 파일명을 그대로 사용
             String fileName = file.getOriginalFilename();
             Path filePath = Paths.get(UPLOAD_DIR + fileName);
 
@@ -29,9 +29,8 @@ public class FileUploadController {
             // 파일 저장
             Files.write(filePath, file.getBytes());
 
-            // 이미지 URL 반환 (파일 경로로 접근 가능하도록)
-            String fileUrl = "http://localhost:8080/uploads/" + fileName;
-            return ResponseEntity.ok().body("{\"imageUrl\": \"" + fileUrl + "\"}");
+            // 파일명만 반환 (URL은 클라이언트가 구성)
+            return ResponseEntity.ok().body("{\"fileName\": \"" + fileName + "\"}");
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
