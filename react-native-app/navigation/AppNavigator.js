@@ -4,8 +4,8 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "../screens/home/HomeScreen";
 import BusinessCardScreen from "../screens/businessCard/BusinessCardScreen";
-import CreateBusinessCardScreen from "../screens/businessCard/CreateBusinessCardScreen"; // CreateBusinessCardScreen 추가
-import UpdateBusinessCardScreen from "../screens/businessCard/UpdateBusinessCardScreen"; // UpdateBusinessCardScreen 사용
+import CreateBusinessCardScreen from "../screens/businessCard/CreateBusinessCardScreen";
+import UpdateBusinessCardScreen from "../screens/businessCard/UpdateBusinessCardScreen";
 import TravelCertificationMain from "../screens/travelCertification/TravelCertificationMain";
 import TravelCertificationList from "../screens/travelCertification/TravelCertificationList";
 import TravelCertificationDetail from "../components/travelCertification/TravelCertificationDetail";

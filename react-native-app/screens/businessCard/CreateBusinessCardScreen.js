@@ -3,6 +3,8 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux'; // useDispatch 추가
 import * as ImagePicker from 'expo-image-picker';
 import { fetchBusinessCard } from '../../redux/businessCardSlice'; // Redux 액션 임포트
+import { BASE_URL } from '../../constants/config';
+
 
 // 이미지 업로드 함수 (이미지 파일명을 반환하도록 수정)
 const uploadImage = async (imageUri, memberId) => {
@@ -16,7 +18,7 @@ const uploadImage = async (imageUri, memberId) => {
       type: 'image/jpeg',
     });
 
-    const response = await fetch('http://10.0.2.2:8080/api/upload', {
+    const response = await fetch(`${BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
     });
@@ -92,7 +94,7 @@ const CreateBusinessCardScreen = ({ navigation }) => {
 
     // 명함 생성 API 호출
     try {
-      const response = await fetch(`http://10.0.2.2:8080/api/business-cards/members/${memberId}`, {
+      const response = await fetch(`${BASE_URL}/api/business-cards/members/${memberId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux'; // useDispatch와 useSelector 추가
 import * as ImagePicker from 'expo-image-picker'; // 이미지 선택 라이브러리
 import { updateBusinessCard, fetchBusinessCard } from '../../redux/businessCardSlice'; // 필요한 액션 임포트
+import { BASE_URL } from '../../constants/config';
 
 // 이미지 업로드 함수 (로그 추가)
 const uploadImage = async (imageUri, memberId) => {
@@ -18,7 +19,7 @@ const uploadImage = async (imageUri, memberId) => {
 
     console.log('이미지 업로드 시작:', fileName);
 
-    const response = await fetch('http://10.0.2.2:8080/api/upload', {
+    const response = await fetch(`${BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
     });
