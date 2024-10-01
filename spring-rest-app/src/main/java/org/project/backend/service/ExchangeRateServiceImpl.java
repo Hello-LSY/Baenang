@@ -149,10 +149,20 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .collect(Collectors.toList());
     }
 
+    private static final int MAX_RETRY_COUNT = 10;  // 최대 시도 횟수
+
     private LocalDate getPreviousBusinessDay(LocalDate date) {
-        while (isNonBusinessDay(date)) {
+        int retryCount = 0;
+        while (isNonBusinessDay(date) && retryCount < MAX_RETRY_COUNT) {
             date = date.minusDays(1);  // 비영업일이면 전날로 이동
+            retryCount++;
         }
+
+        if (retryCount >= MAX_RETRY_COUNT) {
+            logger.warn("Max retry count reached while searching for previous business day");
+            throw new ExchangeRateNotFoundException("Could not find a valid business day within limit");
+        }
+
         return date;
     }
 
@@ -164,15 +174,22 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     }
 
     private List<ExchangeRate> fetchRatesWithFallback(LocalDate date) {
+        LocalDate minimumDate = LocalDate.of(2024, 1, 1);
+
         List<ExchangeRate> rates = exchangeRateRepository.findByRecordedAtBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
 
         while (rates.isEmpty()) {
             date = getPreviousBusinessDay(date.minusDays(1));  // 이전 영업일로 이동
+            if (date.isBefore(minimumDate)) {
+                logger.error("No exchange rate data available before " + minimumDate);
+                throw new ExchangeRateNotFoundException("No exchange rate data available for the requested period.");
+            }
             rates = exchangeRateRepository.findByRecordedAtBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
         }
 
         return rates;
     }
+
 
     private ExchangeRateDTO convertToDTO(ExchangeRate exchangeRate) {
         return ExchangeRateDTO.builder()
