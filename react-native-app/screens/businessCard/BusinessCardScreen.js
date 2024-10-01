@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBusinessCard, clearBusinessCard } from '../../redux/businessCardSlice';
 import QRCode from 'react-native-qrcode-svg';
+import { BASE_URL } from '../../constants/config';
 
 const BusinessCardScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -36,7 +37,7 @@ const BusinessCardScreen = ({ navigation }) => {
               {/* 이미지 표시 (DB에는 이미지명만 저장됨) */}
               {businessCard.imageUrl ? (
                 <Image 
-                  source={{ uri: `http://10.0.2.2:8080/uploads/${businessCard.imageUrl}` }} // 이미지명에 기반해 URL 생성
+                  source={{ uri: `${BASE_URL}/uploads/${businessCard.imageUrl}` }} // 이미지명에 기반해 URL 생성
                   style={styles.businessCardImage} 
                   resizeMode="contain" 
                 />
