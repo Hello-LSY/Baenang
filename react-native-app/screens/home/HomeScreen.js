@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Button, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Button,
+  FlatList,
+} from 'react-native';
 import { useAuth } from '../../redux/authState'; // useAuth 훅 import
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
 import DocumentCard from '../../components/DocumentCard';
@@ -38,7 +47,14 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const renderExchangeRateItem = ({ item }) => (
-    <TouchableOpacity style={styles.exchangeItem} onPress={() => navigation.navigate('ExchangeRateDetail', { currencyCode: item.currencyCode })}>
+    <TouchableOpacity
+      style={styles.exchangeItem}
+      onPress={() =>
+        navigation.navigate('ExchangeRateDetail', {
+          currencyCode: item.currencyCode,
+        })
+      }
+    >
       <Text style={styles.exchangeText}>{item.currencyCode}</Text>
       <Text style={styles.exchangeRate}>{item.exchangeRateValue}</Text>
       <Text style={styles.exchangeChange}>{item.exchangeChangePercentage}</Text>
@@ -145,7 +161,7 @@ const HomeScreen = ({ navigation }) => {
           title="여행자 테스트"
           imgSrc={TravelTest}
           imgSize={60}
-          onPress={() => navigation.navigate('Community')}
+          onPress={() => navigation.navigate('TravelerPersonalityTest')}
         />
       </View>
 
@@ -196,11 +212,13 @@ const HomeScreen = ({ navigation }) => {
             title="자주 묻는 질문"
             style={styles.cscenter}
             textStyle={styles.cscenterText}
+            onPress={() => navigation.navigate('CustomerService')}
           />
           <CustomButton
             title="공지사항"
             style={styles.cscenter}
             textStyle={styles.cscenterText}
+            onPress={() => navigation.navigate('CustomerService')}
           />
         </View>
         <View style={styles.row}>
@@ -208,6 +226,7 @@ const HomeScreen = ({ navigation }) => {
             title="사용 가이드"
             style={styles.cscenter}
             textStyle={styles.cscenterText}
+            onPress={() => navigation.navigate('CustomerService')}
           />
           <CustomButton
             title="챗봇 상담"
@@ -218,7 +237,12 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       {/* 프로필 설정 모달 */}
-      <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={toggleModal}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={toggleModal}
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>프로필 설정</Text>
