@@ -2,11 +2,44 @@ import React, { useState } from "react";
 import { View, Text, Button, Image, StyleSheet, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import * as FileSystem from "expo-file-system"; 
-import axios from "axios";
-import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux'; // Redux 사용
-import { fetchTravelCertificates } from '../../redux/travelCertificatesSlice'; // Redux 액션
+import * as FileSystem from "expo-file-system";
+import axios from "axios"; // axios 임포트
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { fetchTravelCertificates } from "../../redux/travelCertificatesSlice"; // Redux 액션
+
+// 이미지 업로드 함수
+const uploadImage = async (imageUri, travelid) => {
+  try {
+    const formData = new FormData();
+    const fileName = `${travelid}_${Date.now()}.jpg`;
+
+    formData.append("file", {
+      uri: imageUri.startsWith("file://") ? imageUri : `file://${imageUri}`,
+      name: fileName,
+      type: "image/jpeg",
+    });
+
+    console.log("이미지 업로드 시작:", fileName);
+
+    const response = await fetch("http://10.0.2.2:8080/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("이미지 업로드 실패");
+    }
+
+    const data = await response.json();
+    console.log("이미지 업로드 성공, 반환된 파일명:", data.fileName);
+
+    return data.fileName;
+  } catch (error) {
+    console.error("이미지 업로드 중 오류 발생:", error);
+    throw error;
+  }
+};
 
 const TravelCertificationProcess = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -100,35 +133,54 @@ const TravelCertificationProcess = () => {
       alert("사진과 위치 정보가 필요합니다.");
       return;
     }
-
-    const currentTime = new Date().toISOString().replace("T", " ").split(".")[0];
-
-    const data = {
-      username: username,
-      imagepath: imageUri,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
-      visitedcountry: visitedCountry,
-      traveldate: currentTime,
-    };
-
+  
     try {
-      await axios.post(
-        "http://10.0.2.2:8080/api/travel-certificates/save",
-        data
-      );
-      Alert.alert("인증 완료", "사진과 위치가 데이터베이스에 저장되었습니다.");
-
-      // Redux 상태 업데이트
-      dispatch(fetchTravelCertificates());
-
-      // 저장 후 목록 화면으로 이동
-      navigation.navigate('TravelCertificationList');
+      // 이미지 업로드
+      const uploadedFileName = await uploadImage(imageUri, username);
+      console.log("업로드된 파일명:", uploadedFileName);
+  
+      // 서버에 여행 인증서 저장 요청
+      const currentTime = new Date().toISOString().replace("T", " ").split(".")[0];
+      const data = {
+        username,
+        imagepath: uploadedFileName, // 업로드된 파일명 저장
+        latitude: location.latitude,
+        longitude: location.longitude,
+        visitedcountry: visitedCountry,
+        traveldate: currentTime,
+      };
+  
+      console.log("서버로 전송할 데이터:", data);
+  
+      // 데이터 전송
+      const response = await axios.post("http://10.0.2.2:8080/api/travel-certificates/save", data);
+  
+      if (response.status === 201) {
+        console.log("서버 응답 데이터:", JSON.stringify(response.data)); // 서버 응답 데이터 출력
+        Alert.alert("인증 완료", "사진과 위치가 데이터베이스에 저장되었습니다.");
+  
+        // Redux 상태 업데이트
+        dispatch(fetchTravelCertificates());
+  
+        // 저장 후 목록 화면으로 이동
+        navigation.navigate("TravelCertificationList");
+      } else {
+        console.log("서버 응답 상태 코드:", response.status);
+        const errorText = JSON.stringify(response.data);
+        throw new Error(`데이터 전송 실패: ${errorText}`);
+      }
     } catch (error) {
       console.error("데이터 저장 오류:", error);
-      Alert.alert("저장 실패", "데이터베이스에 저장하는 데 실패했습니다.");
+      if (error.response) {
+        console.log("서버 응답 데이터:", JSON.stringify(error.response.data)); // 서버에서 반환한 에러 메시지
+        Alert.alert("저장 실패", `서버 오류: ${JSON.stringify(error.response.data)}`);
+      } else {
+        Alert.alert("저장 실패", `데이터베이스에 저장하는 데 실패했습니다. 오류: ${error.message}`);
+      }
     }
   };
+  
+  
 
   return (
     <View style={styles.container}>
