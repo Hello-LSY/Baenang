@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   Button,
+  Image,
   FlatList,
 } from 'react-native';
 import { useAuth } from '../../redux/authState'; // useAuth 훅 import
@@ -27,7 +28,7 @@ import agoda from '../../assets/icons/아고다.png';
 import booking from '../../assets/icons/부킹닷컴.png';
 import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
-
+import ProfileButton from '../../components/ProfileButton';
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const { logout } = useAuth(); // useAuth 훅에서 logout 함수 가져오기
@@ -87,10 +88,12 @@ const HomeScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       {/* 상단 로고와 제목 */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>즐거운 여행 되세요 name 님</Text>
-        <TouchableOpacity style={styles.profileButton} onPress={toggleModal}>
-          <Text style={styles.profileIcon}>👤</Text>
-        </TouchableOpacity>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerGreeting}>즐거운 여행 되세요,</Text>
+          <Text style={styles.headerName}>이태웅님</Text>
+        </View>
+        <ProfileButton onPress={toggleModal} />
+        <ProfileButton onPress={() => navigation.navigate('UserProfile')} />
       </View>
 
       {/* 내 문서 섹션 */}
@@ -102,51 +105,6 @@ const HomeScreen = ({ navigation }) => {
         />
       </ScrollView>
 
-      {/* <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📂 내 문서</Text>
-        <View style={styles.documentList}>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}
-          >
-            <Text style={styles.documentText}>주민등록증</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#8BC34A' }]}
-          >
-            <Text style={styles.documentText}>운전면허증</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#00BCD4' }]}
-          >
-            <Text style={styles.documentText}>여권</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#FF9800' }]}
-          >
-            <Text style={styles.documentText}>여행보험증명서</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#9C27B0' }]}
-          >
-            <Text style={styles.documentText}>예방접종증명서</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#009688' }]}
-          >
-            <Text style={styles.documentText}>출입국사실증명서</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#3F51B5' }]}
-          >
-            <Text style={styles.documentText}>국제학생증</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#E91E63' }]}
-          >
-            <Text style={styles.documentText}>여행보혐증명서</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
       {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
@@ -166,23 +124,19 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('TravelCertificationMain')}
         />
       </View>
-      <View style={styles.servicecontainer2}>
+      <View style={styles.servicecontainer}>
         <ServiceButton
-          title="커뮤니티"
-          imgSrc={Community}
-          imgSize={60}
-          onPress={() => navigation.navigate('Community')}
-        />
-        <ServiceButton
-          title="환율"
+          title="실시간 환율"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요"
           imgSrc={Exchange}
-          imgSize={60}
-          onPress={() => navigation.navigate('ExchangeRateList')}
+          imgSize={75}
+          onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요"
           imgSrc={TravelTest}
-          imgSize={60}
+          imgSize={75}
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
         />
       </View>
@@ -284,32 +238,39 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    width: '100%',
   },
-  logo: {
-    fontSize: 24,
-    marginRight: 8,
+  headerTextContainer: {
+    flexDirection: 'column',
   },
-  headerText: {
+  headerGreeting: {
+    fontSize: 18,
+    fontWeight: 'normal',
+  },
+  headerName: {
     fontSize: 24,
     fontWeight: 'bold',
   },
   profileButton: {
-    padding: 8,
-    borderRadius: 50,
+    width: 40, // 프로필 이미지 크기
+    height: 40, // 프로필 이미지 크기
+    borderRadius: 20, // 원형 모양을 위해 width/height의 절반
+    overflow: 'hidden', // 이미지를 원 안에 맞추기 위해
     backgroundColor: '#e3f2fd',
   },
   profileIcon: {
-    fontSize: 24,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover', // 이미지가 버튼을 꽉 채우도록
   },
+
   section: {
     marginTop: 16,
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: 8,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -344,11 +305,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 10,
     width: '100%',
+    justifyContent: 'space-between',
   },
   servicecontainer2: {
     flexDirection: 'row',
     paddingHorizontal: 10,
+    width: '100%',
+    justifyContent: 'space-between',
   },
+
   exchangeList: {
     marginTop: 12,
   },
