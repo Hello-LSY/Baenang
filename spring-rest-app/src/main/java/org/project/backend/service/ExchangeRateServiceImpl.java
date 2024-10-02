@@ -202,8 +202,9 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     private Double parseDouble(Object value) {
         try {
-            return value != null ? Double.parseDouble(value.toString()) : null;
+            return value != null ? Double.parseDouble(value.toString().replace(",", "")) : null;
         } catch (NumberFormatException e) {
+            logger.error("Failed to parse value: " + value, e);
             return null;
         }
     }
