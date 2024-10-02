@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,24 +8,24 @@ import {
   Modal,
   Button,
   FlatList,
-} from 'react-native';
-import { useAuth } from '../../redux/authState'; // useAuth 훅 import
-import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
-import DocumentCard from '../../components/DocumentCard';
-import ServiceButton from '../../components/ServiceButton';
-import BussinessCard from '../../assets/icons/ID.png';
-import TravelCertification from '../../assets/icons//MAP.png';
-import Community from '../../assets/icons/INFORM.png';
-import Exchange from '../../assets/icons/FINANCE.png';
-import TravelTest from '../../assets/icons/PACKAGE.png';
-import ExternalServiceButton from '../../components/ExternalServiceButton';
-import kbs from '../../assets/icons/kb손해보험.png';
-import kbc from '../../assets/icons/kb차차차.png';
-import tmg from '../../assets/icons/티머니고.png';
-import agoda from '../../assets/icons/아고다.png';
-import booking from '../../assets/icons/부킹닷컴.png';
-import airbnb from '../../assets/icons/에어비앤비.png';
-import CustomButton from '../../components/CustomButton';
+} from "react-native";
+import { useAuth } from "../../redux/authState"; // useAuth 훅 import
+import { useExchangeRate } from "../../redux/exchangeRateState"; // 환율 정보를 불러오기 위한 훅
+import DocumentCard from "../../components/DocumentCard";
+import ServiceButton from "../../components/ServiceButton";
+import BussinessCard from "../../assets/icons/ID.png";
+import TravelCertification from "../../assets/icons//MAP.png";
+import Community from "../../assets/icons/INFORM.png";
+import Exchange from "../../assets/icons/FINANCE.png";
+import TravelTest from "../../assets/icons/PACKAGE.png";
+import ExternalServiceButton from "../../components/ExternalServiceButton";
+import kbs from "../../assets/icons/kb손해보험.png";
+import kbc from "../../assets/icons/kb차차차.png";
+import tmg from "../../assets/icons/티머니고.png";
+import agoda from "../../assets/icons/아고다.png";
+import booking from "../../assets/icons/부킹닷컴.png";
+import airbnb from "../../assets/icons/에어비앤비.png";
+import CustomButton from "../../components/CustomButton";
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -43,14 +43,18 @@ const HomeScreen = ({ navigation }) => {
   const handleLogout = () => {
     logout(); // 로그아웃 함수 호출
     toggleModal(); // 모달 닫기
-    navigation.navigate('Login'); // 로그아웃 후 로그인 화면으로 이동
+    navigation.navigate("Login"); // 로그아웃 후 로그인 화면으로 이동
+  };
+
+  const touchHandle  = () => {
+    console.log('!!!!!!!!!!!!!!');
   };
 
   const renderExchangeRateItem = ({ item }) => (
     <TouchableOpacity
       style={styles.exchangeItem}
       onPress={() =>
-        navigation.navigate('ExchangeRateDetail', {
+        navigation.navigate("ExchangeRateDetail", {
           currencyCode: item.currencyCode,
         })
       }
@@ -84,42 +88,43 @@ const HomeScreen = ({ navigation }) => {
           />
 
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}
+            style={[styles.documentItem, { backgroundColor: "#FFEB3B" }]}
+            onPress={() => navigation.navigate('ResidentRegistrationMain')}
           >
             <Text style={styles.documentText}>주민등록증</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#8BC34A' }]}
+            style={[styles.documentItem, { backgroundColor: "#8BC34A" }]}
           >
             <Text style={styles.documentText}>운전면허증</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#00BCD4' }]}
+            style={[styles.documentItem, { backgroundColor: "#00BCD4" }]}
           >
             <Text style={styles.documentText}>여권</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#FF9800' }]}
+            style={[styles.documentItem, { backgroundColor: "#FF9800" }]}
           >
             <Text style={styles.documentText}>여행보험증명서</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#9C27B0' }]}
+            style={[styles.documentItem, { backgroundColor: "#9C27B0" }]}
           >
             <Text style={styles.documentText}>예방접종증명서</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#009688' }]}
+            style={[styles.documentItem, { backgroundColor: "#009688" }]}
           >
             <Text style={styles.documentText}>출입국사실증명서</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#3F51B5' }]}
+            style={[styles.documentItem, { backgroundColor: "#3F51B5" }]}
           >
             <Text style={styles.documentText}>국제학생증</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#E91E63' }]}
+            style={[styles.documentItem, { backgroundColor: "#E91E63" }]}
           >
             <Text style={styles.documentText}>여행보혐증명서</Text>
           </TouchableOpacity>
@@ -133,7 +138,7 @@ const HomeScreen = ({ navigation }) => {
           subtitle="여행 중 만난 인연을 이 안에 넣어요"
           imgSrc={BussinessCard}
           imgSize={75}
-          onPress={() => navigation.navigate('BusinessCard')}
+          onPress={() => navigation.navigate("BusinessCard")}
         />
         <ServiceButton
           style={styles.serviceButton}
@@ -141,7 +146,7 @@ const HomeScreen = ({ navigation }) => {
           subtitle="내가 여행한 곳을 한 눈에 확인해요"
           imgSrc={TravelCertification}
           imgSize={75}
-          onPress={() => navigation.navigate('TravelCertificationMain')}
+          onPress={() => navigation.navigate("TravelCertificationMain")}
         />
       </View>
       <View style={styles.servicecontainer2}>
@@ -149,19 +154,19 @@ const HomeScreen = ({ navigation }) => {
           title="커뮤니티"
           imgSrc={Community}
           imgSize={60}
-          onPress={() => navigation.navigate('Community')}
+          onPress={() => navigation.navigate("Community")}
         />
         <ServiceButton
           title="환율"
           imgSrc={Exchange}
           imgSize={60}
-          onPress={() => navigation.navigate('ExchangeRateList')}
+          onPress={() => navigation.navigate("ExchangeRateList")}
         />
         <ServiceButton
           title="여행자 테스트"
           imgSrc={TravelTest}
           imgSize={60}
-          onPress={() => navigation.navigate('TravelerPersonalityTest')}
+          onPress={() => navigation.navigate("TravelerPersonalityTest")}
         />
       </View>
 
@@ -203,7 +208,7 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
         <Text style={styles.sectionSubtitle}>
           {
-            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'
+            "운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00"
           }
         </Text>
 
@@ -212,13 +217,13 @@ const HomeScreen = ({ navigation }) => {
             title="자주 묻는 질문"
             style={styles.cscenter}
             textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
+            onPress={() => navigation.navigate("CustomerService")}
           />
           <CustomButton
             title="공지사항"
             style={styles.cscenter}
             textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
+            onPress={() => navigation.navigate("CustomerService")}
           />
         </View>
         <View style={styles.row}>
@@ -226,7 +231,7 @@ const HomeScreen = ({ navigation }) => {
             title="사용 가이드"
             style={styles.cscenter}
             textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
+            onPress={() => navigation.navigate("CustomerService")}
           />
           <CustomButton
             title="챗봇 상담"
@@ -257,16 +262,16 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: "#f0f8ff",
     paddingHorizontal: 16,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    justifyContent: 'space-between',
+    borderBottomColor: "#ccc",
+    justifyContent: "space-between",
   },
   logo: {
     fontSize: 24,
@@ -274,12 +279,12 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   profileButton: {
     padding: 8,
     borderRadius: 50,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: "#e3f2fd",
   },
   profileIcon: {
     fontSize: 24,
@@ -287,111 +292,111 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 12,
   },
   documentList: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   documentItem: {
     padding: 15,
     borderRadius: 8,
     marginVertical: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   documentText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   servicecontainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 10,
-    width: '100%',
+    width: "100%",
   },
   servicecontainer2: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 10,
   },
   exchangeList: {
     marginTop: 12,
   },
   exchangeItem: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 15,
     marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
   exchangeText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   exchangeRate: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4caf50', // 환율 값에 대한 스타일
+    fontWeight: "bold",
+    color: "#4caf50", // 환율 값에 대한 스타일
     marginTop: 5,
   },
   exchangeChange: {
     fontSize: 14,
-    color: 'red', // 변화율에 대한 스타일
+    color: "red", // 변화율에 대한 스타일
     marginTop: 3,
   },
   sectionSubtitle: {
     fontSize: 12,
-    color: '#777',
+    color: "#777",
     marginBottom: 8,
   },
   cscenter: {
-    width: '48%',
+    width: "48%",
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: '#87CEFA',
+    backgroundColor: "#87CEFA",
   },
   cscenterText: {
-    color: 'white',
+    color: "white",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
+    width: "80%",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 
