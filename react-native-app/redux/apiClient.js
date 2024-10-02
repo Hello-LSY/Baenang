@@ -1,8 +1,7 @@
 // redux/apiClient.js
 
 import axios from 'axios';
-
-const API_BASE_URL = 'http://10.0.2.2:8080'; // 로컬 환경에 맞게 설정
+import { BASE_URL } from '../constants/config';
 
 export const getApiClient = (token = '') => {
   const headers = {
@@ -13,7 +12,7 @@ export const getApiClient = (token = '') => {
   }
 
   const instance = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: BASE_URL,
     headers,
     timeout: 5000,
   });

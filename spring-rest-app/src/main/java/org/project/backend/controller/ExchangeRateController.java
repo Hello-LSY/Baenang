@@ -60,9 +60,8 @@ public class ExchangeRateController {
         }
     }
 
-    @ApiOperation(value = "특정 통화 코드의 환율 기록 조회", notes = "특정 통화 코드의 환율 변동 기록을 조회합니다.")
-    @GetMapping(value = "/{currencyCode}", produces = "application/json")
-    public ResponseEntity<List<ExchangeRateDTO>> getExchangeRateByCurrencyCode(
+    @GetMapping(value = "/history/{currencyCode}", produces = "application/json")
+    public ResponseEntity<List<ExchangeRateDTO>> getExchangeRateHistoryByCurrencyCode(
             @ApiParam(value = "통화 코드", required = true) @PathVariable String currencyCode) {
         try {
             List<ExchangeRateDTO> exchangeRates = exchangeRateService.getExchangeRateByCurrencyCode(currencyCode);
@@ -71,6 +70,18 @@ public class ExchangeRateController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+    @ApiOperation(value = "최신 환율 데이터 조회", notes = "가장 최신 영업일의 환율 정보를 조회합니다.")
+    @GetMapping(value = "/latest", produces = "application/json")
+    public ResponseEntity<List<ExchangeRateDTO>> getLatestExchangeRates() {
+        try {
+            List<ExchangeRateDTO> latestRates = exchangeRateService.getLatestExchangeRates();
+            return ResponseEntity.ok(latestRates);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
         }
     }
 }

@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import CustomButton from '../../components/CustomButton';
 import CustomInput from '../../components/CustomInput';
+import { BASE_URL } from '../../constants/config';
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -29,7 +30,7 @@ const Signup = ({ navigation }) => {
     try {
       // 서버로 회원가입 요청 보내기
       console.log(email);
-      const response = await axios.post('http://10.0.2.2:8080/api/members', {
+      const response = await axios.post(`${BASE_URL}/api/members`, {
         username,
         password,
         name,
