@@ -1,5 +1,6 @@
 package org.project.backend.dto;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 @Getter
@@ -8,15 +9,30 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DocumentDTO {
+    @ApiModelProperty(value = "회원 ID", example = "1")
     private Long memberId;
-    private Long documentId;  //문서 고유번호
 
-    private ResidentRegistrationDTO RRN; //주민등록증 번호 (DTO)
-    private DriverLicenseDTO DLN; //운전면허증번호 (DTO)
-    private PassportDTO PN;  //여권 번호 (DTO)
-    private InternationalStudentIdentityCardDTO ISIC;// 국제 학생증 번호 (DTO)
+    @ApiModelProperty(value = "문서 고유번호", example = "100")
+    private Long documentId;
 
-    private String TIC; // 여행 보험 증명서 (이미지 파일 경로)
-    private String VC;  // 예방접종 증명서 (이미지 파일 경로)
-    private String IC; // 출입국 사실 증명서 (이미지 파일 경로)
+    @ApiModelProperty(value = "주민등록 정보", example = "{...}") // DTO를 포함한 설명
+    private ResidentRegistrationDTO RRN;
+
+    @ApiModelProperty(value = "운전면허 정보", example = "{...}")
+    private DriverLicenseDTO DLN;
+
+    @ApiModelProperty(value = "여권 정보", example = "{...}")
+    private PassportDTO PN;
+
+    @ApiModelProperty(value = "국제학생증 정보", example = "{...}")
+    private InternationalStudentIdentityCardDTO ISIC;
+
+    @ApiModelProperty(value = "여행 보험 증명서", example = "https://example.com/travelInsurance.jpg")
+    private String TIC;
+
+    @ApiModelProperty(value = "예방 접종 증명서", example = "https://example.com/vaccineCertificate.jpg")
+    private String VC;
+
+    @ApiModelProperty(value = "출입국 사실 증명서", example = "https://example.com/immigrationCertificate.jpg")
+    private String IC;
 }

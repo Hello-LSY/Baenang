@@ -35,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             // 응답 객체 반환 (memberId 포함)
-            return new LoginResponseDTO(token, "Bearer", member.getId());
+            return new LoginResponseDTO(member.getId(),token, "Bearer");
         } catch (AuthenticationException e) {
             throw new UsernameNotFoundException("Invalid username/password");
         }

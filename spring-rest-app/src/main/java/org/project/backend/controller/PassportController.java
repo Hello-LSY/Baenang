@@ -1,6 +1,7 @@
 package org.project.backend.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,9 @@ public class PassportController {
 
     @ApiOperation(value = "회원 ID로 여권 조회", notes = "회원 ID를 사용하여 여권 정보를 조회합니다.")
     @GetMapping("/my-license/{memberId}")
-    public ResponseEntity<Object> getPassport(@PathVariable Long memberId) {
+    public ResponseEntity<Object> getPassport(
+        @ApiParam(value = "회원 ID", required = true, example = "12345")
+        @PathVariable Long memberId) {
         try {
             // (1) memberId로 document 정보 조회
             DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
