@@ -42,7 +42,7 @@ const Login = ({ navigation }) => {
 
   const yOffset = floatAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 20],
+    outputRange: [0, 10],
   });
 
   useEffect(() => {
@@ -73,7 +73,6 @@ const Login = ({ navigation }) => {
           style={styles.logo}
         />
       </Animated.View>
-      <Text style={styles.login}>로그인</Text>
       <CustomInput
         style={styles.textInput}
         placeholder="ID"
@@ -147,22 +146,36 @@ const styles = StyleSheet.create({
     color: '#87CEFA',
   },
   loginButton: {
-    width: '40%',
+    width: '80%',
     backgroundColor: '#87CEFA',
   },
   signupButton: {
-    fontSize: 5,
-    marginTop: 0,
-    paddingTop: 0,
+    width: '80%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#87CEFA',
   },
+
   signupText: {
     color: '#87CEFA',
-    marginTop: 15,
     fontSize: 16,
   },
   logo: {
     width: 360,
     height: 180,
+  },
+  socialLoginContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  socialButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  socialButton: {
+    width: 50,
+    height: 50,
+    margin: 10,
   },
 });
 

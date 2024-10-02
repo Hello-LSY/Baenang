@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+
 import HomeScreen from '../screens/home/HomeScreen';
 import BusinessCardScreen from '../screens/businessCard/BusinessCardScreen';
 import CreateBusinessCardScreen from '../screens/businessCard/CreateBusinessCardScreen'; // CreateBusinessCardScreen 추가
@@ -14,17 +16,33 @@ import TravelCertificationProcess from '../components/travelCertification/Travel
 import TravelerPersonalityTest from '../screens/travelpersonalitytest/TravelPersonalityTest.js';
 import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScreen';
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
+import Community from '../screens/community/Community.js';
 import CustomerService from '../screens/customerService/CustomerService.js';
 
 const Stack = createStackNavigator();
+const Tab = createMaterialTopTabNavigator();
 
+const MainTabs = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarLabelStyle: { fontSize: 16, fontWeight: 'bold' },
+        tabBarStyle: { backgroundColor: 'white' },
+        tabBarIndicatorStyle: { backgroundColor: '#ea4c89' },
+      }}
+    >
+      <Tab.Screen name="홈" component={HomeScreen} />
+      <Tab.Screen name="커뮤니티" component={Community} />
+    </Tab.Navigator>
+  );
+};
 const AppNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator initialRouteName="MainTabs">
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ title: '홈 화면' }}
+        name="MainTabs"
+        component={MainTabs}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="BusinessCard"
@@ -72,7 +90,12 @@ const AppNavigator = () => {
         options={{ title: '여행 인증서 등록 과정' }}
       />
       <Stack.Screen
-        name="ExchangeRateList"
+        name="Community"
+        component={Community}
+        options={{ title: '커뮤니티' }}
+      />
+      <Stack.Screen
+        name="ExchangeRateListScreen"
         component={ExchangeRateListScreen}
         options={{ title: '환율 정보' }}
       />

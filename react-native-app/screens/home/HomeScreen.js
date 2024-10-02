@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../redux/authState'; // useAuth 훅 import
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
 import DocumentCard from '../../components/DocumentCard';
+import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
 import TravelCertification from '../../assets/icons//MAP.png';
@@ -45,6 +46,27 @@ const HomeScreen = ({ navigation }) => {
     toggleModal(); // 모달 닫기
     navigation.navigate('Login'); // 로그아웃 후 로그인 화면으로 이동
   };
+  const backgroundColors = [
+    '#EEEDDB',
+    '#93EDFF',
+    '#C2B4FD',
+    '#78E8E1',
+    '#BFEF82',
+    '#6DE7AC',
+    '#FFB268',
+    '#FFD974',
+  ];
+
+  const documents = [
+    { title: '주민등록증', isNew: false },
+    { title: '운전면허증', isNew: true },
+    { title: '여권', isNew: true },
+    { title: '여행보험증명서', isNew: false },
+    { title: '예방접종증명서', isNew: false },
+    { title: '출입국사실증명서', isNew: true },
+    { title: '국제학생증', isNew: false },
+    { title: '여행보험증명서', isNew: false },
+  ];
 
   const renderExchangeRateItem = ({ item }) => (
     <TouchableOpacity
@@ -65,24 +87,24 @@ const HomeScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       {/* 상단 로고와 제목 */}
       <View style={styles.header}>
-        <Text style={styles.logo}>🏠</Text>
-        <Text style={styles.headerText}>커뮤니티</Text>
+        <Text style={styles.headerText}>즐거운 여행 되세요 name 님</Text>
         <TouchableOpacity style={styles.profileButton} onPress={toggleModal}>
           <Text style={styles.profileIcon}>👤</Text>
         </TouchableOpacity>
       </View>
 
       {/* 내 문서 섹션 */}
-      <View style={styles.section}>
+      <ScrollView style={styles.container}>
+        <DocumentWallet2
+          title="내 문서"
+          documents={documents}
+          backgroundColors={backgroundColors}
+        />
+      </ScrollView>
+
+      {/* <View style={styles.section}>
         <Text style={styles.sectionTitle}>📂 내 문서</Text>
         <View style={styles.documentList}>
-          <DocumentCard
-            title="주민등록증"
-            subtitle="123456-1234567"
-            color1="#4158D0"
-            color2="#C850C0"
-          />
-
           <TouchableOpacity
             style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}
           >
@@ -124,7 +146,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.documentText}>여행보혐증명서</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
       {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
@@ -155,7 +177,7 @@ const HomeScreen = ({ navigation }) => {
           title="환율"
           imgSrc={Exchange}
           imgSize={60}
-          onPress={() => navigation.navigate('Community')}
+          onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
