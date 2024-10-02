@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import {
   View,
   TextInput,
-  Button,
   Alert,
   Text,
   StyleSheet,
   TouchableOpacity,
+  ScrollView
 } from 'react-native';
 import axios from 'axios';
 import CustomButton from '../../components/CustomButton';
@@ -18,18 +18,21 @@ const Signup = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [gender, setGender] = useState('남자'); // 기본값을 '남자'로 설정
+  const [gender, setGender] = useState('남자');
   const [birthdate, setBirthdate] = useState('');
+  const [registrationNumberFirst, setRegistrationNumberFirst] = useState('');
+  const [registrationNumberSecond, setRegistrationNumberSecond] = useState('');
+  const [nickname, setNickname] = useState('');
 
   const handleSignup = async () => {
-    if (!username || !password || !name || !email || !gender || !birthdate) {
+    const cleanedRegistrationNumber = registrationNumberFirst + registrationNumberSecond;
+
+    if (!username || !password || !name || !email || !gender || !birthdate || !cleanedRegistrationNumber || !nickname) {
       Alert.alert('Error', '모든 필드를 입력하세요.');
       return;
     }
 
     try {
-      // 서버로 회원가입 요청 보내기
-      console.log(email);
       const response = await axios.post(`${BASE_URL}/api/members`, {
         username,
         password,
@@ -37,11 +40,13 @@ const Signup = ({ navigation }) => {
         email,
         gender,
         birthdate,
+        registrationNumber: cleanedRegistrationNumber,
+        nickname
       });
 
       if (response.status === 201) {
         Alert.alert('Success', '회원가입 성공');
-        navigation.navigate('Login'); // 회원가입 후 로그인 화면으로 이동
+        navigation.navigate('Login');
       } else {
         Alert.alert('Error', '회원가입 실패');
       }
@@ -52,112 +57,100 @@ const Signup = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.modalContainer}>
-        <Text style={styles.title}>회원가입</Text>
-        {/* <TextInput
-        style={styles.input}
-        placeholder="아이디"
-        value={username}
-        onChangeText={setUsername}
-      /> */}
-        <CustomInput
-          label="아이디"
-          value={username}
-          onChangeText={setUsername}
-        />
-        {/* <TextInput
-        style={styles.input}
-        placeholder="비밀번호"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      /> */}
-        <CustomInput
-          label="비밀번호"
-          value={password}
-          onChangeText={setPassword}
-          isPassword={true}
-        />
-        <CustomInput
-          style={styles.input}
-          label="이름"
-          value={name}
-          onChangeText={setName}
-        />
-        <CustomInput
-          label="이메일"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-        />
-        <View style={styles.genderContainer}>
-          <Text style={styles.genderLabel}>성별</Text>
-          <View style={styles.radioButtonContainer}>
-            <TouchableOpacity
-              style={styles.radioButton}
-              onPress={() => setGender('남자')}
-            >
-              <View
-                style={[
-                  styles.radioOuterCircle,
-                  gender === '남자' && styles.radioSelected,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.radioInnerCircle,
-                    gender === '남자' && styles.radioSelectedInner,
-                  ]}
-                />
-              </View>
-              <Text style={styles.radioText}>남자</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.radioButton}
-              onPress={() => setGender('여자')}
-            >
-              <View
-                style={[
-                  styles.radioOuterCircle,
-                  gender === '여자' && styles.radioSelected,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.radioInnerCircle,
-                    gender === '여자' && styles.radioSelectedInner,
-                  ]}
-                />
-              </View>
-              <Text style={styles.radioText}>여자</Text>
-            </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+      <View style={styles.container}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.title}>회원가입</Text>
+          <CustomInput
+            label="아이디"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <CustomInput
+            label="비밀번호"
+            value={password}
+            onChangeText={setPassword}
+            isPassword={true}
+          />
+          <CustomInput
+            label="이름"
+            value={name}
+            onChangeText={setName}
+          />
+          <CustomInput
+            label="이메일"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <CustomInput
+            label="닉네임"
+            value={nickname}
+            onChangeText={setNickname}
+          />
+          <View style={styles.registrationContainer}>
+            <Text style={styles.registrationLabel}>주민등록번호</Text>
+            <View style={styles.registrationFields}>
+              <TextInput
+                style={styles.registrationInput}
+                value={registrationNumberFirst}
+                onChangeText={(text) => setRegistrationNumberFirst(text.replace(/[^0-9]/g, '').slice(0, 6))}
+                keyboardType="numeric"
+                maxLength={6}
+              />
+              <Text style={styles.hyphen}>-</Text>
+              <TextInput
+                style={styles.registrationInput}
+                value={registrationNumberSecond}
+                onChangeText={(text) => setRegistrationNumberSecond(text.replace(/[^0-9]/g, '').slice(0, 7))}
+                secureTextEntry={true}
+                keyboardType="numeric"
+                maxLength={7}
+              />
+            </View>
           </View>
+
+          <View style={styles.genderContainer}>
+            <Text style={styles.genderLabel}>성별</Text>
+            <View style={styles.radioButtonContainer}>
+              <TouchableOpacity style={styles.radioButton} onPress={() => setGender('남자')}>
+                <View style={[styles.radioOuterCircle, gender === '남자' && styles.radioSelected]}>
+                  <View style={[styles.radioInnerCircle, gender === '남자' && styles.radioSelectedInner]} />
+                </View>
+                <Text style={styles.radioText}>남자</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.radioButton} onPress={() => setGender('여자')}>
+                <View style={[styles.radioOuterCircle, gender === '여자' && styles.radioSelected]}>
+                  <View style={[styles.radioInnerCircle, gender === '여자' && styles.radioSelectedInner]} />
+                </View>
+                <Text style={styles.radioText}>여자</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <CustomInput
+            label="생년월일"
+            value={birthdate}
+            onChangeText={setBirthdate}
+            isDate={true}
+            style={styles.birthdateInput}
+          />
         </View>
-        <CustomInput
-          label="생년월일"
-          value={birthdate}
-          onChangeText={setBirthdate}
-          isDate={true}
-          style={styles.birthdateInput}
-        />
+        <CustomButton title="확 인" onPress={handleSignup} style={styles.validationButton} />
       </View>
-      <CustomButton
-        title="확 인"
-        onPress={handleSignup}
-        style={styles.validationButton}
-      />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollViewContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f0f8ff',
+  },
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
   },
   modalContainer: {
     width: '100%',
@@ -173,12 +166,34 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-
   title: {
     fontSize: 24,
     marginBottom: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  registrationContainer: {
+    marginBottom: 16,
+  },
+  registrationLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  registrationFields: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  registrationInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    fontSize: 18,
+    padding: 8,
+    width: 100,
+    textAlign: 'center',
+  },
+  hyphen: {
+    fontSize: 18,
+    marginHorizontal: 8,
   },
   genderLabel: {
     fontSize: 16,
