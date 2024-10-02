@@ -26,6 +26,19 @@ public class ChatbotController {
         this.inquiryService = inquiryService;
     }
 
+    // 하드코딩된 FAQ 데이터
+    private static final Map<String, String> faqData = new HashMap<>();
+
+    static {
+        faqData.put("hello", "안녕하세요! 무엇을 도와드릴까요?");
+        faqData.put("help", "어떻게 도와드릴까요?");
+        faqData.put("hours", "운영 시간은 오전 9시부터 오후 6시까지입니다.");
+        faqData.put("location", "저희는 서울 강남에 위치해 있습니다.");
+        faqData.put("contact", "고객센터 전화번호는 02-123-4567입니다.");
+        // 더 많은 FAQ 항목을 여기에 추가
+    }
+
+
     @ApiOperation(value = "태그를 기반으로 챗봇 응답을 반환", notes = "태그에 따라 챗봇의 기본 응답을 반환합니다.")
     @GetMapping(value = "/chatbot", produces = "application/json; charset=UTF-8")
     public ResponseEntity<Map<String, String>> chatbot(
@@ -38,17 +51,19 @@ public class ChatbotController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        if ("hello".equals(tag)) {
-            response.put("message", "안녕하세요! 무엇을 도와드릴까요?");
-            return ResponseEntity.ok(response);
-        } else if ("help".equals(tag)) {
-            response.put("message", "어떻게 도와드릴까요?");
+        // 하드코딩된 데이터에서 응답 찾기
+        String answer = faqData.get(tag.toLowerCase());
+
+        if (answer != null) {
+            response.put("message", answer);
             return ResponseEntity.ok(response);
         } else {
             response.put("error", "다른 질문을 해 주세요!");
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+
 @ApiOperation(value = "모든 문의 조회", notes = "모든 사용자의 문의 정보를 반환합니다.")
     @GetMapping(produces = "application/json; charset=UTF-8")
     public ResponseEntity<List<Inquiry>> getAllInquiries() {
