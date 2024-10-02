@@ -1,5 +1,9 @@
 package org.project.backend.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/inquiries")
+@Api(tags = "Chatbot API", description = "챗봇 관련 API")
 public class ChatbotController {
     private final InquiryService inquiryService;
 
@@ -21,12 +26,14 @@ public class ChatbotController {
         this.inquiryService = inquiryService;
     }
 
-
+    @ApiOperation(value = "태그를 기반으로 챗봇 응답을 반환", notes = "태그에 따라 챗봇의 기본 응답을 반환합니다.")
     @GetMapping(value = "/chatbot", produces = "application/json; charset=UTF-8")
-    public ResponseEntity<Map<String, String>> chatbot(@RequestParam String tag) {
+    public ResponseEntity<Map<String, String>> chatbot(
+            @ApiParam(value = "챗봇 태그", required = true, example = "hello")
+            @RequestParam String tag) {
         Map<String, String> response = new HashMap<>();
 
-        if (tag == null) {
+        if (tag == null  || tag.trim().isEmpty()) {
             response.put("error", "태그 파라미터가 없습니다.");
             return ResponseEntity.badRequest().body(response);
         }
@@ -42,7 +49,7 @@ public class ChatbotController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-
+@ApiOperation(value = "모든 문의 조회", notes = "모든 사용자의 문의 정보를 반환합니다.")
     @GetMapping(produces = "application/json; charset=UTF-8")
     public ResponseEntity<List<Inquiry>> getAllInquiries() {
         List<Inquiry> inquiries = inquiryService.getAllInquiries();

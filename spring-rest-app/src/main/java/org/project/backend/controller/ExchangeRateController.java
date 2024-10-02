@@ -60,9 +60,11 @@ public class ExchangeRateController {
         }
     }
 
-    @GetMapping(value = "/history/{currencyCode}", produces = "application/json")
-    public ResponseEntity<List<ExchangeRateDTO>> getExchangeRateHistoryByCurrencyCode(
-            @ApiParam(value = "통화 코드", required = true) @PathVariable String currencyCode) {
+    @ApiOperation(value = "특정 통화 코드의 환율 기록 조회", notes = "특정 통화 코드의 환율 변동 기록을 조회합니다.")
+    @GetMapping(value = "/{currencyCode}", produces = "application/json")
+    public ResponseEntity<List<ExchangeRateDTO>> getExchangeRateByCurrencyCode(
+            @ApiParam(value = "통화 코드", required = true, example = "USD") //여기에 실제 예시 값 입력
+            @PathVariable String currencyCode) {
         try {
             List<ExchangeRateDTO> exchangeRates = exchangeRateService.getExchangeRateByCurrencyCode(currencyCode);
             return ResponseEntity.ok(exchangeRates);
