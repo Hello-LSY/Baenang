@@ -33,7 +33,8 @@ public class MemberController {
     @ApiOperation(value = "회원 ID로 회원 정보 조회", notes = "특정 회원 ID로 회원 정보를 조회합니다.")
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<MemberDTO> getMemberById(
-            @ApiParam(value = "회원 ID", required = true) @PathVariable Long id) {
+            @ApiParam(value = "회원 ID", required = true, example = "123")
+            @PathVariable Long id) {
         try {
             MemberDTO member = memberServiceImpl.getMemberById(id);
             return ResponseEntity.ok(member);  // 성공적으로 조회된 회원 정보를 반환
@@ -45,7 +46,8 @@ public class MemberController {
     @ApiOperation(value = "새로운 회원 생성", notes = "새로운 회원을 생성합니다.")
     @PostMapping(produces = "application/json", consumes = "application/json")
     public ResponseEntity<Member> createMember(
-            @ApiParam(value = "생성할 회원 정보", required = true) @Valid @RequestBody MemberDTO memberDTO) {
+            @ApiParam(value = "생성할 회원 정보", required = true)
+            @Valid @RequestBody MemberDTO memberDTO) {
         try {
             Member createdMember = memberServiceImpl.createMember(memberDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdMember);  // 회원 생성 후 201 반환
@@ -57,8 +59,10 @@ public class MemberController {
     @ApiOperation(value = "회원 정보 업데이트", notes = "회원 ID를 사용하여 기존 회원 정보를 업데이트합니다.")
     @PutMapping(value = "/{id}", produces = "application/json", consumes = "application/json")
     public ResponseEntity<MemberDTO> updateMember(
-            @ApiParam(value = "회원 ID", required = true) @PathVariable Long id,
-            @ApiParam(value = "업데이트할 회원 정보", required = true) @Valid @RequestBody MemberDTO memberDetails) {
+            @ApiParam(value = "회원 ID", required = true, example = "123")
+            @PathVariable Long id,
+            @ApiParam(value = "업데이트할 회원 정보", required = true, example = "1")
+            @Valid @RequestBody MemberDTO memberDetails) {
         try {
             MemberDTO updatedMember = memberServiceImpl.updateMember(id, memberDetails);
             return ResponseEntity.ok(updatedMember);  // 성공적으로 업데이트된 정보를 반환
@@ -70,7 +74,8 @@ public class MemberController {
     @ApiOperation(value = "회원 삭제", notes = "회원 ID를 사용하여 특정 회원을 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMember(
-            @ApiParam(value = "회원 ID", required = true) @PathVariable Long id) {
+            @ApiParam(value = "회원 ID", required = true, example = "123")
+            @PathVariable Long id) {
         try {
             memberServiceImpl.deleteMember(id);
             return ResponseEntity.noContent().build();  // 회원 삭제 후 204 반환

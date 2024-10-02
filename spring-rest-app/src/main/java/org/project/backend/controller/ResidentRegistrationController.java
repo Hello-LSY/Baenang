@@ -38,7 +38,9 @@ public class ResidentRegistrationController {
 
     @ApiOperation(value = "회원 ID로 주민등록증 조회", notes = "회원 ID를 사용하여 주민등록증 정보를 조회합니다.")
     @GetMapping("/my-license/{memberId}")
-    public ResponseEntity<Object> getResidentRegistration(@PathVariable Long memberId) {
+    public ResponseEntity<Object> getResidentRegistration(
+            @ApiParam(value = "회원 ID", required = true, example = "12345")
+            @PathVariable Long memberId) {
         try {
             // (1) memberId로 document 정보 조회
             DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
