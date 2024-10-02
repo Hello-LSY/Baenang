@@ -26,6 +26,9 @@ public class Passport implements Serializable {
     @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
     private Document document;
 
+    @Column(name = "rrn", nullable = false, length = 14)
+    private String RRN;   // 주민등록증 번호
+
     @Column(name = "pn", nullable = false, unique = true)
     private String PN;  //여권번호
 

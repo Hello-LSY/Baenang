@@ -47,7 +47,7 @@ public class InternationalStudentIdentityCardController {
             }
 
             InternationalStudentIdentityCardDTO isicDTO = documentDTO.getISIC();
-            if(isicDTO != null) {
+            if(isicDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ISIC not found.");
             }
 

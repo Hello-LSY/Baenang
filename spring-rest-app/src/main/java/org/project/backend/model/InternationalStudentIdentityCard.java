@@ -27,6 +27,9 @@ public class InternationalStudentIdentityCard implements Serializable {
     @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
     private Document document;
 
+    @Column(name = "rrn", nullable = false, length = 14)
+    private String RRN;   // 주민등록증 번호
+
     @Column(name = "isic", nullable = false)
     private String isic;   // 국제학생증 카드 번호, 기본 키 설정
 

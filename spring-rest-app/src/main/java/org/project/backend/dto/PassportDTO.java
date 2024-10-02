@@ -13,6 +13,10 @@ import java.time.LocalDate;
 @Builder
 public class PassportDTO {
     private Long id;  //여권 고유번호
+    
+    @NotNull(message = "Resident Registration Number is required")
+    @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "Invalid Resident Registration Number format")
+    private String RRN;   //주민등록증 번호
 
     @NotNull(message = "Passport Number is required")
     private String PN;  //여권번호
