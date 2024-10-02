@@ -9,9 +9,9 @@ import {
   Button,
   FlatList,
 } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux'; // Redux 훅 추가
+import { useSelector } from 'react-redux'; // Redux 훅 추가
+import { useAuth } from '../../redux/authState'; // useAuth 훅 사용
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
-import DocumentCard from '../../components/DocumentCard';
 import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
@@ -30,8 +30,7 @@ import CustomButton from '../../components/CustomButton';
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const dispatch = useDispatch(); // Redux dispatch 사용
-  const auth = useSelector((state) => state.auth); // auth 상태 가져오기
+  const { auth, logout } = useAuth(); // useAuth 훅에서 auth 상태와 logout 함수 가져오기
   const { top5Rates, fetchTop5Rates, loading } = useExchangeRate(); // 환율 정보 가져오기
 
   useEffect(() => {
@@ -43,9 +42,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    dispatch(clearBusinessCard()); // 로그아웃 시 businessCard 초기화 (필요시)
-    toggleModal(); // 모달 닫기
-    navigation.navigate('Login'); // 로그아웃 후 로그인 화면으로 이동
+    logout();  // 로그아웃 함수 호출
+    toggleModal();  // 모달 닫기
+    navigation.navigate('Login');  // 로그인 화면으로 이동
   };
 
   const backgroundColors = [
@@ -105,7 +104,7 @@ const HomeScreen = ({ navigation }) => {
           backgroundColors={backgroundColors}
         />
       </ScrollView>
-      
+
       {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
@@ -183,9 +182,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
         <Text style={styles.sectionSubtitle}>
-          {
-            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'
-          }
+          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'}
         </Text>
 
         <View style={styles.row}>

@@ -7,6 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LoginResponseDTO {
     @ApiModelProperty(value = "회원 ID", example = "1")
     private Long memberId;

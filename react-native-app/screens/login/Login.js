@@ -1,4 +1,3 @@
-// components/login/Login.js
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -9,6 +8,7 @@ import {
   Image,
   Animated,
   Easing,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../redux/authState';
 import CustomInput from '../../components/CustomInput';
@@ -17,8 +17,7 @@ import CustomButton from '../../components/CustomButton';
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login, auth } = useAuth();
-
+  const { login, auth } = useAuth(); // useAuth 훅을 통해 login 함수와 auth 상태 가져오기
   const floatAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -50,10 +49,16 @@ const Login = ({ navigation }) => {
       Alert.alert('Success', '로그인 성공');
       navigation.navigate('Home');
     } else if (auth.error) {
-      Alert.alert('Error', auth.error || '로그인 실패');
+      // auth.error가 객체일 경우 message 필드를 정확하게 가져옴
+      let errorMessage = auth.error?.message;
+      if (typeof errorMessage === 'object') {
+        errorMessage = errorMessage.message || '로그인 실패';
+      }
+      
+      Alert.alert('Error', errorMessage || '로그인 실패');
     }
   }, [auth.token, auth.error, navigation]);
-
+  
   const handleLogin = () => {
     if (!username || !password) {
       Alert.alert('Error', '아이디와 비밀번호를 입력하세요.');
@@ -73,6 +78,8 @@ const Login = ({ navigation }) => {
           style={styles.logo}
         />
       </Animated.View>
+
+      {/* 사용자 입력 */}
       <CustomInput
         style={styles.textInput}
         placeholder="ID"
@@ -86,16 +93,27 @@ const Login = ({ navigation }) => {
         onChangeText={setPassword}
         isPassword={true}
       />
-      <CustomButton
-        style={styles.loginButton}
-        onPress={handleLogin}
-        title="로그인"
-      />
-      <CustomButton
-        style={styles.signupButton}
-        onPress={() => navigation.navigate('Signup')}
-        title="회원가입"
-      />
+
+      {/* 로딩 중인 경우 로딩 인디케이터 표시 */}
+      {auth.loading ? (
+        <ActivityIndicator size="large" color="#87CEFA" />
+      ) : (
+        <>
+          {/* 로그인 버튼 */}
+          <CustomButton
+            style={styles.loginButton}
+            onPress={handleLogin}
+            title="로그인"
+          />
+          <CustomButton
+            style={styles.signupButton}
+            onPress={() => navigation.navigate('Signup')}
+            title="회원가입"
+          />
+        </>
+      )}
+
+      {/* 소셜 로그인 */}
       <View style={styles.socialLoginContainer}>
         <Text style={styles.socialLoginText}>소셜 계정으로 로그인</Text>
         <View style={styles.socialButtonsContainer}>
@@ -154,11 +172,6 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     borderColor: '#87CEFA',
-  },
-
-  signupText: {
-    color: '#87CEFA',
-    fontSize: 16,
   },
   logo: {
     width: 360,
