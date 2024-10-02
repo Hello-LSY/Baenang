@@ -5,6 +5,7 @@ import businessCardReducer from './businessCardSlice'; // businessCard 리듀서
 import travelCertificatesReducer from '../redux/travelCertificatesSlice';
 import exchangeRateReducer from './exchangeRateState'; // exchangeRate 리듀서 추가
 import postsReducer from './postReducer';
+import friendReducer from './friendSlice'; // friend 리듀서 추가
 
 const storeConfig = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ const storeConfig = configureStore({
     travelCertificates: travelCertificatesReducer,
     exchangeRate: exchangeRateReducer, // exchangeRate 리듀서 등록
     posts: postsReducer,
+    friend: friendReducer,
   },
 });
 

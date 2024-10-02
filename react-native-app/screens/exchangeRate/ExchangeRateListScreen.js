@@ -1,6 +1,4 @@
-// screens/exchangeRate/ExchangeRateListScreen.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,30 +6,23 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { fetchAllExchangeRates } from '../../redux/exchangeRateState'; // 환율 정보를 가져오는 함수
+import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 가져오는 Hook
 
-const ExchangeRateListScreen = () => {
-  const [exchangeRates, setExchangeRates] = useState([]);
-  const navigation = useNavigation();
+const ExchangeRateListScreen = ({ navigation }) => {
+  const { latestExchangeRates, fetchLatestRates, loading } = useExchangeRate();
 
   useEffect(() => {
-    // 모든 환율 데이터를 가져오는 함수 호출
-    fetchAllExchangeRates()
-      .then((data) => setExchangeRates(data))
-      .catch((error) =>
-        console.error('Failed to fetch exchange rates:', error)
-      );
+    fetchLatestRates(); // 최신 환율 데이터를 가져오는 함수 호출
   }, []);
 
   const renderExchangeRate = ({ item }) => (
     <TouchableOpacity
       style={styles.exchangeCard}
       onPress={() =>
-        navigation.navigate('ExchangeRateChart', {
+        navigation.navigate('ExchangeRateDetail', {
           currencyCode: item.currencyCode,
         })
-      }
+      } // 환율 상세보기로 이동
     >
       <Text style={styles.currencyText}>{item.currencyCode}</Text>
       <Text style={styles.rateText}>{item.exchangeRateValue}</Text>
@@ -40,11 +31,15 @@ const ExchangeRateListScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={exchangeRates}
-        renderItem={renderExchangeRate}
-        keyExtractor={(item) => item.currencyCode}
-      />
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={latestExchangeRates} // 최신 환율 데이터를 사용
+          renderItem={renderExchangeRate}
+          keyExtractor={(item) => item.currencyCode}
+        />
+      )}
     </View>
   );
 };
