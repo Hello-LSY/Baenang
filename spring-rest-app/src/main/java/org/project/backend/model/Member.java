@@ -47,6 +47,9 @@ public class Member implements UserDetails {
     @Column(name = "birthdate")
     private String birthdate;
 
+    @Column(name = "registration_number", length = 14) // 주민등록번호
+    private String registrationNumber;
+
     @OneToOne(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore  // 순환 참조 방지
     private BusinessCard businessCard;

@@ -69,6 +69,9 @@ public class MemberDTO {
     @ApiModelProperty(value = "생년월일", example = "1990-01-01")
     private String birthdate;
 
+    private String registrationNumber;
+
+
     // MemberDTO 빌더 패턴을 사용하기 위한 생성자
     @Builder
     public MemberDTO(Long id, String username, String password, String email, String name, String nickname, String gender, Long profileId) {

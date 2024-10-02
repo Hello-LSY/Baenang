@@ -7,6 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LoginResponseDTO {
     @ApiModelProperty(value = "회원 ID", example = "1")
     private Long memberId;
@@ -16,4 +17,8 @@ public class LoginResponseDTO {
 
     @ApiModelProperty(value = "토큰 타입", example = "Bearer")
     private String type = "Bearer";
+
+    private String nickname;
+    private String registrationNumber;
+    private String email;
 }
