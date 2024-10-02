@@ -11,7 +11,7 @@ const CustomButton = ({ title, onPress, style, textStyle }) => {
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 5,
     paddingVertical: 15,
     borderRadius: 10,
   },

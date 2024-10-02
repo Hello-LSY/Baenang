@@ -9,12 +9,13 @@ import {
   Button,
   FlatList,
 } from 'react-native';
-import { useAuth } from '../../redux/authState'; // useAuth 훅 import
+import { useSelector, useDispatch } from 'react-redux'; // Redux 훅 추가
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
 import DocumentCard from '../../components/DocumentCard';
+import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
-import TravelCertification from '../../assets/icons//MAP.png';
+import TravelCertification from '../../assets/icons/MAP.png';
 import Community from '../../assets/icons/INFORM.png';
 import Exchange from '../../assets/icons/FINANCE.png';
 import TravelTest from '../../assets/icons/PACKAGE.png';
@@ -29,7 +30,8 @@ import CustomButton from '../../components/CustomButton';
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const { logout } = useAuth(); // useAuth 훅에서 logout 함수 가져오기
+  const dispatch = useDispatch(); // Redux dispatch 사용
+  const auth = useSelector((state) => state.auth); // auth 상태 가져오기
   const { top5Rates, fetchTop5Rates, loading } = useExchangeRate(); // 환율 정보 가져오기
 
   useEffect(() => {
@@ -41,10 +43,32 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    logout(); // 로그아웃 함수 호출
+    dispatch(clearBusinessCard()); // 로그아웃 시 businessCard 초기화 (필요시)
     toggleModal(); // 모달 닫기
     navigation.navigate('Login'); // 로그아웃 후 로그인 화면으로 이동
   };
+
+  const backgroundColors = [
+    '#EEEDDB',
+    '#93EDFF',
+    '#C2B4FD',
+    '#78E8E1',
+    '#BFEF82',
+    '#6DE7AC',
+    '#FFB268',
+    '#FFD974',
+  ];
+
+  const documents = [
+    { title: '주민등록증', isNew: false },
+    { title: '운전면허증', isNew: true },
+    { title: '여권', isNew: true },
+    { title: '여행보험증명서', isNew: false },
+    { title: '예방접종증명서', isNew: false },
+    { title: '출입국사실증명서', isNew: true },
+    { title: '국제학생증', isNew: false },
+    { title: '여행보험증명서', isNew: false },
+  ];
 
   const renderExchangeRateItem = ({ item }) => (
     <TouchableOpacity
@@ -65,66 +89,23 @@ const HomeScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       {/* 상단 로고와 제목 */}
       <View style={styles.header}>
-        <Text style={styles.logo}>🏠</Text>
-        <Text style={styles.headerText}>커뮤니티</Text>
+        <Text style={styles.headerText}>
+          {auth.nickname ? `즐거운 여행 되세요 ${auth.nickname} 님` : '즐거운 여행 되세요'}
+        </Text>
         <TouchableOpacity style={styles.profileButton} onPress={toggleModal}>
           <Text style={styles.profileIcon}>👤</Text>
         </TouchableOpacity>
       </View>
 
       {/* 내 문서 섹션 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📂 내 문서</Text>
-        <View style={styles.documentList}>
-          <DocumentCard
-            title="주민등록증"
-            subtitle="123456-1234567"
-            color1="#4158D0"
-            color2="#C850C0"
-          />
-
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#FFEB3B' }]}
-          >
-            <Text style={styles.documentText}>주민등록증</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#8BC34A' }]}
-          >
-            <Text style={styles.documentText}>운전면허증</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#00BCD4' }]}
-          >
-            <Text style={styles.documentText}>여권</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#FF9800' }]}
-          >
-            <Text style={styles.documentText}>여행보험증명서</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#9C27B0' }]}
-          >
-            <Text style={styles.documentText}>예방접종증명서</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#009688' }]}
-          >
-            <Text style={styles.documentText}>출입국사실증명서</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#3F51B5' }]}
-          >
-            <Text style={styles.documentText}>국제학생증</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.documentItem, { backgroundColor: '#E91E63' }]}
-          >
-            <Text style={styles.documentText}>여행보혐증명서</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <ScrollView style={styles.container}>
+        <DocumentWallet2
+          title="내 문서"
+          documents={documents}
+          backgroundColors={backgroundColors}
+        />
+      </ScrollView>
+      
       {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
@@ -155,7 +136,7 @@ const HomeScreen = ({ navigation }) => {
           title="환율"
           imgSrc={Exchange}
           imgSize={60}
-          onPress={() => navigation.navigate('ExchangeRateList')}
+          onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
@@ -254,6 +235,7 @@ const HomeScreen = ({ navigation }) => {
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -267,10 +249,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     justifyContent: 'space-between',
-  },
-  logo: {
-    fontSize: 24,
-    marginRight: 8,
   },
   headerText: {
     fontSize: 24,
@@ -298,20 +276,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
-  },
-  documentList: {
-    flexDirection: 'column',
-  },
-  documentItem: {
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 8,
-    alignItems: 'center',
-  },
-  documentText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   row: {
     flexDirection: 'row',
@@ -349,12 +313,12 @@ const styles = StyleSheet.create({
   exchangeRate: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4caf50', // 환율 값에 대한 스타일
+    color: '#4caf50',
     marginTop: 5,
   },
   exchangeChange: {
     fontSize: 14,
-    color: 'red', // 변화율에 대한 스타일
+    color: 'red',
     marginTop: 3,
   },
   sectionSubtitle: {

@@ -34,12 +34,20 @@ public class AuthServiceImpl implements AuthService {
             Member member = memberRepository.findByUsername(loginRequest.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-            // 응답 객체 반환 (memberId 포함)
-            return new LoginResponseDTO(token, "Bearer", member.getId());
+            // 추가 정보 포함한 응답 객체 반환
+            return new LoginResponseDTO(
+                    token,
+                    "Bearer",
+                    member.getId(),
+                    member.getNickname(),
+                    member.getRegistrationNumber(), // 주민등록번호
+                    member.getEmail()
+            );
         } catch (AuthenticationException e) {
             throw new UsernameNotFoundException("Invalid username/password");
         }
     }
+
 
     @Override
     public Authentication authenticate(LoginRequestDTO loginRequest) {
