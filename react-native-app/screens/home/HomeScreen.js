@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   Button,
+  Image,
   FlatList,
 } from 'react-native';
 import { useSelector } from 'react-redux'; // Redux 훅 추가
@@ -27,7 +28,7 @@ import agoda from '../../assets/icons/아고다.png';
 import booking from '../../assets/icons/부킹닷컴.png';
 import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
-
+import ProfileButton from '../../components/ProfileButton';
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const { auth, logout } = useAuth(); // useAuth 훅에서 auth 상태와 logout 함수 가져오기
@@ -42,9 +43,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    logout();  // 로그아웃 함수 호출
-    toggleModal();  // 모달 닫기
-    navigation.navigate('Login');  // 로그인 화면으로 이동
+    logout(); // 로그아웃 함수 호출
+    toggleModal(); // 모달 닫기
+    navigation.navigate('Login'); // 로그인 화면으로 이동
   };
 
   const backgroundColors = [
@@ -88,12 +89,17 @@ const HomeScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       {/* 상단 로고와 제목 */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>
-          {auth.nickname ? `즐거운 여행 되세요 ${auth.nickname} 님` : '즐거운 여행 되세요'}
-        </Text>
-        <TouchableOpacity style={styles.profileButton} onPress={toggleModal}>
-          <Text style={styles.profileIcon}>👤</Text>
-        </TouchableOpacity>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerGreeting}>즐거운 여행 되세요,</Text>
+          <Text style={styles.headerName}>이태웅님</Text>
+          <Text style={styles.headerText}>
+            {auth.nickname
+              ? `즐거운 여행 되세요 ${auth.nickname} 님`
+              : '즐거운 여행 되세요'}
+          </Text>
+        </View>
+        <ProfileButton onPress={toggleModal} />
+        <ProfileButton onPress={() => navigation.navigate('UserProfile')} />
       </View>
 
       {/* 내 문서 섹션 */}
@@ -124,23 +130,19 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('TravelCertificationMain')}
         />
       </View>
-      <View style={styles.servicecontainer2}>
+      <View style={styles.servicecontainer}>
         <ServiceButton
-          title="커뮤니티"
-          imgSrc={Community}
-          imgSize={60}
-          onPress={() => navigation.navigate('Community')}
-        />
-        <ServiceButton
-          title="환율"
+          title="실시간 환율"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요"
           imgSrc={Exchange}
-          imgSize={60}
+          imgSize={75}
           onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요"
           imgSrc={TravelTest}
-          imgSize={60}
+          imgSize={75}
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
         />
       </View>
@@ -182,7 +184,9 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
         <Text style={styles.sectionSubtitle}>
-          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'}
+          {
+            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'
+          }
         </Text>
 
         <View style={styles.row}>
@@ -241,28 +245,39 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    width: '100%',
   },
-  headerText: {
+  headerTextContainer: {
+    flexDirection: 'column',
+  },
+  headerGreeting: {
+    fontSize: 18,
+    fontWeight: 'normal',
+  },
+  headerName: {
     fontSize: 24,
     fontWeight: 'bold',
   },
   profileButton: {
-    padding: 8,
-    borderRadius: 50,
+    width: 40, // 프로필 이미지 크기
+    height: 40, // 프로필 이미지 크기
+    borderRadius: 20, // 원형 모양을 위해 width/height의 절반
+    overflow: 'hidden', // 이미지를 원 안에 맞추기 위해
     backgroundColor: '#e3f2fd',
   },
   profileIcon: {
-    fontSize: 24,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover', // 이미지가 버튼을 꽉 채우도록
   },
+
   section: {
     marginTop: 16,
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: 8,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -283,11 +298,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 10,
     width: '100%',
+    justifyContent: 'space-between',
   },
   servicecontainer2: {
     flexDirection: 'row',
     paddingHorizontal: 10,
+    width: '100%',
+    justifyContent: 'space-between',
   },
+
   exchangeList: {
     marginTop: 12,
   },

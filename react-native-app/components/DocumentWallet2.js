@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import DocumentCard2 from './DocumentCard2';
-import DocumentModal from './DocumentModal'; // 새로 만들 컴포넌트
+import DocumentModal from './DocumentModal';
 
 if (
   Platform.OS === 'android' &&
@@ -19,6 +19,10 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const CARD_HEIGHT = 60; // 각 카드의 높이
+const CARD_MARGIN = 10; // 카드 사이의 간격
+const VISIBLE_CARDS = 3; // 접혀있을 때 보이는 카드 수
 
 const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   const [expanded, setExpanded] = useState(false);
@@ -28,7 +32,9 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   const [selectedDocument, setSelectedDocument] = useState(null);
 
   useLayoutEffect(() => {
-    const toValue = expanded ? contentHeight : Math.min(contentHeight, 3 * 60);
+    const toValue = expanded
+      ? contentHeight
+      : VISIBLE_CARDS * (CARD_HEIGHT + CARD_MARGIN) - CARD_MARGIN;
     Animated.timing(animatedHeight, {
       toValue: toValue,
       duration: 300,
@@ -56,9 +62,13 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
     <View style={styles.container}>
       <Pressable onPress={toggleExpand} style={styles.header}>
         <Text style={styles.title}>{title}</Text>
+        <Text style={styles.expandButton}>{expanded ? '접기' : '펼치기'}</Text>
       </Pressable>
       <Animated.View
-        style={[styles.contentWrapper, { height: animatedHeight }]}
+        style={[
+          styles.contentWrapper,
+          { height: animatedHeight, overflow: 'hidden' },
+        ]}
       >
         <View style={styles.content} onLayout={onContentLayout}>
           {documents.map((doc, index) => (
@@ -74,6 +84,11 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
           ))}
         </View>
       </Animated.View>
+      {!expanded && documents.length > VISIBLE_CARDS && (
+        <Pressable onPress={toggleExpand} style={styles.showMoreButton}>
+          <Text style={styles.showMoreText}></Text>
+        </Pressable>
+      )}
       <DocumentModal
         visible={modalVisible}
         document={selectedDocument}
@@ -88,35 +103,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#37415F',
     borderRadius: 8,
     overflow: 'hidden',
+    marginBottom: 15,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#37415F',
+    padding: 15,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    paddingHorizontal: 15,
-    paddingTop: 15,
-    paddingBottom: 10,
   },
-  expandButton: {},
-  expandButtonText: {
-    fontSize: 18,
+  expandButton: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  contentWrapper: {
+    overflow: 'hidden',
   },
   content: {
     padding: 10,
   },
   showMoreButton: {
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#37415F',
   },
   showMoreText: {
-    color: '#4a90e2',
+    color: '#fff',
     fontWeight: 'bold',
   },
 });
