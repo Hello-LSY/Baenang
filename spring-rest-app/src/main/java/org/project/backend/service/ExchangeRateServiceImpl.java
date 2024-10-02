@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -149,22 +150,17 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .collect(Collectors.toList());
     }
 
-    private static final int MAX_RETRY_COUNT = 10;  // 최대 시도 횟수
-
     private LocalDate getPreviousBusinessDay(LocalDate date) {
-        int retryCount = 0;
-        while (isNonBusinessDay(date) && retryCount < MAX_RETRY_COUNT) {
+        // 현재 시간이 11시 이전이면 전날 영업일을 기준으로 설정
+        if (LocalTime.now().isBefore(LocalTime.of(11, 1))) {
+            date = date.minusDays(1);
+        }
+        while (isNonBusinessDay(date)) {
             date = date.minusDays(1);  // 비영업일이면 전날로 이동
-            retryCount++;
         }
-
-        if (retryCount >= MAX_RETRY_COUNT) {
-            logger.warn("Max retry count reached while searching for previous business day");
-            throw new ExchangeRateNotFoundException("Could not find a valid business day within limit");
-        }
-
         return date;
     }
+
 
     private boolean isNonBusinessDay(LocalDate date) {
         if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -174,21 +170,24 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     }
 
     private List<ExchangeRate> fetchRatesWithFallback(LocalDate date) {
-        LocalDate minimumDate = LocalDate.of(2024, 1, 1);
-
         List<ExchangeRate> rates = exchangeRateRepository.findByRecordedAtBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
 
+        // 최대 검색 범위를 1년 전으로 설정
+        LocalDate minDate = LocalDate.now().minusYears(1);
+
         while (rates.isEmpty()) {
-            date = getPreviousBusinessDay(date.minusDays(1));  // 이전 영업일로 이동
-            if (date.isBefore(minimumDate)) {
-                logger.error("No exchange rate data available before " + minimumDate);
-                throw new ExchangeRateNotFoundException("No exchange rate data available for the requested period.");
+            if (date.isBefore(minDate)) {
+                // 만약 최소 날짜까지 내려갔는데도 데이터가 없으면 예외 발생
+                throw new ExchangeRateNotFoundException("No exchange rate data available in the last year.");
             }
+
+            date = getPreviousBusinessDay(date.minusDays(1));  // 이전 영업일로 이동
             rates = exchangeRateRepository.findByRecordedAtBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
         }
 
         return rates;
     }
+
 
 
     private ExchangeRateDTO convertToDTO(ExchangeRate exchangeRate) {
