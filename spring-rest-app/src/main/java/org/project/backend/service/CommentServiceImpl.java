@@ -26,6 +26,9 @@ public class CommentServiceImpl implements CommentService {
                 .map(comment -> CommentDTO.builder()
                         .id(comment.getId())
                         .content(comment.getContent())
+                        .nickname(comment.getNickname())
+                        .createdAt(comment.getCreatedAt())
+                        .updatedAt(comment.getUpdatedAt())
                         .postId(comment.getPost().getId())
                         .build())
                 .collect(Collectors.toList());
@@ -37,13 +40,16 @@ public class CommentServiceImpl implements CommentService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Comment comment = new Comment(commentDTO.getContent());
+        Comment comment = new Comment(commentDTO.getContent(), commentDTO.getNickname());
         post.addComment(comment);
 
         Comment savedComment = commentRepository.save(comment);
         return CommentDTO.builder()
                 .id(savedComment.getId())
                 .content(savedComment.getContent())
+                .nickname(savedComment.getNickname())
+                .createdAt(savedComment.getCreatedAt())
+                .updatedAt(savedComment.getUpdatedAt())
                 .postId(postId)
                 .build();
     }

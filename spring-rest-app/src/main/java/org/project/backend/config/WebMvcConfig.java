@@ -113,10 +113,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Bean
     public MultipartResolver multipartResolver() {
-        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-        multipartResolver.setMaxUploadSize(5242880); // 최대 업로드 파일 크기 설정 (5MB)
-        return multipartResolver;
+        return new StandardServletMultipartResolver();
     }
+
 
 
 
