@@ -15,7 +15,7 @@ const ExternalServiceButton = ({ title, imgSrc, onPress }) => (
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 10,
     marginVertical: 10,
     shadowColor: '#000',
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     marginHorizontal: 5,
-    width: '45%',
+    width: '47%',
     height: 60,
     alignItems: 'center',
     justifyContent: 'center',

@@ -23,7 +23,7 @@ public class AuthController {
     @ApiOperation(value = "로그인", notes = "사용자의 ID와 패스워드를 사용하여 로그인합니다.")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(
-            @ApiParam(value = "로그인 요청 데이터", required = true, example = "{ \"id\": \"user\", \"password\": \"1234\" }")
+            @ApiParam(value = "로그인 요청 데이터", required = true)
             @Valid @RequestBody LoginRequestDTO loginRequest) {
         // AuthService를 이용하여 로그인 처리
         LoginResponseDTO response = authService.login(loginRequest);

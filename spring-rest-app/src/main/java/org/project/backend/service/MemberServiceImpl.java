@@ -103,6 +103,7 @@ public class MemberServiceImpl implements MemberService {
                 .gender(dto.getGender())
                 .birthdate(dto.getBirthdate())
                 .email(dto.getEmail())
+                .registrationNumber(dto.getRegistrationNumber())
                 .build();
     }
 }

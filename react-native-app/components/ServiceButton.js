@@ -36,12 +36,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   subtitle: {
     fontSize: 8,
     color: '#666',
-    width: 63,
+    width: 57,
   },
 });
 

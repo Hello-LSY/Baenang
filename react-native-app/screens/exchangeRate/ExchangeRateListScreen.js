@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 가져오는 Hook
 
 const ExchangeRateListScreen = ({ navigation }) => {
@@ -12,7 +18,11 @@ const ExchangeRateListScreen = ({ navigation }) => {
   const renderExchangeRate = ({ item }) => (
     <TouchableOpacity
       style={styles.exchangeCard}
-      onPress={() => navigation.navigate('ExchangeRateDetail', { currencyCode: item.currencyCode })} // 환율 상세보기로 이동
+      onPress={() =>
+        navigation.navigate('ExchangeRateDetail', {
+          currencyCode: item.currencyCode,
+        })
+      } // 환율 상세보기로 이동
     >
       <Text style={styles.currencyText}>{item.currencyCode}</Text>
       <Text style={styles.rateText}>{item.exchangeRateValue}</Text>

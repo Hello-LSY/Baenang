@@ -1,5 +1,6 @@
 package org.project.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,7 +47,11 @@ public class Member implements UserDetails {
     @Column(name = "birthdate")
     private String birthdate;
 
+    @Column(name = "registration_number", length = 14) // 주민등록번호
+    private String registrationNumber;
+
     @OneToOne(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JsonIgnore  // 순환 참조 방지
     private BusinessCard businessCard;
 
     // 관계 해제 메서드
