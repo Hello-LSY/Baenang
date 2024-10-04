@@ -16,7 +16,9 @@ import TravelCertificationProcess from '../components/travelCertification/Travel
 import TravelerPersonalityTest from '../screens/travelpersonalitytest/TravelPersonalityTest.js';
 import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScreen';
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
-import Community from '../screens/community/Community.js';
+import CommunityHome from '../screens/community/CommunityHome.js';
+import CreatePost from '../screens/community/CreatePost';
+import EditPost from '../screens/community/EditPost';
 import UserProfile from '../screens/UserProfile.js';
 import CustomerService from '../screens/customerService/CustomerService.js';
 
@@ -33,7 +35,7 @@ const MainTabs = () => {
       }}
     >
       <Tab.Screen name="홈" component={HomeScreen} />
-      <Tab.Screen name="커뮤니티" component={Community} />
+      <Tab.Screen name="커뮤니티" component={CommunityHome} />
     </Tab.Navigator>
   );
 };
@@ -92,8 +94,18 @@ const AppNavigator = () => {
       />
       <Stack.Screen
         name="Community"
-        component={Community}
+        component={CommunityHome}
         options={{ title: '커뮤니티' }}
+      />
+      <Stack.Screen
+        name="CreatePost"
+        component={CreatePost}
+        options={{ title: '게시글 작성' }}
+      />
+      <Stack.Screen
+        name="EditPost"
+        component={EditPost}
+        options={{ title: '게시글 수정' }}
       />
       <Stack.Screen
         name="ExchangeRateListScreen"

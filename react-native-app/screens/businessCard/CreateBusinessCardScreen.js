@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux'; // useDispatch 추가
+import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import { fetchBusinessCard } from '../../redux/businessCardSlice'; // Redux 액션 임포트
-import { BASE_URL } from '../../constants/config';
-
-
-// 이미지 업로드 함수 (이미지 파일명을 반환하도록 수정)
-const uploadImage = async (imageUri, memberId) => {
+import { getApiClient } from '../../redux/apiClient'; // axios 클라이언트 가져오기
+const uploadImage = async (imageUri, memberId, token) => {
   try {
     const formData = new FormData();
     const fileName = `${memberId}_${Date.now()}.jpg`;
@@ -18,32 +15,37 @@ const uploadImage = async (imageUri, memberId) => {
       type: 'image/jpeg',
     });
 
-    const response = await fetch(`${BASE_URL}/api/upload`, {
-      method: 'POST',
-      body: formData,
+    console.log('FormData 확인:', formData);
+
+    const apiClient = getApiClient(token);
+
+    const response = await apiClient.post('/api/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error('이미지 업로드 실패');
     }
 
-    const data = await response.json();
-    return data.fileName;  // 파일 이름만 반환
+    return response.data.fileName;
   } catch (error) {
     console.error('이미지 업로드 중 오류 발생:', error);
     throw error;
   }
 };
 
+
 const CreateBusinessCardScreen = ({ navigation }) => {
-  const dispatch = useDispatch();  // useDispatch로 dispatch 가져오기
+  const dispatch = useDispatch();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [email, setEmail] = useState('');
   const [sns, setSns] = useState('');
   const [introduction, setIntroduction] = useState('');
   const [image, setImage] = useState(null);
-  const [imageFileName, setImageFileName] = useState(null); // 이미지 파일 이름만 저장
+  const [imageFileName, setImageFileName] = useState(null);
 
   // Redux에서 memberId 및 토큰 가져오기
   const { memberId, token } = useSelector((state) => state.auth);
@@ -57,14 +59,12 @@ const CreateBusinessCardScreen = ({ navigation }) => {
     });
 
     if (!result.cancelled && result.assets && result.assets.length > 0) {
-      const selectedImage = result.assets[0]; // assets 배열에서 첫 번째 이미지 선택
-      setImage(selectedImage.uri); // 이미지 URI 설정
-      console.log('이미지 선택됨:', selectedImage.uri);
+      const selectedImage = result.assets[0];
+      setImage(selectedImage.uri);
 
       try {
-        // 이미지 업로드 후 파일명 받기
-        const uploadedFileName = await uploadImage(selectedImage.uri, memberId);
-        setImageFileName(uploadedFileName); // 파일명을 상태로 설정
+        const uploadedFileName = await uploadImage(selectedImage.uri, memberId, token);
+        setImageFileName(uploadedFileName);
         console.log('이미지 업로드 성공:', uploadedFileName);
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
@@ -76,6 +76,8 @@ const CreateBusinessCardScreen = ({ navigation }) => {
   };
 
   const handleSubmitCard = async () => {
+    console.log('사용 중인 토큰:', token);
+
     if (!name || !email || !imageFileName) {
       Alert.alert('입력 오류', '이름, 이메일, 이미지를 모두 입력해주세요.');
       return;
@@ -87,28 +89,18 @@ const CreateBusinessCardScreen = ({ navigation }) => {
       email,
       sns,
       introduction,
-      imageUrl: imageFileName, // 이미지 파일명만 백엔드로 보냄
+      imageUrl: imageFileName,
     };
 
-    console.log('명함 데이터 전송:', businessCardData); // 전송할 데이터 로그 출력
+    console.log('명함 데이터 전송:', businessCardData);
 
-    // 명함 생성 API 호출
     try {
-      const response = await fetch(`${BASE_URL}/api/business-cards/members/${memberId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // 토큰 추가
-        },
-        body: JSON.stringify(businessCardData),
-      });
+      const apiClient = getApiClient(token); // 토큰을 포함한 axios 인스턴스 생성
+      const response = await apiClient.post(`/api/business-cards/members/${memberId}`, businessCardData);
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         console.log('명함 생성 성공');
-        
-        // 명함 생성 후 Redux 상태를 즉시 업데이트
         await dispatch(fetchBusinessCard(memberId));
-
         Alert.alert('성공', '명함이 성공적으로 생성되었습니다.');
         navigation.goBack();
       } else {
@@ -116,7 +108,7 @@ const CreateBusinessCardScreen = ({ navigation }) => {
         Alert.alert('실패', '명함 생성 실패');
       }
     } catch (error) {
-      console.error('명함 생성 중 오류:', error); // 명함 생성 실패 시 로그 출력
+      console.error('명함 생성 중 오류:', error);
       Alert.alert('오류', '명함 생성 중 오류가 발생했습니다.');
     }
   };
@@ -132,11 +124,7 @@ const CreateBusinessCardScreen = ({ navigation }) => {
       <Button title="이미지 선택" onPress={pickImage} />
       {image && <Text>이미지 선택됨: {String(image)}</Text>}
       {imageFileName && <Text>업로드된 이미지 파일명: {String(imageFileName)}</Text>}
-      <Button
-        title="명함 등록"
-        onPress={handleSubmitCard}
-        disabled={!name || !email || !imageFileName} // 파일명 기반으로 버튼 활성화 여부 결정
-      />
+      <Button title="명함 등록" onPress={handleSubmitCard} disabled={!name || !email || !imageFileName} />
     </View>
   );
 };
