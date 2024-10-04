@@ -70,10 +70,10 @@ public class DataInitializer {
                 .orElseThrow(() -> new IllegalArgumentException("Document가 존재하지 않습니다."));
 
         // ResidentRegistration 객체가 존재하지 않는 경우 생성
-        if (residentRegistrationRepository.findByDocument(document).isEmpty()) {
+        if (residentRegistrationRepository.findByRrn("991231-2763531").isEmpty()) {
             ResidentRegistration residentRegistration = ResidentRegistration.builder()
-                    .document(document)  // Document 객체 설정
-                    .RRN("991231-2763531")  // 주민등록증 번호
+//                    .document(document)  // Document 객체 설정
+                    .rrn("991231-2763531")  // 주민등록증 번호
                     .name("홍길동")  // 이름
                     .imagePath("/images/resident_registration.png") // 이미지 경로
                     .address("서울특별시 마포구 성암로 4층") // 주소
@@ -84,19 +84,22 @@ public class DataInitializer {
             // ResidentRegistration 객체 저장
             residentRegistrationRepository.save(residentRegistration);
 
-            document = document.toBuilder().RRN(residentRegistration).build();
+//            document = document.toBuilder().(residentRegistration).build();
+            document = document.toBuilder()
+                    .rrnId(residentRegistration.getId()) // 주민등록증 ID 설정
+                    .build();
             documentRepository.save(document);
 
             System.out.println("주민등록증이 생성되었습니다. ID: " + residentRegistration.getId());
         }
 
         // DriverLicense 객체가 존재하지 않는 경우 생성
-        if (driverLicenseRepository.findByDocument(document).isEmpty()) {
+        if (driverLicenseRepository.findByRrn("991231-2763531").isEmpty()) {
             DriverLicense driverLicense = DriverLicense.builder()
-                    .document(document) // Document 객체 설정
-                    .DLN("21-19-174133-01")  // 운전면허증 번호
+//                    .document(document) // Document 객체 설정
+                    .dln("21-19-174133-01")  // 운전면허증 번호
                     .managementNumber("8H1X3Y") // 관리 번호
-                    .RRN("991231-2763531") // 주민등록번호
+                    .rrn("991231-2763531") // 주민등록번호
                     .address("서울특별시 마포구 성암로 4층") // 주소
                     .issueDate(LocalDate.of(2020, 1, 1)) // 발급일
                     .expiryDate(LocalDate.of(2030, 1, 1)) // 만료일
@@ -107,18 +110,22 @@ public class DataInitializer {
             // ResidentRegistration 객체 저장
             driverLicenseRepository.save(driverLicense);
 
-            document = document.toBuilder().DLN(driverLicense).build();
+//            document = document.toBuilder().DLN(driverLicense).build();
+            document = document.toBuilder()
+                    .dlnId(driverLicense.getId()) // 운전면허증 ID 설정
+                    .build();
             documentRepository.save(document);
 
             System.out.println("운전면허증이 생성되었습니다. ID: " + driverLicense.getId());
         }
 
-        if(isicRepository.findByDocument(document).isEmpty()){
+        if (isicRepository.findByRrn("991231-2763531").isEmpty()) {
             InternationalStudentIdentityCard isic = InternationalStudentIdentityCard.builder()
-                    .document(document) // Document 객체 설정
+//                    .document(document) // Document 객체 설정
                     .isic("S123456789012X") // 국제학생증 카드 번호
                     .schoolName("Hankook University") // 학교 이름
-                    .name("홍길동") // 성명
+                    .name("홍길동")
+                    .rrn("991231-2763531") // 성명
                     .birth(LocalDate.of(1999, 12, 31)) // 생년월일
                     .issueDate(LocalDate.of(2022, 1, 1)) // 발급년월
                     .expiryDate(LocalDate.of(2024, 1, 1)) // 만료년월
@@ -127,22 +134,26 @@ public class DataInitializer {
 
             isicRepository.save(isic);
 
-            document = document.toBuilder().ISIC(isic).build();
+//            document = document.toBuilder().ISIC(isic).build();
+            document = document.toBuilder()
+                    .isicId(isic.getId()) // ISIC ID 설정
+                    .build();
             documentRepository.save(document);
 
             System.out.println("국제학생증이 생성되었습니다. ID: " + isic.getId());
         }
 
-        if(passportRepository.findByDocument(document).isEmpty()){
+        if (passportRepository.findByPn("M123456789").isEmpty()) {
             Passport passport = Passport.builder()
-                    .document(document)  // Document 객체 설정
-                    .PN("M123456789")  // 여권 번호
+//                    .document(document)  // Document 객체 설정
+                    .pn("M123456789")  // 여권 번호
                     .imagePath("/images/passport.png")  // 이미지 경로
                     .countryCode("KOR")  // 국가 코드
                     .type("P")  // 여권 종류
                     .surName("Hong")  // 성 (영문)
                     .givenName("Gildong")  // 이름 (영문)
                     .koreanName("홍길동")  // 한글 성명
+                    .rrn("991231-2763531")
                     .birth(LocalDate.of(1999, 12, 31))  // 생년월일
                     .gender('F')  // 성별
                     .nationality("South Korean")  // 국적
@@ -153,7 +164,10 @@ public class DataInitializer {
 
             passportRepository.save(passport);
 
-            document = document.toBuilder().PN(passport).build();
+//            document = document.toBuilder().PN(passport).build();
+            document = document.toBuilder()
+                    .pnId(passport.getId()) // 여권 ID 설정
+                    .build();
             documentRepository.save(document);
 
             System.out.println("여권이 생성되었습니다. ID: " + passport.getId());

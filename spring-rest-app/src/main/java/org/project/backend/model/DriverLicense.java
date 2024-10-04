@@ -23,17 +23,17 @@ public class DriverLicense implements Serializable {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
+    @JoinColumn(name = "document_id", nullable = true)  // 문서 고유번호와 연결
     private Document document;
 
     @Column(name = "dln", nullable = false, unique = true)
-    private String DLN; //운전면허증 번호
+    private String dln; //운전면허증 번호
 
     @Column(name = "management_number", nullable = false, length = 50)
     private String managementNumber;  //관리번호
 
     @Column(name = "rrn", nullable = false, length = 14)
-    private String RRN;  //주민등록번호
+    private String rrn;  //주민등록번호
 
     @Column(name = "address", nullable = false, length = 255)
     private String address;  //주소

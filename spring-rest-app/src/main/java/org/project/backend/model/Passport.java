@@ -23,14 +23,14 @@ public class Passport implements Serializable {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
+    @JoinColumn(name = "document_id", nullable = true)  // 문서 고유번호와 연결
     private Document document;
 
     @Column(name = "rrn", nullable = false, length = 14)
-    private String RRN;   // 주민등록증 번호
+    private String rrn;   // 주민등록증 번호
 
     @Column(name = "pn", nullable = false, unique = true)
-    private String PN;  //여권번호
+    private String pn;  //여권번호
 
     @Column(name = "image_path", nullable = false, columnDefinition = "TEXT")
     private String imagePath;  //이미지경로

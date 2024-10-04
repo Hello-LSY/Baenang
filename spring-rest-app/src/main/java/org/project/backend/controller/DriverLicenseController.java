@@ -41,19 +41,35 @@ public class DriverLicenseController {
     @GetMapping("/my-license/{memberId}")
     public ResponseEntity<Object> getDriverLicense(@PathVariable Long memberId) {
         try {
+//            // (1) memberId로 document 정보 조회
+//            DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
+//            if (documentDTO == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found for the given member.");
+//            }
+//
+//            // (2) documentId로 DriverLicense 조회
+//            Long driverLicenseDTO = documentDTO.getDlnId();
+//            if (driverLicenseDTO == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver License not found.");
+//            }
+//
+//            // 성공적으로 DriverLicense 조회 시
+//            return ResponseEntity.ok(driverLicenseDTO);
+
             // (1) memberId로 document 정보 조회
-            DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
+            DocumentDTO documentDTO = documentService.getDocumentByLoggedInUser();
             if (documentDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found for the given member.");
             }
 
-            // (2) documentId로 DriverLicense 조회
-            DriverLicenseDTO driverLicenseDTO = documentDTO.getDLN();
-            if (driverLicenseDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver License not found.");
+            // (2) document에서 운전면허증 ID 조회
+            Long driverLicenseId = documentDTO.getDlnId();
+            if (driverLicenseId == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver License not found for the given member.");
             }
 
-            // 성공적으로 DriverLicense 조회 시
+            // (3) DriverLicense 정보 조회
+            DriverLicenseDTO driverLicenseDTO = driverLicenseService.getDriverLicenseById(driverLicenseId);
             return ResponseEntity.ok(driverLicenseDTO);
         } catch (DocumentNotFoundException e) {
             // Document 조회 실패 시 예외 처리
@@ -62,6 +78,27 @@ public class DriverLicenseController {
             // 기타 예외 처리
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+        }
+    }
+
+    @ApiOperation(value = "현재 로그인한 사용자의 운전면허증 정보 조회", notes = "현재 로그인한 사용자의 운전면허증 정보를 조회합니다.")
+    @GetMapping("/get")
+    public ResponseEntity<?> getDriverLicenseForLoggedInUser() {
+        try {
+            // 현재 로그인한 사용자의 Document 정보 조회
+            DocumentDTO documentDTO = documentService.getDocumentByLoggedInUser();
+            Long dlnId = documentDTO.getDlnId();
+
+            if (dlnId == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("운전면허증 정보가 없습니다.");
+            }
+
+            // 운전면허증 정보 조회
+            DriverLicenseDTO driverLicense = driverLicenseService.getDriverLicenseById(dlnId);
+            return ResponseEntity.ok(driverLicense);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
         }
     }
 

@@ -15,14 +15,14 @@ public class DriverLicenseDTO {
     private Long id;  //운전면허증 고유번호
 
     @NotNull(message = "Driver License Number is required")
-    private String DLN; //운전면허증 번호
+    private String dln; //운전면허증 번호
 
     @NotNull(message = "Management Number is required")
     private String managementNumber;  //관리번호
 
     @NotNull(message = "Resident Registration Number is required")
     @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "Invalid Resident Registration Number format")
-    private String RRN;  //주민등록번호
+    private String rrn;  //주민등록번호
 
     @NotNull(message = "Address is required")
     private String address;  //주소

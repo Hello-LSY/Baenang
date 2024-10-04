@@ -1,215 +1,280 @@
 package org.project.backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.project.backend.converter.DocumentConverter;
+//import org.project.backend.converter.DocumentConverter;
 import org.project.backend.dto.*;
-import org.project.backend.exception.businessCard.BusinessCardNotFoundException;
-import org.project.backend.exception.document.DocumentNotFoundException;
 import org.project.backend.model.*;
-import org.project.backend.repository.DocumentRepository;
-import org.project.backend.repository.MemberRepository;
+import org.project.backend.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DocumentServiceImpl implements DocumentService {
 
+    @Autowired
     private final DocumentRepository documentRepository;
     private final MemberRepository memberRepository;
-    private final DocumentConverter documentConverter;
+    private final DriverLicenseRepository driverLicenseRepository;
+    private final ResidentRegistrationRepository residentRegistrationRepository;
+    private final PassportRepository passportRepository;
+    private final InternationalStudentIdentityCardRepository isicRepository;
 
-    private Member findMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
-    }
-
-    private Document findDocumentByMemberId(Long memberId) {
-        return documentRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found for member ID: " + memberId));
-    }
-
-    //Creat
+    // 문서 생성 (현재 로그인한 사용자 기준)
     @Override
-    public DocumentDTO createDocument(Long memberId) {
-        Member member = findMemberById(memberId);
+    public DocumentDTO createDocumentForLoggedInUser() {
+        Long memberId = getCurrentMemberId(); // 로그인한 사용자 memberId 가져오기
+
+        // memberId로 Member 엔티티 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found for ID: " + memberId));
 
         // 이미 Document가 존재하는지 확인
         if (documentRepository.findByMemberId(memberId).isPresent()) {
             throw new IllegalStateException("Member already has a document.");
         }
 
-        /// Document 객체 생성, 나머지 필드는 null로 설정
+        // Document 객체 생성, 나머지 필드는 null로 설정
         Document document = Document.builder()
                 .member(member)
-                .DLN(null)  // 나머지 필드를 null로 설정
-                .RRN(null)
-                .PN(null)
-                .ISIC(null)
+                .rrnId(null)
+                .dlnId(null)
+                .pnId(null)
+                .isicId(null)
                 .ticPath(null)
                 .vcPath(null)
                 .icPath(null)
                 .build();
 
         Document savedDocument = documentRepository.save(document);
-
-        return documentConverter.convertToDTO(savedDocument);
+        return convertToDTO(savedDocument);
     }
 
-    //Read
+    // 문서 읽기 (현재 로그인한 사용자 기준)
     @Override
-    public DocumentDTO getDocumentByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return documentConverter.convertToDTO(document);
+    public DocumentDTO getDocumentByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        Document document = documentRepository.findDocumentWithAllDetails(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Document not found for member ID: " + memberId));
+        return convertToDTO(document);
     }
 
+    // 각 문서 ID 반환 (로그인한 사용자 기준)
     @Override
-    public DriverLicense getDriverLicenseByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getDLN();
-    }
-
-    @Override
-    public ResidentRegistration getResidentRegistrationByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getRRN();
-    }
-
-    @Override
-    public Passport getPassportByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getPN();
+    public Long getDriverLicenseIdByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getDlnId)
+                .orElse(null);
     }
 
     @Override
-    public InternationalStudentIdentityCard getISICByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getISIC();
+    public Long getResidentRegistrationIdByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getRrnId)
+                .orElse(null);
     }
 
     @Override
-    public String getTICByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getTicPath();
+    public Long getPassportIdByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getPnId)
+                .orElse(null);
     }
 
     @Override
-    public String getVCByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getVcPath();
+    public Long getISICIdByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getIsicId)
+                .orElse(null);
+    }
+
+    // 이미지 경로 반환 (로그인한 사용자 기준)
+    @Override
+    public String getTICByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getTicPath)
+                .orElse(null);
     }
 
     @Override
-    public String getICByMemberId(Long memberId) {
-        Document document = findDocumentByMemberId(memberId);
-        return document.getIcPath();
+    public String getVCByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getVcPath)
+                .orElse(null);
     }
 
-    //Update
     @Override
-    public DocumentDTO updateDriverLicense(Long memberId, DriverLicense updatedDriverLicense) {
-        Document document = findDocumentByMemberId(memberId);
+    public String getICByLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .map(Document::getIcPath)
+                .orElse(null);
+    }
 
+    // 문서 ID 업데이트 (로그인한 사용자 기준)
+    @Override
+    public DocumentDTO updateDriverLicenseForLoggedInUser(Long driverLicenseId) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
-                .DLN(updatedDriverLicense)
+                .dlnId(driverLicenseId)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
     }
 
     @Override
-    public DocumentDTO updateResidentRegistration(Long memberId, ResidentRegistration updatedResidentRegistration) {
-        Document document = findDocumentByMemberId(memberId);
-
+    public DocumentDTO updateResidentRegistrationForLoggedInUser(Long residentRegistrationId) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
-                .RRN(updatedResidentRegistration)
+                .rrnId(residentRegistrationId)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
     }
 
     @Override
-    public DocumentDTO updatePassport(Long memberId, Passport updatedPassport) {
-        Document document = findDocumentByMemberId(memberId);
-
+    public DocumentDTO updatePassportForLoggedInUser(Long passportId) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
-                .PN(updatedPassport)
+                .pnId(passportId)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
     }
 
     @Override
-    public DocumentDTO updateISIC(Long memberId, InternationalStudentIdentityCard updatedISIC) {
-        Document document = findDocumentByMemberId(memberId);
-
+    public DocumentDTO updateISICForLoggedInUser(Long isicId) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
-                .ISIC(updatedISIC)
+                .isicId(isicId)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
     }
 
+    // 이미지 파일 경로 업데이트
     @Override
-    public DocumentDTO updateTIC(Long memberId, String updatedTicPath) {
-        Document document = findDocumentByMemberId(memberId);
-
+    public DocumentDTO updateTICForLoggedInUser(String updatedTicPath) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
                 .ticPath(updatedTicPath)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
     }
 
     @Override
-    public DocumentDTO updateVC(Long memberId, String updatedVcPath) {
-        Document document = findDocumentByMemberId(memberId);
-
+    public DocumentDTO updateVCForLoggedInUser(String updatedVcPath) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
                 .vcPath(updatedVcPath)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
     }
 
     @Override
-    public DocumentDTO updateIC(Long memberId, String updateIcPath) {
-        Document document = findDocumentByMemberId(memberId);
-
+    public DocumentDTO updateICForLoggedInUser(String updatedIcPath) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
         Document updatedDocument = document.toBuilder()
-                .icPath(updateIcPath)
+                .icPath(updatedIcPath)
                 .build();
-
         documentRepository.save(updatedDocument);
-        return documentConverter.convertToDTO(updatedDocument);
+        return convertToDTO(updatedDocument);
+    }
+
+    // 문서 삭제 (로그인한 사용자 기준)
+    @Override
+    public void deleteDocumentForLoggedInUser() {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
+        documentRepository.delete(document);
+    }
+
+    // Document 엔티티 가져오기
+    private Document getDocumentEntityByMemberId(Long memberId) {
+        return documentRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Document not found for member ID: " + memberId));
+    }
+
+    // Document 엔티티를 DTO로 변환하는 메서드
+    private DocumentDTO convertToDTO(Document document) {
+        return DocumentDTO.builder()
+                .memberId(document.getMember().getId())
+                .documentId(document.getDocumentId())
+                .rrnId(document.getRrnId())
+                .dlnId(document.getDlnId())
+                .pnId(document.getPnId())
+                .isicId(document.getIsicId())
+                .TIC(document.getTicPath())
+                .VC(document.getVcPath())
+                .IC(document.getIcPath())
+                .build();
     }
 
     @Override
-    public void deleteDocumentByMemberId(Long memberId) {
-        // (1) memberId로 Document를 조회
-        Document document = findDocumentByMemberId(memberId);
+    public void updateDocumentByRrn(String rrn) {
+        // 현재 로그인한 사용자의 memberId 가져오기
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByMemberId(memberId);
 
-        if (document != null) {
-            // (2) 기존 객체의 연관된 데이터를 null로 설정한 새로운 Document 객체 생성
-            Document updatedDocument = document.toBuilder()
-                    .DLN(null)   // 운전면허 정보 삭제
-                    .PN(null)    // 여권 정보 삭제
-                    .RRN(null)   // 주민등록증 정보 삭제
-                    .ISIC(null)  // 국제학생증 정보 삭제
-                    .build();
+        // 새로운 Document 객체를 만들기 위한 빌더 초기화
+        Document.DocumentBuilder updatedDocumentBuilder = document.toBuilder();
 
-            // (3) 연관된 데이터 해제 후 Document 삭제
-            documentRepository.delete(updatedDocument);
+        // 1. Driver License에서 rrn으로 검색
+        driverLicenseRepository.findByRrn(rrn).ifPresent(driverLicense -> {
+            updatedDocumentBuilder.dlnId(driverLicense.getId());
+        });
+
+        // 2. Resident Registration에서 rrn으로 검색
+        residentRegistrationRepository.findByRrn(rrn).ifPresent(residentRegistration -> {
+            updatedDocumentBuilder.rrnId(residentRegistration.getId());
+        });
+
+        // 3. Passport에서 rrn으로 검색
+        passportRepository.findByRrn(rrn).ifPresent(passport -> {
+            updatedDocumentBuilder.pnId(passport.getId());
+        });
+
+        // 4. International Student Identity Card에서 rrn으로 검색
+        isicRepository.findByRrn(rrn).ifPresent(isic -> {
+            updatedDocumentBuilder.isicId(isic.getId());
+        });
+
+        // 업데이트된 Document 객체 생성
+        Document updatedDocument = updatedDocumentBuilder.build();
+
+        // 변경된 document 저장
+        documentRepository.save(updatedDocument);
+    }
+
+    // 현재 로그인한 사용자의 memberId를 반환하는 메서드
+    private Long getCurrentMemberId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("Member not found for username: " + username));
+            return member.getId();
         } else {
-            throw new DocumentNotFoundException("Document not found for member ID: " + memberId);
+            throw new IllegalArgumentException("Invalid user authentication.");
         }
     }
+
 }

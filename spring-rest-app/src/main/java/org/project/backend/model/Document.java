@@ -20,26 +20,25 @@ public class Document {
     @Column(name = "document_id")
     private Long documentId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", referencedColumnName = "member_id")
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)  // Lazy 로딩 및 cascade 옵션 추가
-    @JoinColumn(name = "rrn", referencedColumnName = "rrn")
-    private ResidentRegistration RRN; //주민등록증 번호
+    // 주민등록증 ID (엔티티 대신 Long 타입으로 ID 저장)
+    @Column(name = "rrn_id", nullable = true)
+    private Long rrnId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "dln", referencedColumnName = "dln")
-    private DriverLicense DLN; //운전면허증번호
+    // 운전면허증 ID
+    @Column(name = "dln_id", nullable = true)
+    private Long dlnId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "pn", referencedColumnName = "pn")
-    private Passport PN;  //여권 번호
+    // 여권 ID
+    @Column(name = "pn_id", nullable = true)
+    private Long pnId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "isic", referencedColumnName = "isic")
-    private InternationalStudentIdentityCard ISIC;// 국제 학생증 번호
-
+    // 국제학생증 ID
+    @Column(name = "isic_id", nullable = true)
+    private Long isicId;
     @Column(name = "tic", columnDefinition = "TEXT")
     private String ticPath; // 여행 보험 증명서 (이미지 파일 경로)
 

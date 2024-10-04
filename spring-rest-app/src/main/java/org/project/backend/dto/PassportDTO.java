@@ -16,10 +16,10 @@ public class PassportDTO {
     
     @NotNull(message = "Resident Registration Number is required")
     @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "Invalid Resident Registration Number format")
-    private String RRN;   //주민등록증 번호
+    private String rrn;   //주민등록증 번호
 
     @NotNull(message = "Passport Number is required")
-    private String PN;  //여권번호
+    private String pn;  //여권번호
 
     @NotNull(message = "Image Path is required")
     private String imagePath; //이미지 경로

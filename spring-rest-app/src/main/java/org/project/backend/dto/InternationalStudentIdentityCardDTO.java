@@ -16,10 +16,10 @@ public class InternationalStudentIdentityCardDTO {
 
     @NotNull(message = "Resident Registration Number is required")
     @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "Invalid Resident Registration Number format")
-    private String RRN;   //주민등록증 번호
+    private String rrn;   //주민등록증 번호
 
     @NotNull(message = "International Student Identity Card Number is required")
-    private String ISIC;  //국제학생증 카드 번호
+    private String isic;  //국제학생증 카드 번호
 
 
     @NotNull(message = "School Name is required")

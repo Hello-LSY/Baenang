@@ -21,51 +21,16 @@ public class PassportServiceImpl implements PassportService{
     private final DocumentConverter documentConverter;
     private final PassportRepository passportRepository;
 
-//    @Override
-//    public PassportDTO createOrUpdatePassport(Long documentId, PassportDTO passportDTO) {
-//        Document document = findDocumentById(documentId);
-//
-//        Passport existingPassport = document.getPN();
-//        if(existingPassport != null){
-//            passportRepository.delete(existingPassport);
-//            document = document.toBuilder().PN(null).build();
-//            documentRepository.save(document);
-//        }
-//
-//
-//        Passport passport = documentConverter.convertToPassportEntity(passportDTO, document);
-//        Passport savedPassport = passportRepository.save(passport);
-//
-//        document = document.toBuilder().PN(savedPassport).build();
-//        Document updatedDocument = documentRepository.save(document);
-//
-//        return documentConverter.convertToPassportDTO(updatedDocument.getPN());
-//    }
 
     @Override
-    public PassportDTO getPassportById(Long documentId) {
-        Passport passport = findDocumentById(documentId).getPN();
+    public PassportDTO getPassportById(Long pnId) {
+        // Passport 엔티티 조회
+        Passport passport = passportRepository.findById(pnId)
+                .orElseThrow(() -> new DocumentNotFoundException("Passport not found with ID: " + pnId));
 
-        if (passport == null) {
-            throw new DocumentNotFoundException("Passport not found for Document ID: " + documentId);
-        }
-
+        // Passport 엔티티를 DTO로 변환하여 반환
         return documentConverter.convertToPassportDTO(passport);
     }
-
-//    @Override
-//    public void deletePassportById(Long documentId) {
-//        Document document = findDocumentById(documentId);
-//
-//        if(document.getPN()!=null){
-//            Long passportId = document.getPN().getId();
-//
-//            Document updatedDocument = document.toBuilder().PN(null).build();
-//            documentRepository.save(updatedDocument);
-//
-//            passportRepository.deleteById(passportId);
-//        }
-//    }
 
     private Document findDocumentById(Long documentId) {
         return documentRepository.findById(documentId)

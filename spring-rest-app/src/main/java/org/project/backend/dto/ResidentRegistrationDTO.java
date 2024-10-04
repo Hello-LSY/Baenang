@@ -16,7 +16,7 @@ public class ResidentRegistrationDTO {
 
     @NotNull(message = "Resident Registration Number is required")
     @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "Invalid Resident Registration Number format")
-    private String RRN;   //주민등록증 번호
+    private String rrn;   //주민등록증 번호
 
     @NotNull(message = "Name is required")
     private String name; //사용자 이름
