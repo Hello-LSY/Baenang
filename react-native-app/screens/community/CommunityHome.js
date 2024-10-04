@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Text } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchPosts, deletePost, toggleLike } from '../../redux/postSlice'; // deletePost 추가
+import { fetchPosts, deletePost, toggleLike } from '../../redux/postSlice';
 import CommunityItem from './CommunityItem';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../redux/authState';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function CommunityHome({ navigation }) {
   const dispatch = useDispatch();
@@ -12,19 +13,28 @@ export default function CommunityHome({ navigation }) {
   const { auth } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchPosts());
-  }, [dispatch]);
+  // 화면에 포커스될 때마다 게시글 목록을 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      if (auth.memberId) {
+        dispatch(fetchPosts());
+      }
+    }, [dispatch, auth.memberId])
+  );
 
   // 새로고침 핸들러
   const handleRefresh = () => {
     setRefreshing(true);
-    dispatch(fetchPosts()).finally(() => setRefreshing(false));
+    if (auth.memberId) {
+      dispatch(fetchPosts()).finally(() => setRefreshing(false));
+    }
   };
 
   // 좋아요 상태 변경 핸들러
   const handleLike = (postId, liked) => {
-    dispatch(toggleLike({ postId, memberId: auth.memberId, liked }));
+    if (auth.memberId) {
+      dispatch(toggleLike({ postId, memberId: auth.memberId, liked }));
+    }
   };
 
   // 삭제 핸들러
@@ -32,11 +42,17 @@ export default function CommunityHome({ navigation }) {
     dispatch(deletePost(postId));
   };
 
+  // 수정 핸들러 (수정 화면으로 이동)
+  const handleEdit = (postId) => {
+    navigation.navigate('EditPost', { postId });
+  };
+
   const renderPostItem = ({ item }) => (
     <CommunityItem
       post={item}
       onLike={handleLike}
-      onDelete={handleDelete} // 삭제 핸들러 전달
+      onDelete={handleDelete}
+      onEdit={handleEdit}
       onViewComments={() => navigation.navigate('Comments', { postId: item.id })}
     />
   );

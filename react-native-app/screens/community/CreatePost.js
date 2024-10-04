@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Image, ScrollView, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useDispatch, useSelector } from 'react-redux'; // useSelector 임포트
-import { getApiClient } from '../../redux/apiClient'; // axios 클라이언트 가져오기
+import { useSelector } from 'react-redux';
+import { getApiClient } from '../../redux/apiClient';
+import { Ionicons } from '@expo/vector-icons';
 import { BASE_URL } from '../../constants/config';
 
 // 이미지 업로드 함수
@@ -36,8 +37,6 @@ const uploadImage = async (imageUri, token) => {
 };
 
 const CreatePost = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
   const [imageFileName, setImageFileName] = useState(null);
@@ -54,7 +53,7 @@ const CreatePost = ({ navigation }) => {
   };
 
   useEffect(() => {
-    requestPermission(); // 컴포넌트 마운트 시 권한 요청
+    requestPermission();
   }, []);
 
   // 이미지 선택 함수
@@ -85,17 +84,16 @@ const CreatePost = ({ navigation }) => {
 
   // 게시글 작성 함수
   const handleCreatePost = async () => {
-    if (!title || !content || !imageFileName) {
-      Alert.alert('Validation', '제목, 내용, 이미지를 모두 입력해주세요.');
+    if (!content || !imageFileName) {
+      Alert.alert('Validation', '내용과 이미지를 모두 입력해주세요.');
       return;
     }
 
     const postData = {
-      title,
       content,
       imageNames: [imageFileName],
-      nickname, // 닉네임 추가
-      memberId, // memberId 추가
+      nickname,
+      memberId,
     };
 
     try {
@@ -117,22 +115,27 @@ const CreatePost = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="제목"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="내용"
-        value={content}
-        onChangeText={setContent}
-      />
-      {image && <Image source={{ uri: image }} style={styles.image} />}
-      <Button title="이미지 선택" onPress={pickImage} />
-      {imageFileName && <Text>업로드된 이미지 파일명: {imageFileName}</Text>}
-      <Button title="게시글 작성" onPress={handleCreatePost} />
+      <View style={styles.card}>
+        <TextInput
+          style={styles.input}
+          placeholder="당신의 이야기를 공유해보세요..."
+          value={content}
+          onChangeText={setContent}
+          multiline
+        />
+        {image && (
+          <Image source={{ uri: image }} style={styles.image} />
+        )}
+        <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+          <Ionicons name="image-outline" size={24} color="#66b2ff" />
+          <Text style={styles.imagePickerText}>이미지 선택</Text>
+        </TouchableOpacity>
+        {imageFileName && <Text style={styles.uploadedText}>업로드된 이미지 파일명: {imageFileName}</Text>}
+        <TouchableOpacity style={styles.createPostButton} onPress={handleCreatePost}>
+          <Ionicons name="checkmark-circle-outline" size={24} color="white" />
+          <Text style={styles.createPostText}>게시글 작성</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -141,19 +144,64 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
+    backgroundColor: '#f7f7f7', // 부드러운 배경색
+  },
+  card: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    marginBottom: 15,
+    minHeight: 100,
+    textAlignVertical: 'top',
   },
   image: {
     width: '100%',
     height: 200,
-    marginBottom: 10,
     borderRadius: 10,
+    marginBottom: 10,
+  },
+  imagePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    backgroundColor: '#ebf5ff', // 부드러운 파란색 배경
+    padding: 10,
+    borderRadius: 10,
+  },
+  imagePickerText: {
+    color: '#66b2ff', // 부드러운 파란색 텍스트
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  uploadedText: {
+    fontSize: 14,
+    color: '#777',
+    marginBottom: 15,
+  },
+  createPostButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#66b2ff', // 부드러운 파란색 버튼
+    padding: 15,
+    borderRadius: 10,
+    justifyContent: 'center',
+  },
+  createPostText: {
+    color: 'white',
+    fontSize: 18,
+    marginLeft: 10,
+    fontWeight: 'bold',
   },
 });
 

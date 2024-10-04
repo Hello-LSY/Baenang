@@ -21,8 +21,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public List<PostResponseDTO> getAllPosts(Long memberId) {
-        return postRepository.findAll().stream()
-                .map(post -> convertToPostResponseDTO(post, memberId)) // 좋아요 상태 계산
+        // 최신 게시글이 상단에 오도록 내림차순 정렬된 게시글 목록을 가져옴
+        return postRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(post -> convertToPostResponseDTO(post, memberId))
                 .collect(Collectors.toList());
     }
 
@@ -54,20 +55,22 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostDTO updatePost(Long id, PostDTO postDTO) {
+        // 게시글 조회
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
+        // 제목과 내용만 업데이트
         post.updatePost(
                 postDTO.getTitle(),
                 postDTO.getContent(),
-                postDTO.getImageNames() != null && !postDTO.getImageNames().isEmpty()
-                        ? postDTO.getImageNames()
-                        : post.getImageNames()
+                post.getImageNames()  // 기존 이미지 리스트 그대로 유지
         );
 
+        // 업데이트된 게시글 저장
         Post savedPost = postRepository.save(post);
         return convertToPostDTO(savedPost);
     }
+
 
     @Override
     public void deletePost(Long id) {

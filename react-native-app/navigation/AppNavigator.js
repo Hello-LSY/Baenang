@@ -18,6 +18,7 @@ import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScre
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
 import CommunityHome from '../screens/community/CommunityHome.js';
 import CreatePost from '../screens/community/CreatePost';
+import EditPost from '../screens/community/EditPost';
 import UserProfile from '../screens/UserProfile.js';
 import CustomerService from '../screens/customerService/CustomerService.js';
 
@@ -100,6 +101,11 @@ const AppNavigator = () => {
         name="CreatePost"
         component={CreatePost}
         options={{ title: '게시글 작성' }}
+      />
+      <Stack.Screen
+        name="EditPost"
+        component={EditPost}
+        options={{ title: '게시글 수정' }}
       />
       <Stack.Screen
         name="ExchangeRateListScreen"

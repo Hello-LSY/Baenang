@@ -1,3 +1,4 @@
+// redux/postSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiClient } from './apiClient';
 
@@ -5,8 +6,15 @@ import { getApiClient } from './apiClient';
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async (_, thunkAPI) => {
   try {
     const { auth } = thunkAPI.getState(); // auth 상태에서 token 가져오기
+    if (!auth.token) {
+      throw new Error('로그인이 필요합니다.');
+    }
     const apiClient = getApiClient(auth.token); // 토큰 포함 API 클라이언트 생성
-    const response = await apiClient.get('/api/posts');
+    const response = await apiClient.get('/api/posts', {
+      params: {
+        memberId: auth.memberId,
+      },
+    });
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response ? error.response.data : { message: 'Network error' });
@@ -61,7 +69,6 @@ export const toggleLike = createAsyncThunk('posts/toggleLike', async ({ postId, 
   }
 });
 
-
 const postsSlice = createSlice({
   name: 'posts',
   initialState: {
@@ -92,8 +99,8 @@ const postsSlice = createSlice({
       .addCase(toggleLike.fulfilled, (state, action) => {
         const post = state.items.find((item) => item.id === action.payload.postId);
         if (post) {
-          post.liked = action.payload.liked;  // 좋아요 상태를 갱신
-          post.likeCount += action.payload.liked ? 1 : -1; // 좋아요 수 갱신
+          post.liked = action.payload.liked;
+          post.likeCount += action.payload.liked ? 1 : -1;
         }
       });
   },
