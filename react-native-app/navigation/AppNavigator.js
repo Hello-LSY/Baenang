@@ -17,6 +17,7 @@ import TravelerPersonalityTest from '../screens/travelpersonalitytest/TravelPers
 import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScreen';
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
 import Community from '../screens/community/Community.js';
+import UserProfile from '../screens/UserProfile.js';
 import CustomerService from '../screens/customerService/CustomerService.js';
 
 const Stack = createStackNavigator();
@@ -103,6 +104,11 @@ const AppNavigator = () => {
         name="ExchangeRateDetail"
         component={ExchangeRateDetailScreen}
         options={{ title: '환율 상세' }}
+      />
+      <Stack.Screen
+        name="UserProfile"
+        component={UserProfile}
+        options={{ title: '내 프로필' }}
       />
       <Stack.Screen
         name="CustomerService"
