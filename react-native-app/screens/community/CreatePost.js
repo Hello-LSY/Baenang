@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Image, Text, ScrollView } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, Image, ScrollView, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { useDispatch, useSelector } from 'react-redux'; // useSelector 임포트
+import { getApiClient } from '../../redux/apiClient'; // axios 클라이언트 가져오기
 import { BASE_URL } from '../../constants/config';
 
 // 이미지 업로드 함수
-const uploadImage = async (imageUri) => {
+const uploadImage = async (imageUri, token) => {
   try {
     const formData = new FormData();
-    const fileName = `${Date.now()}.jpg`;  // 고유한 파일명 생성
+    const fileName = `${Date.now()}.jpg`;
 
     formData.append('file', {
       uri: imageUri,
@@ -15,17 +17,18 @@ const uploadImage = async (imageUri) => {
       type: 'image/jpeg',
     });
 
-    const response = await fetch(`${BASE_URL}/api/upload`, {
-      method: 'POST',
-      body: formData,
+    const apiClient = getApiClient(token);
+    const response = await apiClient.post(`${BASE_URL}/api/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
+    if (!response.data || !response.data.fileName) {
       throw new Error('이미지 업로드 실패');
     }
 
-    const data = await response.json();
-    return data.fileName;  // 파일 이름만 반환
+    return response.data.fileName;
   } catch (error) {
     console.error('이미지 업로드 중 오류 발생:', error);
     throw error;
@@ -33,10 +36,14 @@ const uploadImage = async (imageUri) => {
 };
 
 const CreatePost = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [image, setImage] = useState(null);  // 이미지 URI 상태
-  const [imageFileName, setImageFileName] = useState(null);  // 업로드된 이미지 파일명
+  const [image, setImage] = useState(null);
+  const [imageFileName, setImageFileName] = useState(null);
+
+  // Redux에서 token, nickname, memberId 가져오기
+  const { token, nickname, memberId } = useSelector((state) => state.auth);
 
   // 권한 요청 함수
   const requestPermission = async () => {
@@ -47,7 +54,7 @@ const CreatePost = ({ navigation }) => {
   };
 
   useEffect(() => {
-    requestPermission();  // 컴포넌트 마운트 시 권한 요청
+    requestPermission(); // 컴포넌트 마운트 시 권한 요청
   }, []);
 
   // 이미지 선택 함수
@@ -64,7 +71,7 @@ const CreatePost = ({ navigation }) => {
       setImage(selectedImage.uri);
 
       try {
-        const uploadedFileName = await uploadImage(selectedImage.uri);
+        const uploadedFileName = await uploadImage(selectedImage.uri, token);
         setImageFileName(uploadedFileName);
         console.log('이미지 업로드 성공:', uploadedFileName);
       } catch (error) {
@@ -78,7 +85,7 @@ const CreatePost = ({ navigation }) => {
 
   // 게시글 작성 함수
   const handleCreatePost = async () => {
-    if (!title || !content) {
+    if (!title || !content || !imageFileName) {
       Alert.alert('Validation', '제목, 내용, 이미지를 모두 입력해주세요.');
       return;
     }
@@ -86,26 +93,20 @@ const CreatePost = ({ navigation }) => {
     const postData = {
       title,
       content,
-      imageNames: [imageFileName],  // 업로드된 이미지 파일명을 전송
+      imageNames: [imageFileName],
+      nickname, // 닉네임 추가
+      memberId, // memberId 추가
     };
 
-    console.log('게시글 데이터 전송:', postData);
-
     try {
-      const response = await fetch(`${BASE_URL}/api/posts/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(postData),
-      });
+      const apiClient = getApiClient(token);
+      const response = await apiClient.post(`${BASE_URL}/api/posts/create`, postData);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200 || response.status === 201) {
         Alert.alert('Success', '게시글이 성공적으로 작성되었습니다.');
         navigation.goBack();
       } else {
-        const errorData = await response.json();
+        const errorData = await response.data;
         Alert.alert('Error', errorData.message || '게시글 작성에 실패했습니다.');
       }
     } catch (error) {
@@ -128,14 +129,9 @@ const CreatePost = ({ navigation }) => {
         value={content}
         onChangeText={setContent}
       />
-
-      {/* 이미지 미리보기 */}
       {image && <Image source={{ uri: image }} style={styles.image} />}
-
       <Button title="이미지 선택" onPress={pickImage} />
-
       {imageFileName && <Text>업로드된 이미지 파일명: {imageFileName}</Text>}
-
       <Button title="게시글 작성" onPress={handleCreatePost} />
     </ScrollView>
   );

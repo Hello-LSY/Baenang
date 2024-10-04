@@ -29,7 +29,7 @@ export const fetchExchangeRateHistory = createAsyncThunk(
   async (currencyCode, { getState }) => {
     const { auth } = getState(); // auth 상태에서 토큰을 가져옴
     const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
-    const response = await apiClient.get(`/api/exchange/history/${currencyCode}`);
+    const response = await apiClient.get(`/api/exchange/${currencyCode}`);
     return { currencyCode, history: response.data }; // 통화 코드와 함께 반환
   }
 );

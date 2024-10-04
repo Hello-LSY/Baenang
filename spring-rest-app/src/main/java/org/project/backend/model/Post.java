@@ -6,6 +6,7 @@ import lombok.Getter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -17,6 +18,8 @@ public class Post {
     private Long id;
 
     private String title;
+
+    private Long memberId;
 
     @Lob
     private String content;
@@ -38,23 +41,27 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 
+    private int likeCount; // 좋아요 수 필드 추가
+
     // 생성자
     protected Post() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.likeCount = 0; // 좋아요 수 초기화
     }
 
     @Builder
-    public Post(Long id, String title, String content, String nickname, double latitude, double longitude, List<String> imageNames) {
-        this.id = id; // 기존 id를 유지할 수 있도록 빌더에서 설정 가능
+    public Post(String title, String content, String nickname, double latitude, double longitude, List<String> imageNames, Long memberId) {
         this.title = title;
         this.content = content;
         this.nickname = nickname;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.imageNames = imageNames != null ? imageNames : new ArrayList<>();
+        this.imageNames = imageNames != null ? new ArrayList<>(imageNames) : new ArrayList<>();
+        this.memberId = memberId;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.likeCount = 0;
     }
 
     // 댓글 추가 메서드
@@ -63,14 +70,14 @@ public class Post {
         comment.setPost(this);
     }
 
-    // 좋아요 추가 메서드
-    public void addLike(Like like) {
-        this.likes.add(like);
+    public void incrementLikeCount() {
+        this.likeCount += 1;
     }
 
-    // 좋아요 삭제 메서드
-    public void removeLike(Like like) {
-        this.likes.remove(like);
+    public void decrementLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount -= 1;
+        }
     }
 
     // 이미지 파일 이름 추가 메서드
@@ -78,8 +85,19 @@ public class Post {
         this.imageNames.add(imageName);
     }
 
+    // 이미지 파일 이름 목록 가져오기 (불변 컬렉션 반환)
     public List<String> getImageNames() {
-        return imageNames;
+        return Collections.unmodifiableList(imageNames);
+    }
+
+    // 댓글 목록 가져오기 (불변 컬렉션 반환)
+    public List<Comment> getComments() {
+        return Collections.unmodifiableList(comments);
+    }
+
+    // 좋아요 목록 가져오기 (불변 컬렉션 반환)
+    public List<Like> getLikes() {
+        return Collections.unmodifiableList(likes);
     }
 
     // updatedAt 필드 업데이트 메서드
@@ -91,7 +109,7 @@ public class Post {
     public void updatePost(String title, String content, List<String> imageNames) {
         this.title = title;
         this.content = content;
-        this.imageNames = imageNames != null ? imageNames : this.imageNames;
+        this.imageNames = imageNames != null ? new ArrayList<>(imageNames) : this.imageNames;
         updateTimestamp(); // 수정 시 updatedAt 업데이트
     }
 }

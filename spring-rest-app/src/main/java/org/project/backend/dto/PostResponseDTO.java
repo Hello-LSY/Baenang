@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDTO {
+public class PostResponseDTO {
     private Long id;
     private String title;
     private String content;
@@ -22,6 +22,7 @@ public class PostDTO {
     private List<String> imageNames;
     private int likeCount;
     private int commentCount;
+    private boolean hasLiked;  // 사용자가 해당 게시글을 좋아했는지 여부
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long memberId;

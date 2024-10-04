@@ -113,10 +113,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Bean
     public MultipartResolver multipartResolver() {
-        return new StandardServletMultipartResolver();
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(5242880); // 최대 파일 크기 5MB 설정
+        multipartResolver.setDefaultEncoding("UTF-8");
+        return multipartResolver;
     }
-
-
-
 
 }

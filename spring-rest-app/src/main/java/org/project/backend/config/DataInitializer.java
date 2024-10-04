@@ -45,10 +45,13 @@ public class DataInitializer {
             Member member = Member.builder()
                     .username("user")
                     .password(passwordEncoder.encode("1234")) // 비밀번호 암호화
+                    .email("sample@naver.com")
+                    .nickname("Sample")
+                    .birthdate("1998-02-05")
+                    .gender("남자")
+                    .registrationNumber("9802051111111")
                     .build();
             memberRepository.save(member); // 데이터베이스에 사용자 저장
-            System.out.println("임시 사용자 'user'가 생성되었습니다.");
-            System.out.println("암호화된 비밀번호: " + member.getPassword());
         }
 
         // 생성된 'user'의 ID를 통해 Member 객체 가져오기
