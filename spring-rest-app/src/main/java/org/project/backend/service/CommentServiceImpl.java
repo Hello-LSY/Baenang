@@ -40,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Comment comment = new Comment(commentDTO.getContent(), commentDTO.getNickname());
+        Comment comment = new Comment(commentDTO.getContent(), commentDTO.getMemberId(), commentDTO.getNickname());
         post.addComment(comment);
 
         Comment savedComment = commentRepository.save(comment);
@@ -48,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
                 .id(savedComment.getId())
                 .content(savedComment.getContent())
                 .nickname(savedComment.getNickname())
+                .memberId(savedComment.getMemberId())
                 .createdAt(savedComment.getCreatedAt())
                 .updatedAt(savedComment.getUpdatedAt())
                 .postId(postId)

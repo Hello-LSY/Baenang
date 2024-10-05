@@ -16,8 +16,10 @@ public class Comment {
 
     private String content;
     private String nickname;  // 댓글 작성자 닉네임
+    private Long memberId; // 댓글 작성자 memberId
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -27,8 +29,9 @@ public class Comment {
     // 생성자
     protected Comment() {}
 
-    public Comment(String content, String nickname) {
+    public Comment(String content, Long memberId, String nickname) {
         this.content = content;
+        this.memberId = memberId;
         this.nickname = nickname;
         this.createdAt = LocalDateTime.now();
     }

@@ -102,6 +102,16 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await apiClient.delete(`/api/comments/${commentId}`);
+      setComments(comments.filter(comment => comment.id !== commentId));
+      setCommentsCount(commentsCount - 1);
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+
   return (
     <View style={styles.postContainer}>
       <View style={styles.postHeader}>
@@ -160,11 +170,18 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
           {comments.map((comment) => (
             <View key={comment.id} style={styles.comment}>
               <View style={styles.commentHeader}>
-                <Image
-                  source={defaultProfileImage}
-                  style={styles.commentProfileImage}
-                />
-                <Text style={styles.commentUsername}>{comment.nickname || "User"}</Text>
+                <View style={styles.commentHeaderLeft}>
+                  <Image
+                    source={defaultProfileImage}
+                    style={styles.commentProfileImage}
+                  />
+                  <Text style={styles.commentUsername}>{comment.nickname}</Text>
+                </View>
+                {String(auth.memberId) === String(comment.memberId) && (
+                  <TouchableOpacity onPress={() => handleDeleteComment(comment.id)} style={styles.deleteCommentButton}>
+                    <Ionicons name="trash-outline" size={16} color="#999" />
+                  </TouchableOpacity>
+                )}
               </View>
               <Text style={styles.commentText}>{comment.content}</Text>
             </View>
@@ -274,6 +291,11 @@ const styles = StyleSheet.create({
   commentHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  commentHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   commentProfileImage: {
     width: 30,
@@ -315,6 +337,9 @@ const styles = StyleSheet.create({
   addCommentText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  deleteCommentButton: {
+    padding: 5,
   },
 });
 
