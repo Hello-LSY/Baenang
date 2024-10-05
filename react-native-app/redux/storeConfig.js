@@ -1,19 +1,21 @@
 // redux/storeConfig.js
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
-import businessCardReducer from './businessCardSlice'; // businessCard 리듀서 추가
-import travelCertificatesReducer from '../redux/travelCertificatesSlice';
-import exchangeRateReducer from './exchangeRateState'; // exchangeRate 리듀서 추가
-import postsReducer from './postReducer';
-import friendReducer from './friendSlice'; // friend 리듀서 추가
+import businessCardReducer from './businessCardSlice';
+import travelCertificatesReducer from './travelCertificatesSlice';
+import exchangeRateReducer from './exchangeRateState';
+import postReducer from './postSlice';
+import friendReducer from './friendSlice';
+import commentReducer from './commentSlice'
 
 const storeConfig = configureStore({
   reducer: {
     auth: authReducer,
-    businessCard: businessCardReducer, // businessCard 리듀서 등록
+    businessCard: businessCardReducer,
     travelCertificates: travelCertificatesReducer,
-    exchangeRate: exchangeRateReducer, // exchangeRate 리듀서 등록
-    posts: postsReducer,
+    exchangeRate: exchangeRateReducer,
+    post: postReducer,
+    comment: commentReducer,
     friend: friendReducer,
   },
 });

@@ -7,16 +7,14 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }, thunkAPI) => {
     try {
-      const apiClient = getApiClient(); // 토큰 없이 API 클라이언트 호출
+      const apiClient = getApiClient();
       const response = await apiClient.post('/api/auth/login', { username, password });
-      
-      // 로그인 시 서버로부터 추가로 받아올 데이터들
+
       const { token, memberId, email, registrationNumber, nickname } = response.data;
 
       // 로그인 정보 저장
-      await authStorage.storeCredentials(token, memberId);
+      await authStorage.storeCredentials(token, memberId, email, registrationNumber, nickname);
 
-      // 필요한 정보를 리턴
       return { token, memberId, email, registrationNumber, nickname };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response ? error.response.data : 'Network error');
@@ -24,14 +22,14 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// 비동기 작업 정의 (토큰 로드)
 export const loadCredentials = createAsyncThunk(
   'auth/loadCredentials',
   async () => {
-    const { token, memberId } = await authStorage.getCredentials();
-    return { token, memberId };
+    const { token, memberId, email, registrationNumber, nickname } = await authStorage.getCredentials();
+    return { token, memberId, email, registrationNumber, nickname };
   }
 );
+
 
 const authSlice = createSlice({
   name: 'auth',

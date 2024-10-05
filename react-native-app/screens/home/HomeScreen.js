@@ -91,10 +91,9 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerGreeting}>즐거운 여행 되세요,</Text>
-          <Text style={styles.headerName}>이태웅님</Text>
-          <Text style={styles.headerText}>
+          <Text style={styles.headerName}>
             {auth.nickname
-              ? `즐거운 여행 되세요 ${auth.nickname} 님`
+              ? `${auth.nickname} 님`
               : '즐거운 여행 되세요'}
           </Text>
         </View>

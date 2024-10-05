@@ -20,11 +20,11 @@ export const getApiClient = (token = '') => {
   // 요청 인터셉터
   instance.interceptors.request.use(
     (config) => {
-      console.log('Request Config:', config); // 요청 로그
+      // console.log('Request Config:', config); // 요청 로그
       return config;
     },
     (error) => {
-      console.error('Request Error:', error); // 요청 오류 로그
+      // console.error('Request Error:', error); // 요청 오류 로그
       return Promise.reject(error);
     }
   );
