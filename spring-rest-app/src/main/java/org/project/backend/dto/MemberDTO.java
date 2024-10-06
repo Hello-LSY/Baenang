@@ -3,8 +3,6 @@ package org.project.backend.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import java.time.LocalDate;
-
 // import javax.validation.constraints.Email;
 // import javax.validation.constraints.NotBlank;
 // import javax.validation.constraints.Size;
@@ -50,7 +48,7 @@ public class MemberDTO {
     // 사용자 이름
     // @Size(max = 50, message = "Name must be at most 50 characters")
     @ApiModelProperty(value = "이름", example = "홍길동")
-    private String name;
+    private String fullName;
 
     // 닉네임
     // @Size(max = 30, message = "Nickname must be at most 30 characters")
@@ -74,12 +72,12 @@ public class MemberDTO {
 
     // MemberDTO 빌더 패턴을 사용하기 위한 생성자
     @Builder
-    public MemberDTO(Long id, String username, String password, String email, String name, String nickname, String gender, Long profileId) {
+    public MemberDTO(Long id, String username, String password, String email, String fullName, String nickname, String gender, Long profileId) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
-        this.name = name;
+        this.fullName = fullName;
         this.nickname = nickname;
         this.gender = gender;
         this.profileId = profileId;

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Modal,
   Button,
-  Image,
   FlatList,
 } from 'react-native';
 import { useSelector } from 'react-redux'; // Redux 훅 추가
@@ -28,7 +27,8 @@ import agoda from '../../assets/icons/아고다.png';
 import booking from '../../assets/icons/부킹닷컴.png';
 import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
-import ProfileButton from '../../components/ProfileButton';
+import ProfileButton from '../../components/ProfileButton'; // 유지할 프로필 버튼 컴포넌트
+
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const { auth, logout } = useAuth(); // useAuth 훅에서 auth 상태와 logout 함수 가져오기
@@ -46,6 +46,11 @@ const HomeScreen = ({ navigation }) => {
     logout(); // 로그아웃 함수 호출
     toggleModal(); // 모달 닫기
     navigation.navigate('Login'); // 로그인 화면으로 이동
+  };
+
+  const handleEditProfile = () => {
+    toggleModal();
+    navigation.navigate('UserProfile');
   };
 
   const backgroundColors = [
@@ -92,13 +97,11 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerGreeting}>즐거운 여행 되세요,</Text>
           <Text style={styles.headerName}>
-            {auth.nickname
-              ? `${auth.nickname} 님`
-              : '즐거운 여행 되세요'}
+            {auth.nickname ? `${auth.nickname} 님` : '즐거운 여행 되세요'}
           </Text>
         </View>
+        {/* 프로필 버튼 유지 */}
         <ProfileButton onPress={toggleModal} />
-        <ProfileButton onPress={() => navigation.navigate('UserProfile')} />
       </View>
 
       {/* 내 문서 섹션 */}
@@ -227,6 +230,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>프로필 설정</Text>
+            <Button title="개인정보 수정" onPress={handleEditProfile} />
             <Button title="로그아웃" onPress={handleLogout} />
             <Button title="닫기" onPress={toggleModal} />
           </View>
@@ -262,18 +266,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   profileButton: {
-    width: 40, // 프로필 이미지 크기
-    height: 40, // 프로필 이미지 크기
-    borderRadius: 20, // 원형 모양을 위해 width/height의 절반
-    overflow: 'hidden', // 이미지를 원 안에 맞추기 위해
+    padding: 10,
     backgroundColor: '#e3f2fd',
+    borderRadius: 20,
   },
-  profileIcon: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover', // 이미지가 버튼을 꽉 채우도록
-  },
-
   section: {
     marginTop: 16,
     padding: 8,
@@ -299,13 +295,6 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
   },
-  servicecontainer2: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    width: '100%',
-    justifyContent: 'space-between',
-  },
-
   exchangeList: {
     marginTop: 12,
   },

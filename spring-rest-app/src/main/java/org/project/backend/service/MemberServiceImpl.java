@@ -57,7 +57,7 @@ public class MemberServiceImpl implements MemberService {
         // Builder 패턴을 통해 엔티티의 상태를 변경
         member = member.toBuilder()
                 .username(memberDetails.getUsername())
-                .name(memberDetails.getName())
+                .fullName(memberDetails.getFullName())
                 .nickname(memberDetails.getNickname())
                 .gender(memberDetails.getGender())
                 .password(memberDetails.getPassword() != null && !memberDetails.getPassword().isEmpty() ?
@@ -88,7 +88,7 @@ public class MemberServiceImpl implements MemberService {
         return MemberDTO.builder()
                 .id(member.getId())
                 .username(member.getUsername())
-                .name(member.getName())
+                .fullName(member.getFullName())
                 .nickname(member.getNickname())
                 .gender(member.getGender())
                 .build();
@@ -98,7 +98,7 @@ public class MemberServiceImpl implements MemberService {
         return Member.builder()
                 .username(dto.getUsername())
                 .password(dto.getPassword()) // 암호화된 비밀번호를 그대로 사용
-                .name(dto.getName())
+                .fullName(dto.getFullName())
                 .nickname(dto.getNickname())
                 .gender(dto.getGender())
                 .birthdate(dto.getBirthdate())

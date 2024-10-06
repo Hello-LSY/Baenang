@@ -49,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
                     .nickname(member.getNickname())
                     .registrationNumber(member.getRegistrationNumber())  // 주민등록번호
                     .email(member.getEmail())
+                    .fullName(member.getFullName())
                     .build();
 
         } catch (AuthenticationException e) {

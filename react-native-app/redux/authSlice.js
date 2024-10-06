@@ -1,8 +1,8 @@
+// Redux authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authStorage from './authStorage';
 import { getApiClient } from './apiClient';
 
-// 비동기 작업 정의 (로그인)
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }, thunkAPI) => {
@@ -10,12 +10,11 @@ export const loginUser = createAsyncThunk(
       const apiClient = getApiClient();
       const response = await apiClient.post('/api/auth/login', { username, password });
 
-      const { token, memberId, email, registrationNumber, nickname } = response.data;
-
+      const { token, memberId, email, registrationNumber, nickname, fullName } = response.data; // fullName 사용
       // 로그인 정보 저장
-      await authStorage.storeCredentials(token, memberId, email, registrationNumber, nickname);
+      await authStorage.storeCredentials(token, memberId, email, registrationNumber, nickname, fullName);
 
-      return { token, memberId, email, registrationNumber, nickname };
+      return { token, memberId, email, registrationNumber, nickname, fullName }; // fullName 리턴
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response ? error.response.data : 'Network error');
     }
@@ -25,20 +24,20 @@ export const loginUser = createAsyncThunk(
 export const loadCredentials = createAsyncThunk(
   'auth/loadCredentials',
   async () => {
-    const { token, memberId, email, registrationNumber, nickname } = await authStorage.getCredentials();
-    return { token, memberId, email, registrationNumber, nickname };
+    const { token, memberId, email, registrationNumber, nickname, fullName } = await authStorage.getCredentials(); // fullName 추가
+    return { token, memberId, email, registrationNumber, nickname, fullName };
   }
 );
-
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
     token: null,
     memberId: null,
-    email: null, // 이메일 필드 추가
-    registrationNumber: null, // 주민등록번호 필드 추가
-    nickname: null, // 닉네임 필드 추가
+    email: null,
+    registrationNumber: null,
+    nickname: null,
+    fullName: null, // fullName 필드 추가
     loading: false,
     error: null,
   },
@@ -46,16 +45,18 @@ const authSlice = createSlice({
     setCredentials: (state, action) => {
       state.token = action.payload.token;
       state.memberId = action.payload.memberId;
-      state.email = action.payload.email; // 이메일 업데이트
-      state.registrationNumber = action.payload.registrationNumber; // 주민등록번호 업데이트
-      state.nickname = action.payload.nickname; // 닉네임 업데이트
+      state.email = action.payload.email;
+      state.registrationNumber = action.payload.registrationNumber;
+      state.nickname = action.payload.nickname;
+      state.fullName = action.payload.fullName; // fullName 설정
     },
     clearCredentials: (state) => {
       state.token = null;
       state.memberId = null;
-      state.email = null; // 이메일 필드 초기화
-      state.registrationNumber = null; // 주민등록번호 필드 초기화
-      state.nickname = null; // 닉네임 필드 초기화
+      state.email = null;
+      state.registrationNumber = null;
+      state.nickname = null;
+      state.fullName = null; // fullName 초기화
       authStorage.clearCredentials();
     },
   },
@@ -68,25 +69,23 @@ const authSlice = createSlice({
         state.loading = false;
         state.token = action.payload.token;
         state.memberId = action.payload.memberId;
-        state.email = action.payload.email; // 로그인 성공 시 이메일 저장
-        state.registrationNumber = action.payload.registrationNumber; // 주민등록번호 저장
-        state.nickname = action.payload.nickname; // 닉네임 저장
+        state.email = action.payload.email;
+        state.registrationNumber = action.payload.registrationNumber;
+        state.nickname = action.payload.nickname;
+        state.fullName = action.payload.fullName; // fullName 저장
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Login failed';
       })
-      .addCase(loadCredentials.pending, (state) => {
-        state.loading = true;
-      })
       .addCase(loadCredentials.fulfilled, (state, action) => {
-        state.loading = false;
         state.token = action.payload.token;
         state.memberId = action.payload.memberId;
-      })
-      .addCase(loadCredentials.rejected, (state) => {
-        state.loading = false;
+        state.email = action.payload.email;
+        state.registrationNumber = action.payload.registrationNumber;
+        state.nickname = action.payload.nickname;
+        state.fullName = action.payload.fullName; // fullName 저장
       });
   },
 });
