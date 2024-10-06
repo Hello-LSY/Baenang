@@ -35,7 +35,7 @@ public class MemberDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         // 로그에 사용자 이름을 기록
-        log.debug("Loaded user: {}", member.getUsername());
+//        log.debug("Loaded user: {}", member.getUsername());
 
         // Member 객체 자체를 반환 (UserDetails 인터페이스를 구현하므로 가능)
         return member;

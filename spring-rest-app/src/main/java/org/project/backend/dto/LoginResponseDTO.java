@@ -21,4 +21,5 @@ public class LoginResponseDTO {
     private String nickname;
     private String registrationNumber;
     private String email;
+    private String fullName;
 }

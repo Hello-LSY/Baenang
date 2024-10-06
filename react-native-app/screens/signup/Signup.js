@@ -16,7 +16,7 @@ import { BASE_URL } from '../../constants/config';
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState(''); // fullName으로 변경
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('남자');
   const [birthdate, setBirthdate] = useState('');
@@ -27,7 +27,7 @@ const Signup = ({ navigation }) => {
   const handleSignup = async () => {
     const cleanedRegistrationNumber = registrationNumberFirst + registrationNumberSecond;
 
-    if (!username || !password || !name || !email || !gender || !birthdate || !cleanedRegistrationNumber || !nickname) {
+    if (!username || !password || !fullName || !email || !gender || !birthdate || !cleanedRegistrationNumber || !nickname) {
       Alert.alert('Error', '모든 필드를 입력하세요.');
       return;
     }
@@ -36,7 +36,7 @@ const Signup = ({ navigation }) => {
       const response = await axios.post(`${BASE_URL}/api/members`, {
         username,
         password,
-        name,
+        fullName, // name 대신 fullName 사용
         email,
         gender,
         birthdate,
@@ -74,8 +74,8 @@ const Signup = ({ navigation }) => {
           />
           <CustomInput
             label="이름"
-            value={name}
-            onChangeText={setName}
+            value={fullName} // name 대신 fullName 사용
+            onChangeText={setFullName} // setName 대신 setFullName 사용
           />
           <CustomInput
             label="이메일"

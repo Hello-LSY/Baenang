@@ -46,6 +46,7 @@ public class DataInitializer {
                     .username("user")
                     .password(passwordEncoder.encode("1234")) // 비밀번호 암호화
                     .email("sample@naver.com")
+                    .fullName("Hong Gil Dong")
                     .nickname("Sample")
                     .birthdate("1998-02-05")
                     .gender("남자")
