@@ -6,17 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
-  Button,
   FlatList,
+  Image,
 } from 'react-native';
-import { useSelector } from 'react-redux'; // Redux 훅 추가
 import { useAuth } from '../../redux/authState'; // useAuth 훅 사용
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
 import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
 import TravelCertification from '../../assets/icons/MAP.png';
-import Community from '../../assets/icons/INFORM.png';
 import Exchange from '../../assets/icons/FINANCE.png';
 import TravelTest from '../../assets/icons/PACKAGE.png';
 import ExternalServiceButton from '../../components/ExternalServiceButton';
@@ -28,11 +26,34 @@ import booking from '../../assets/icons/부킹닷컴.png';
 import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
 import ProfileButton from '../../components/ProfileButton'; // 유지할 프로필 버튼 컴포넌트
+import { Feather } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const { auth, logout } = useAuth(); // useAuth 훅에서 auth 상태와 logout 함수 가져오기
   const { top5Rates, fetchTop5Rates, loading } = useExchangeRate(); // 환율 정보 가져오기
+
+  const documents = [
+    { title: '주민등록증', isNew: false },
+    { title: '운전면허증', isNew: true },
+    { title: '여권', isNew: true },
+    { title: '여행보험증명서', isNew: false },
+    { title: '예방접종증명서', isNew: false },
+    { title: '출입국사실증명서', isNew: true },
+    { title: '국제학생증', isNew: false },
+    { title: '여행보험증명서', isNew: false },
+  ];
+
+  const backgroundColors = [
+    '#EEEDDB',
+    '#93EDFF',
+    '#C2B4FD',
+    '#78E8E1',
+    '#BFEF82',
+    '#6DE7AC',
+    '#FFB268',
+    '#FFD974',
+  ];
 
   useEffect(() => {
     fetchTop5Rates(); // 컴포넌트가 마운트될 때 상위 5개 환율 정보 로드
@@ -52,43 +73,6 @@ const HomeScreen = ({ navigation }) => {
     toggleModal();
     navigation.navigate('UserProfile');
   };
-
-  const backgroundColors = [
-    '#EEEDDB',
-    '#93EDFF',
-    '#C2B4FD',
-    '#78E8E1',
-    '#BFEF82',
-    '#6DE7AC',
-    '#FFB268',
-    '#FFD974',
-  ];
-
-  const documents = [
-    { title: '주민등록증', isNew: false },
-    { title: '운전면허증', isNew: true },
-    { title: '여권', isNew: true },
-    { title: '여행보험증명서', isNew: false },
-    { title: '예방접종증명서', isNew: false },
-    { title: '출입국사실증명서', isNew: true },
-    { title: '국제학생증', isNew: false },
-    { title: '여행보험증명서', isNew: false },
-  ];
-
-  const renderExchangeRateItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.exchangeItem}
-      onPress={() =>
-        navigation.navigate('ExchangeRateDetail', {
-          currencyCode: item.currencyCode,
-        })
-      }
-    >
-      <Text style={styles.exchangeText}>{item.currencyCode}</Text>
-      <Text style={styles.exchangeRate}>{item.exchangeRateValue}</Text>
-      <Text style={styles.exchangeChange}>{item.exchangeChangePercentage}</Text>
-    </TouchableOpacity>
-  );
 
   return (
     <ScrollView style={styles.container}>
@@ -173,7 +157,20 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <FlatList
             data={top5Rates} // top5Rates 배열을 데이터로 설정
-            renderItem={renderExchangeRateItem}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.exchangeItem}
+                onPress={() =>
+                  navigation.navigate('ExchangeRateDetail', {
+                    currencyCode: item.currencyCode,
+                  })
+                }
+              >
+                <Text style={styles.exchangeText}>{item.currencyCode}</Text>
+                <Text style={styles.exchangeRate}>{item.exchangeRateValue}</Text>
+                <Text style={styles.exchangeChange}>{item.exchangeChangePercentage}</Text>
+              </TouchableOpacity>
+            )}
             keyExtractor={(item) => item.currencyCode}
             horizontal={true} // 가로 스크롤 가능하게 설정
             showsHorizontalScrollIndicator={false}
@@ -229,10 +226,23 @@ const HomeScreen = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>프로필 설정</Text>
-            <Button title="개인정보 수정" onPress={handleEditProfile} />
-            <Button title="로그아웃" onPress={handleLogout} />
-            <Button title="닫기" onPress={toggleModal} />
+            <Image
+              source={{ uri: 'https://via.placeholder.com/150' }} // 프로필 사진 (임시 이미지)
+              style={styles.profileImage}
+            />
+            <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
+
+            <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
+              <Feather name="edit" size={20} color="#333" style={styles.modalButtonIcon} />
+              <Text style={styles.editProfileButtonText}>개인정보 수정</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Feather name="log-out" size={20} color="#fff" style={styles.modalButtonIcon} />
+              <Text style={styles.logoutButtonText}>로그아웃</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
+              <Text style={styles.modalCloseButtonText}>닫기</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -265,10 +275,85 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
-  profileButton: {
-    padding: 10,
-    backgroundColor: '#e3f2fd',
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#fff',
+    padding: 30,
     borderRadius: 20,
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#777',
+    marginBottom: 20,
+  },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  editProfileButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ff6b6b',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalButtonIcon: {
+    marginRight: 10,
+  },
+  modalCloseButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#ddd',
+    alignItems: 'center',
+    width: '100%',
+  },
+  modalCloseButtonText: {
+    color: '#333',
+    fontSize: 16,
+  },
+  servicecontainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    width: '100%',
+    justifyContent: 'space-between',
+    marginTop: 16,
   },
   section: {
     marginTop: 16,
@@ -287,12 +372,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  servicecontainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    width: '100%',
     justifyContent: 'space-between',
   },
   exchangeList: {
@@ -338,28 +417,6 @@ const styles = StyleSheet.create({
   },
   cscenterText: {
     color: 'white',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
   },
 });
 
