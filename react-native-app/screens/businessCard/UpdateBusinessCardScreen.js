@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux'; // useDispatch와 useSelector 추가
-import * as ImagePicker from 'expo-image-picker'; // 이미지 선택 라이브러리
-import { updateBusinessCard, fetchBusinessCard } from '../../redux/businessCardSlice'; // 필요한 액션 임포트
-import { BASE_URL } from '../../constants/config';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useDispatch, useSelector } from 'react-redux';  
+import { fetchBusinessCard, updateBusinessCard } from '../../redux/businessCardSlice'; // update 액션 추가
+import { getApiClient } from '../../redux/apiClient';
+import { useAuth } from '../../redux/authState';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 
-// 이미지 업로드 함수 (로그 추가)
-const uploadImage = async (imageUri, memberId) => {
+// 이미지 업로드 함수
+const uploadImage = async (imageUri, memberId, token) => {
   try {
     const formData = new FormData();
     const fileName = `${memberId}_${Date.now()}.jpg`;
@@ -17,70 +20,63 @@ const uploadImage = async (imageUri, memberId) => {
       type: 'image/jpeg',
     });
 
-    console.log('이미지 업로드 시작:', fileName);
+    const apiClient = getApiClient(token);
 
-    const response = await fetch(`${BASE_URL}/api/upload`, {
-      method: 'POST',
-      body: formData,
+    const response = await apiClient.post('/api/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error('이미지 업로드 실패');
     }
 
-    const data = await response.json();
-    console.log('이미지 업로드 성공, 반환된 파일명:', data.fileName);
-
-    return data.fileName; // 파일 이름만 반환
+    return response.data.fileName;
   } catch (error) {
     console.error('이미지 업로드 중 오류 발생:', error);
     throw error;
   }
 };
 
-const UpdateBusinessCardScreen = ({ route, navigation }) => {
+const UpdateBusinessCardScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const { businessCard } = route.params;
-  const auth = useSelector((state) => state.auth);
+  const { memberId, token } = useAuth();
+  const { businessCardId } = route.params; // route에서 명함 ID를 받아옴
 
-  const [name, setName] = useState(businessCard.name || '');
-  const [country, setCountry] = useState(businessCard.country || '');
-  const [email, setEmail] = useState(businessCard.email || '');
-  const [sns, setSns] = useState(businessCard.sns || '');
-  const [introduction, setIntroduction] = useState(businessCard.introduction || '');
-  const [image, setImage] = useState(null); // 선택한 이미지 URI 상태
-  const [imageUrl, setImageUrl] = useState(businessCard.imageUrl || null); // 기존 이미지 파일명
+  const { businessCard } = useSelector((state) => state.businessCard);
 
-  const handleUpdateCard = async () => {
-    const updatedBusinessCardData = { name, country, email, sns, introduction };
-  
-    try {
-      console.log('명함 수정 시작');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [country, setCountry] = useState('');
+  const [snsPlatform, setSnsPlatform] = useState('');
+  const [snsId, setSnsId] = useState('');
+  const [introduction, setIntroduction] = useState('');
+  const [image, setImage] = useState(null);
+  const [imageFileName, setImageFileName] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-      // 이미지가 선택된 경우에만 파일명을 저장
-      if (image) {
-        console.log('새로운 이미지 선택됨:', image);
-        const uploadedFileName = await uploadImage(image, auth.memberId);
-        updatedBusinessCardData.imageUrl = uploadedFileName; // 업로드된 파일명 저장
-        console.log('업로드된 파일명:', uploadedFileName);
-      } else {
-        updatedBusinessCardData.imageUrl = imageUrl; // 기존 파일명 유지
-        console.log('기존 파일명 사용:', imageUrl);
+  useEffect(() => {
+    const fetchBusinessCardData = async () => {
+      try {
+        await dispatch(fetchBusinessCard(memberId));
+        if (businessCard) {
+          setName(businessCard.fullName); 
+          setEmail(businessCard.email); 
+          setCountry(businessCard.country);
+          setSnsPlatform(businessCard.sns.split('_')[0]);
+          setSnsId(businessCard.sns.split('_')[1]);
+          setIntroduction(businessCard.introduction);
+          setImageFileName(businessCard.imageUrl);
+        }
+      } catch (error) {
+        Alert.alert('오류', '명함 데이터를 불러오는 중 오류가 발생했습니다.');
       }
+    };
+    fetchBusinessCardData();
+  }, [businessCardId]);
 
-      console.log('수정할 명함 데이터:', updatedBusinessCardData);
-
-      // 명함 수정 API 호출
-      await dispatch(updateBusinessCard({ cardId: businessCard.cardId, businessCardData: updatedBusinessCardData }));
-      await dispatch(fetchBusinessCard(auth.memberId)); // 수정 후 명함 정보 다시 불러오기
-      Alert.alert('성공', '명함이 성공적으로 수정되었습니다.');
-      navigation.goBack();
-    } catch (error) {
-      console.error('명함 수정 중 오류:', error);
-      Alert.alert('오류', '명함 수정 중 오류가 발생했습니다.');
-    }
-  };
-  
+  // 이미지 선택 후 업로드 처리 함수
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -88,54 +84,121 @@ const UpdateBusinessCardScreen = ({ route, navigation }) => {
       aspect: [4, 3],
       quality: 1,
     });
-  
+
     if (!result.cancelled && result.assets && result.assets.length > 0) {
-      const selectedImage = result.assets[0]; // assets 배열에서 첫 번째 이미지 선택
-      setImage(selectedImage.uri); // 이미지 URI 설정
-      console.log('이미지 선택됨:', selectedImage.uri);
+      const selectedImage = result.assets[0];
+      setImage(selectedImage.uri);  // 이미지 미리보기 용으로 URI 저장
+
+      try {
+        const uploadedFileName = await uploadImage(selectedImage.uri, memberId, token);
+        setImageFileName(uploadedFileName);  // 업로드된 이미지 파일명 저장
+      } catch (error) {
+        Alert.alert('이미지 업로드 실패', '이미지 업로드 중 오류가 발생했습니다.');
+      }
     } else {
-      console.log('이미지 선택이 취소됨');
+      console.log('이미지 선택 취소');
     }
   };
-  
+
+  const handleUpdateCard = async () => {
+    const snsInfo = `${snsPlatform}_${snsId}`; 
+
+    const businessCardData = {
+      name: businessCard.name,  
+      email: businessCard.email,  
+      country,
+      sns: snsInfo,
+      introduction,
+      imageUrl: imageFileName || businessCard.imageUrl, // 이미지가 없으면 기존 이미지 사용
+    };
+    console.log(businessCardData)
+    try {
+      await dispatch(updateBusinessCard({ cardId: businessCardId, businessCardData }));
+      Alert.alert('성공', '명함이 성공적으로 업데이트되었습니다.');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('실패', '명함 업데이트 실패');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>명함 수정</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="이름"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="국가"
-        value={country}
-        onChangeText={setCountry}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="SNS"
-        value={sns}
-        onChangeText={setSns}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="소개"
-        value={introduction}
-        onChangeText={setIntroduction}
-      />
-      <Button title="이미지 선택" onPress={pickImage} />
-      {image && <Text>선택된 이미지: {String(image)}</Text>}
-      <Button title="명함 수정" onPress={handleUpdateCard} />
+
+      {/* 국가 선택 Picker */}
+      <View style={styles.inputContainer}>
+        <MaterialIcons name="public" size={20} color="#3498db" style={styles.icon} />
+        <Picker
+          selectedValue={country}
+          style={styles.input}
+          onValueChange={(itemValue) => setCountry(itemValue)}
+        >
+          <Picker.Item label="국가를 선택하세요" value="" />
+          <Picker.Item label="대한민국" value="대한민국" />
+          <Picker.Item label="미국" value="미국" />
+          <Picker.Item label="일본" value="일본" />
+          <Picker.Item label="중국" value="중국" />
+        </Picker>
+      </View>
+
+      {/* SNS 플랫폼 선택 */}
+      <View style={styles.snsContainer}>
+        <MaterialIcons name="person" size={20} color="#3498db" style={styles.icon} />
+        <TextInput
+          style={styles.textInput}
+          placeholder="SNS 아이디"
+          value={snsId}
+          onChangeText={setSnsId}
+        />
+        <TouchableOpacity style={styles.snsPickerButton} onPress={() => setModalVisible(true)}>
+          <Text>{snsPlatform || '플랫폼'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Modal for SNS platform selection */}
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => { setSnsPlatform('Instagram'); setModalVisible(false); }}>
+              <Text style={styles.modalItem}>Instagram</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setSnsPlatform('Facebook'); setModalVisible(false); }}>
+              <Text style={styles.modalItem}>Facebook</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setSnsPlatform('Twitter'); setModalVisible(false); }}>
+              <Text style={styles.modalItem}>Twitter</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 소개 입력 */}
+      <View style={styles.inputContainer}>
+        <MaterialIcons name="description" size={20} color="#3498db" style={styles.icon} />
+        <TextInput
+          style={styles.textInput}
+          placeholder="소개"
+          value={introduction}
+          onChangeText={setIntroduction}
+        />
+      </View>
+
+      {/* 이미지 선택 버튼 */}
+      <TouchableOpacity style={styles.button} onPress={pickImage}>
+        <Text style={styles.buttonText}>이미지 선택</Text>
+      </TouchableOpacity>
+      {image && <Text>이미지 선택됨: {image}</Text>}
+      {imageFileName && <Text>업로드된 이미지 파일명: {imageFileName}</Text>}
+
+      {/* 명함 수정 버튼 */}
+      <TouchableOpacity style={styles.button} onPress={handleUpdateCard}>
+        <Text style={styles.buttonText}>명함 수정</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -151,13 +214,65 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
     marginBottom: 15,
-    paddingHorizontal: 10,
+  },
+  snsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 15,
+  },
+  snsPickerButton: {
+    marginLeft: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
     borderRadius: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalItem: {
+    fontSize: 18,
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+  icon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+  },
+  textInput: {
+    flex: 1,
+    height: 40,
+  },
+  button: {
+    backgroundColor: '#3498db',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

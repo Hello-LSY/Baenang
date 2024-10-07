@@ -20,11 +20,11 @@ export const getApiClient = (token = '') => {
   // 요청 인터셉터
   instance.interceptors.request.use(
     (config) => {
-      console.log('Request Config:', config); // 요청 로그
+      // console.log('Request Config:', config); // 요청 로그
       return config;
     },
     (error) => {
-      console.error('Request Error:', error); // 요청 오류 로그
+      // console.error('Request Error:', error); // 요청 오류 로그
       return Promise.reject(error);
     }
   );
@@ -32,7 +32,7 @@ export const getApiClient = (token = '') => {
   // 응답 인터셉터
   instance.interceptors.response.use(
     (response) => {
-      console.log('Response Data:', response.data); // 응답 로그
+      // console.log('Response Data:', response.data); // 응답 로그
       return response;
     },
     (error) => {
@@ -48,7 +48,7 @@ export const getApiClient = (token = '') => {
         console.error('No Response from Server:', error.request);
       } else {
         // 요청 설정 중 발생한 오류
-        console.error('Request Setup Error:', error.message);
+        // console.error('Request Setup Error:', error.message);
       }
       return Promise.reject(error);
     }

@@ -32,8 +32,8 @@ public class Member implements UserDetails {
     @Column(name = "profile_id")
     private Long profileId;
 
-    @Column(name = "name", length = 50)
-    private String name;
+    @Column(name = "full_name", length = 50)
+    private String fullName;
 
     @Column(name = "nickname", length = 30)
     private String nickname;
