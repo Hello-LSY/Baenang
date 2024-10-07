@@ -8,6 +8,7 @@ import {
   Modal,
   FlatList,
   Image,
+  RefreshControl, 
 } from 'react-native';
 import { useAuth } from '../../redux/authState'; // useAuth 훅 사용
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
@@ -30,7 +31,8 @@ import { Feather } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const { auth, logout } = useAuth(); // useAuth 훅에서 auth 상태와 logout 함수 가져오기
+  const [refreshing, setRefreshing] = useState(false); 
+  const { auth, logout } = useAuth(); 
   const { top5Rates, fetchTop5Rates, loading } = useExchangeRate(); // 환율 정보 가져오기
 
   const documents = [
@@ -55,6 +57,15 @@ const HomeScreen = ({ navigation }) => {
     '#FFD974',
   ];
 
+  // 새로고침을 위한 함수
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchTop5Rates(); // 환율 정보 새로 가져오기
+    setTimeout(() => {
+      setRefreshing(false); // 2초 후 새로고침 상태 해제
+    }, 2000);
+  };
+
   useEffect(() => {
     fetchTop5Rates(); // 컴포넌트가 마운트될 때 상위 5개 환율 정보 로드
   }, []);
@@ -75,7 +86,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> // 새로고침 기능 추가
+      }
+    >
       {/* 상단 로고와 제목 */}
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>

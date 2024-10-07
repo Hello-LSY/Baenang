@@ -17,58 +17,44 @@ public class ResidentRegistrationServiceImpl implements ResidentRegistrationServ
     private final DocumentConverter documentConverter;
     private final ResidentRegistrationRepository residentRegistrationRepository;
 
-//    @Override
-//    public ResidentRegistrationDTO createOrUpdateResidentRegistration(Long documentId, ResidentRegistrationDTO residentRegistrationDTO) {
-//        Document document = findDocumentById(documentId);
-//
-//        // 기존에 연결된 주민등록증이 있는지 확인
-//        ResidentRegistration existingRR = document.getRRN();
-//        if (existingRR != null) {
-//            // 기존 주민등록증과의 관계를 끊고 삭제
-//            residentRegistrationRepository.delete(existingRR);
-//            document = document.toBuilder().DLN(null).build();
-//            documentRepository.save(document);
-//        }
-//
-//        // 새로운 주민등록증 생성 및 Document와 연결
-//        ResidentRegistration rr = documentConverter.convertToResidentRegistrationEntity(residentRegistrationDTO, document);
-//        ResidentRegistration savedrr = residentRegistrationRepository.save(rr);
-//
-//        // Document에 새로운 주민등록증 연결
-//        document = document.toBuilder().RRN(savedrr).build();
-//        Document updatedDocument = documentRepository.save(document);
-//
-//        return documentConverter.convertToResidentRegistrationDTO(updatedDocument.getRRN());
-//    }
-
     @Override
     public ResidentRegistrationDTO getResidentRegistration(Long documentId) {
-        ResidentRegistration residentRegistration = findDocumentById(documentId).getRRN();
+        // Document에서 ResidentRegistration ID를 가져오기
+        Long residentRegistrationId = findDocumentById(documentId).getRrnId();
 
-        if (residentRegistration == null) {
-            throw new DocumentNotFoundException("Resident Registration not found for Document ID: " + documentId);
-        }
+        // ResidentRegistration 엔티티 조회
+        ResidentRegistration residentRegistration = residentRegistrationRepository.findById(residentRegistrationId)
+                .orElseThrow(() -> new DocumentNotFoundException("Resident Registration not found for Document ID: " + documentId));
 
+        // ResidentRegistration 엔티티를 DTO로 변환
         return documentConverter.convertToResidentRegistrationDTO(residentRegistration);
 
     }
 
-//    @Override
-//    public void deleteResidentRegistrationById(Long documentId) {
-//        Document document = findDocumentById(documentId);
-//
-//        if(document.getRRN() != null) {
-//            Long rrId = document.getRRN().getId();
-//
-//            Document updatedDocument = document.toBuilder().RRN(null).build();
-//            documentRepository.save(updatedDocument);
-//
-//            residentRegistrationRepository.deleteById(rrId);
-//        }
-//    }
+    @Override
+    public ResidentRegistrationDTO getResidentRegistrationById(Long residentRegistrationId) {
+        // ID로 ResidentRegistration 조회
+        ResidentRegistration residentRegistration = residentRegistrationRepository.findById(residentRegistrationId)
+                .orElseThrow(() -> new DocumentNotFoundException("Resident Registration not found with ID: " + residentRegistrationId));
+
+        // ResidentRegistration 엔티티를 DTO로 변환
+        return convertToDTO(residentRegistration);
+    }
 
     private Document findDocumentById(Long documentId) {
         return documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + documentId));
+    }
+
+    private ResidentRegistrationDTO convertToDTO(ResidentRegistration residentRegistration) {
+        return ResidentRegistrationDTO.builder()
+                .id(residentRegistration.getId())
+                .rrn(residentRegistration.getRrn())
+                .name(residentRegistration.getName())
+                .imagePath(residentRegistration.getImagePath())
+                .address(residentRegistration.getAddress())
+                .issueDate(residentRegistration.getIssueDate())
+                .issuer(residentRegistration.getIssuer())
+                .build();
     }
 }

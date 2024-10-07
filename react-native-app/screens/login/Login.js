@@ -1,3 +1,5 @@
+// screens/login/Login.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -47,7 +49,7 @@ const Login = ({ navigation }) => {
   useEffect(() => {
     if (auth.token) {
       Alert.alert('Success', '로그인 성공');
-      navigation.navigate('Home');
+      navigation.navigate('HomeScreen');
     } else if (auth.error) {
       // auth.error가 객체일 경우 message 필드를 정확하게 가져옴
       let errorMessage = auth.error?.message;

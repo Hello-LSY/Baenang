@@ -5,6 +5,11 @@ const TravelCertificationDetail = ({ route, navigation }) => {
   // route.params로 전달된 item을 받아옴
   const { item } = route.params;
 
+  console.log('item : ', item)
+
+  // 이미지가 저장된 서버 URL과 결합하여 완전한 이미지 URL을 생성
+  const imageUrl = `http://10.0.2.2:8080/uploads/${item.imagepath}`;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>여행확인서</Text>
@@ -14,8 +19,9 @@ const TravelCertificationDetail = ({ route, navigation }) => {
         <Text style={styles.infoText}>일자: {item.traveldate}</Text>
       </View>
 
+      {/* 이미지가 완전한 URL로 변경됨 */}
       <Image
-        source={{ uri: item.imagepath }} // 이미지 경로를 URI로 사용
+        source={{ uri: imageUrl }} // 이미지 경로를 URI로 사용
         style={styles.image}
         resizeMode="cover"
       />

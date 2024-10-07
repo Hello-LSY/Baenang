@@ -18,7 +18,7 @@ public class DriverLicenseDTO {
 
     @ApiModelProperty(value = "운전면허증 번호", example = "DL123456789")
     @NotNull(message = "Driver License Number is required")
-    private String DLN; //운전면허증 번호
+    private String dln; //운전면허증 번호
 
     @ApiModelProperty(value = "관리 번호", example = "MGT-0012345")
     @NotNull(message = "Management Number is required")
@@ -27,7 +27,7 @@ public class DriverLicenseDTO {
     @ApiModelProperty(value = "주민등록번호", example = "900101-1234567")
     @NotNull(message = "Resident Registration Number is required")
     @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "Invalid Resident Registration Number format")
-    private String RRN;  //주민등록번호
+    private String rrn;  //주민등록번호
 
     @ApiModelProperty(value = "주소", example = "Seoul, South Korea")
     @NotNull(message = "Address is required")

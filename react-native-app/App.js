@@ -5,7 +5,6 @@ import { Provider } from 'react-redux';
 import storeConfig from './redux/storeConfig';
 import { useAuth } from './redux/authState';
 import AppNavigator from './navigation/AppNavigator';
-import AuthNavigator from './navigation/AuthNavigator';
 
 const MainApp = () => {
   const { auth, initializeAuth } = useAuth();
@@ -25,7 +24,8 @@ const MainApp = () => {
 
   return (
     <NavigationContainer>
-      {auth.token ? <AppNavigator /> : <AuthNavigator />}
+      {/* 로그인 여부에 따라 AppNavigator 내에서 처리 */}
+      <AppNavigator />
     </NavigationContainer>
   );
 };
