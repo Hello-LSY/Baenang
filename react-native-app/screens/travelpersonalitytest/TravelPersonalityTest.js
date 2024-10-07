@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  ProgressBarAndroid,
 } from 'react-native';
 
 const questions = [
@@ -97,7 +98,7 @@ const questions = [
   },
 ];
 
-const TravelerPersonalityTest = () => {
+const TravelerPersonalityTest = ({navigation}) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [multipleSelections, setMultipleSelections] = useState([]);
@@ -139,7 +140,7 @@ const TravelerPersonalityTest = () => {
     let result = {
       민감: 0,
       즉흥: 0,
-      미디어공유: 0,
+      미디어: 0,
       도전: 0,
       소비: 0,
       신속: 0,
@@ -182,7 +183,7 @@ const TravelerPersonalityTest = () => {
       answers[6].forEach((choice, index) => {
         if (choice === 0 || choice === 3) result.도전 += (3 - index) * 5;
         if (choice === 1 || choice === 2) result.민감 += (3 - index) * 5;
-        if (choice === 3) result.미디어공유 += (3 - index) * 5;
+        if (choice === 3) result.미디어 += (3 - index) * 5;
       });
     }
 
@@ -199,7 +200,7 @@ const TravelerPersonalityTest = () => {
       answers[8].forEach((choice, index) => {
         if (choice === 0 || choice === 1) result.도전 += (3 - index) * 5;
         if (choice === 2 || choice === 3) result.민감 += (3 - index) * 5;
-        if (choice === 0 || choice === 4) result.미디어공유 += (3 - index) * 5;
+        if (choice === 0 || choice === 4) result.미디어 += (3 - index) * 5;
       });
     }
 
@@ -209,11 +210,11 @@ const TravelerPersonalityTest = () => {
     });
 
     // 결과 출력
-    console.log(JSON.stringify(result, null, 2));
-    alert(JSON.stringify(result, null, 2));
+    // console.log(JSON.stringify(result, null, 2));
+    // alert(JSON.stringify(result, null, 2));
 
     // 여기에 결과를 표시하는 화면으로 네비게이션하는 코드를 추가할 수 있습니다.
-    // navigation.navigate('ResultScreen', { result });
+    navigation.replace('ResultScreen', { result });
   };
 
   if (currentQuestion >= questions.length) {
@@ -225,10 +226,27 @@ const TravelerPersonalityTest = () => {
   }
 
   const currentQuestionData = questions[currentQuestion];
+  const questionNumber = `Q${currentQuestion + 1}`;
+  const progress = (currentQuestion + 1) / questions.length;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* 진행률(프로그레스바) */}
+      <ProgressBarAndroid
+        styleAttr="Horizontal"
+        indeterminate={false}
+        progress={progress}
+        color="#2196F3"
+        style={styles.progressBar}
+      />
+
+      {/* 질문 번호 */}
+      <Text style={styles.questionNumber}>{questionNumber}</Text>
+
+      {/* 질문 텍스트 */}
       <Text style={styles.question}>{currentQuestionData.question}</Text>
+      
+      {/* 선택옵션 */}
       {currentQuestionData.options.map((option, index) => (
         <TouchableOpacity
           key={index}
@@ -259,7 +277,7 @@ const TravelerPersonalityTest = () => {
             multipleSelections.length !== currentQuestionData.selectCount
           }
         >
-          <Text>다음</Text>
+          <Text style={styles.submitButtonText}>선택 완료</Text>
         </TouchableOpacity>
       )}
     </ScrollView>
@@ -273,32 +291,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  questionNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 30,
+  },
   question: {
     fontSize: 18,
-    marginBottom: 20,
+    marginBottom: 50,
     textAlign: 'center',
   },
   option: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
     padding: 10,
     marginVertical: 5,
-    borderRadius: 5,
-    width: '100%',
+    borderRadius: 100,
+    width: '80%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedOption: {
-    backgroundColor: '#a0a0a0',
+    backgroundColor: '#BBDEFB',
   },
   submitButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    marginTop: 20,
-    borderRadius: 5,
-    width: '100%',
+    backgroundColor: '#2196F3',
+    // padding: 10,
+    marginTop: 30,
+    borderRadius: 100,
+    width: '50%',
+    height: '7%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   disabledButton: {
     backgroundColor: '#a0a0a0',
+  },
+  progressBar: {
+    width: '100%',
+    marginBottom: 40,
+  },
+  submitButtonText:{
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 15,
   },
 });
 
