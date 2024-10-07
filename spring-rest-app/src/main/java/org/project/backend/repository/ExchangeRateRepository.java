@@ -13,5 +13,7 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
     List<ExchangeRate> findByCurrencyCode(String currencyCode);
 
     List<ExchangeRate> findByRecordedAtBetween(LocalDateTime start, LocalDateTime end);
+    Optional<ExchangeRate> findByCurrencyCodeAndRecordedAt(String currencyCode, LocalDateTime recordedAt);
+
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -74,18 +75,29 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                             return null;
                         }
 
-                        // 새로 데이터를 기록
-                        return ExchangeRate.builder()
-                                .currencyCode(currencyCode)
-                                .currencyName(currencyName)
-                                .exchangeRateValue(dealBasR)
-                                .recordedAt(LocalDate.parse(searchDate, DATE_FORMAT).atStartOfDay()) // searchDate를 기준으로 설정
-                                .build();
+                        // 중복 저장 방지 로직: 동일한 날짜와 통화 코드에 대한 데이터가 이미 존재하는지 확인
+                        LocalDateTime recordedAt = LocalDate.parse(searchDate, DATE_FORMAT).atStartOfDay();
+                        Optional<ExchangeRate> existingRate = exchangeRateRepository
+                                .findByCurrencyCodeAndRecordedAt(currencyCode, recordedAt);
+
+                        // 중복 데이터가 없을 경우에만 새 데이터를 저장
+                        if (!existingRate.isPresent()) {
+                            return ExchangeRate.builder()
+                                    .currencyCode(currencyCode)
+                                    .currencyName(currencyName)
+                                    .exchangeRateValue(dealBasR)
+                                    .recordedAt(recordedAt)
+                                    .build();
+                        } else {
+                            // 중복 데이터가 있을 경우 저장하지 않음
+                            logger.info("Exchange rate for {} on {} already exists. Skipping.", currencyCode, searchDate);
+                            return null;
+                        }
                     })
-                    .filter(Objects::nonNull)
+                    .filter(Objects::nonNull) // null 데이터는 제외
                     .collect(Collectors.toList());
 
-            // 데이터 저장
+            // 중복되지 않은 데이터만 저장
             exchangeRateRepository.saveAll(newRates);
 
             // 저장된 데이터를 DTO로 변환하여 반환
@@ -96,6 +108,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             throw new ExchangeRateNotFoundException("No exchange rate data found for the given date and type.");
         }
     }
+
 
     @Override
     public List<ExchangeRateDTO> getAllExchangeRates() {
