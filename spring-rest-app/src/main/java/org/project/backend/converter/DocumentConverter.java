@@ -7,102 +7,53 @@ import org.springframework.stereotype.Component;
 @Component
 public class DocumentConverter {
 
+    // DTO를 엔티티로 변환하는 메서드
     public Document convertToEntity(DocumentDTO documentDTO, Document document) {
         return Document.builder()
                 .documentId(documentDTO.getDocumentId())
 
-                // 각 DTO를 엔티티로 변환하여 Document에 설정
-                .RRN(documentDTO.getRRN() != null ? convertToResidentRegistrationEntity(documentDTO.getRRN(), document) : null)
-                .DLN(documentDTO.getDLN() != null ? convertToDriverLicenseEntity(documentDTO.getDLN(), document) : null)
-                .PN(documentDTO.getPN() != null ? convertToPassportEntity(documentDTO.getPN(), document) : null)
-                .ISIC(documentDTO.getISIC() != null ? convertToISICEntity(documentDTO.getISIC(), document) : null)
+                // 각 ID를 Document에 설정
+                .rrnId(documentDTO.getRrnId())
+                .dlnId(documentDTO.getDlnId())
+                .pnId(documentDTO.getPnId())
+                .isicId(documentDTO.getIsicId())
 
                 // 이미지 파일 경로 설정
                 .ticPath(documentDTO.getTIC())
                 .vcPath(documentDTO.getVC())
                 .icPath(documentDTO.getIC())
+
+                .token(document.getToken()) // 토큰 추가
+                .tokenExpiry(document.getTokenExpiry()) // 토큰 만료 시간 추가
                 .build();
     }
 
-    public DriverLicense convertToDriverLicenseEntity(DriverLicenseDTO driverLicenseDTO, Document document) {
-        return DriverLicense.builder()
-                .document(document)
-                .DLN(driverLicenseDTO.getDLN())
-                .managementNumber(driverLicenseDTO.getManagementNumber())
-                .RRN(driverLicenseDTO.getRRN())
-                .address(driverLicenseDTO.getAddress())
-                .issueDate(driverLicenseDTO.getIssueDate())
-                .expiryDate(driverLicenseDTO.getExpiryDate())
-                .imagePath(driverLicenseDTO.getImagePath())
-                .issuer(driverLicenseDTO.getIssuer())
-                .build();
-    }
-
-    public InternationalStudentIdentityCard convertToISICEntity(InternationalStudentIdentityCardDTO isicDTO, Document document) {
-        return InternationalStudentIdentityCard.builder()
-                .document(document)
-                .isic(isicDTO.getISIC())
-                .schoolName(isicDTO.getSchoolName())
-                .name(isicDTO.getName())
-                .birth(isicDTO.getBirth())
-                .issueDate(isicDTO.getIssueDate())
-                .expiryDate(isicDTO.getExpiryDate())
-                .imagePath(isicDTO.getImagePath())
-                .build();
-    }
-
-    public Passport convertToPassportEntity(PassportDTO passportDTO, Document document) {
-        return Passport.builder()
-                .document(document)
-                .PN(passportDTO.getPN())
-                .imagePath(passportDTO.getImagePath())
-                .countryCode(passportDTO.getCountryCode())
-                .type(passportDTO.getType())
-                .surName(passportDTO.getSurName())
-                .givenName(passportDTO.getGivenName())
-                .koreanName(passportDTO.getKoreanName())
-                .birth(passportDTO.getBirth())
-                .gender(passportDTO.getGender())
-                .nationality(passportDTO.getNationality())
-                .authority(passportDTO.getAuthority())
-                .issueDate(passportDTO.getIssueDate())
-                .expiryDate(passportDTO.getExpiryDate())
-                .build();
-    }
-
-    public ResidentRegistration convertToResidentRegistrationEntity(ResidentRegistrationDTO rrnDTO, Document document) {
-        return ResidentRegistration.builder()
-                .document(document)
-                .RRN(rrnDTO.getRRN())
-                .name(rrnDTO.getName())
-                .imagePath(rrnDTO.getImagePath())
-                .address(rrnDTO.getAddress())
-                .issueDate(rrnDTO.getIssueDate())
-                .issuer(rrnDTO.getIssuer())
-                .build();
-    }
-
-    //Entity -> DTO
-    public DocumentDTO convertToDTO(Document document){
+    // 엔티티 -> DTO 변환 메서드
+    public DocumentDTO convertToDTO(Document document) {
         return DocumentDTO.builder()
                 .memberId(document.getMember().getId())
                 .documentId(document.getDocumentId())
-                .RRN(document.getRRN() != null ? convertToResidentRegistrationDTO(document.getRRN()) : null)
-                .DLN(document.getDLN() != null ? convertToDriverLicenseDTO(document.getDLN()) : null)
-                .PN(document.getPN() != null ? convertToPassportDTO(document.getPN()) : null)
-                .ISIC(document.getISIC() != null ? convertToISICDTO(document.getISIC()) : null)
+
+                // 각 ID를 DTO로 변환
+                .rrnId(document.getRrnId())
+                .dlnId(document.getDlnId())
+                .pnId(document.getPnId())
+                .isicId(document.getIsicId())
+
+                // 이미지 파일 경로
                 .TIC(document.getTicPath())
                 .VC(document.getVcPath())
                 .IC(document.getIcPath())
                 .build();
     }
 
+    // DriverLicense 엔티티 -> DriverLicenseDTO 변환
     public DriverLicenseDTO convertToDriverLicenseDTO(DriverLicense driverLicense) {
         return DriverLicenseDTO.builder()
-                .id(driverLicense.getDocument().getDocumentId())
-                .DLN(driverLicense.getDLN())
+                .id(driverLicense.getId()) // DriverLicense의 고유 ID
+                .dln(driverLicense.getDln())
                 .managementNumber(driverLicense.getManagementNumber())
-                .RRN(driverLicense.getRRN())
+                .rrn(driverLicense.getRrn())
                 .address(driverLicense.getAddress())
                 .issueDate(driverLicense.getIssueDate())
                 .expiryDate(driverLicense.getExpiryDate())
@@ -111,23 +62,26 @@ public class DocumentConverter {
                 .build();
     }
 
+    // InternationalStudentIdentityCard 엔티티 -> InternationalStudentIdentityCardDTO 변환
     public InternationalStudentIdentityCardDTO convertToISICDTO(InternationalStudentIdentityCard isic) {
         return InternationalStudentIdentityCardDTO.builder()
-                .id(isic.getDocument().getDocumentId())
-                .ISIC(isic.getIsic())
+                .id(isic.getId()) // InternationalStudentIdentityCard의 고유 ID
+                .isic(isic.getIsic())
                 .schoolName(isic.getSchoolName())
                 .name(isic.getName())
                 .birth(isic.getBirth())
                 .issueDate(isic.getIssueDate())
                 .expiryDate(isic.getExpiryDate())
                 .imagePath(isic.getImagePath())
+                .rrn(isic.getRrn())
                 .build();
     }
 
+    // Passport 엔티티 -> PassportDTO 변환
     public PassportDTO convertToPassportDTO(Passport passport) {
         return PassportDTO.builder()
-                .id(passport.getDocument().getDocumentId())
-                .PN(passport.getPN())
+                .id(passport.getId()) // Passport의 고유 ID
+                .pn(passport.getPn())
                 .imagePath(passport.getImagePath())
                 .countryCode(passport.getCountryCode())
                 .type(passport.getType())
@@ -140,13 +94,15 @@ public class DocumentConverter {
                 .authority(passport.getAuthority())
                 .issueDate(passport.getIssueDate())
                 .expiryDate(passport.getExpiryDate())
+                .rrn(passport.getRrn())
                 .build();
     }
 
+    // ResidentRegistration 엔티티 -> ResidentRegistrationDTO 변환
     public ResidentRegistrationDTO convertToResidentRegistrationDTO(ResidentRegistration rrn) {
         return ResidentRegistrationDTO.builder()
-                .id(rrn.getDocument().getDocumentId())
-                .RRN(rrn.getRRN())
+                .id(rrn.getId()) // ResidentRegistration의 고유 ID
+                .rrn(rrn.getRrn())
                 .name(rrn.getName())
                 .imagePath(rrn.getImagePath())
                 .address(rrn.getAddress())

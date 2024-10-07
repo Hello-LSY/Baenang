@@ -38,30 +38,32 @@ public class InternationalStudentIdentityCardServiceImpl implements Internationa
 //        return documentConverter.convertToISICDTO(updatedDocument.getISIC());
 //    }
 
+//    @Override
+//    public InternationalStudentIdentityCardDTO getISICById(Long documentId) {
+//        // Document에서 ISIC ID 가져오기
+//        Long isicId = findDocumentById(documentId).getIsicId();
+//
+//        if (isicId == null) {
+//            throw new DocumentNotFoundException("ISIC not found for Document ID: " + documentId);
+//        }
+//
+//        // ISIC 엔티티 조회
+//        InternationalStudentIdentityCard isic = isicRepository.findById(isicId)
+//                .orElseThrow(() -> new DocumentNotFoundException("ISIC not found with ID: " + isicId));
+//
+//        // ISIC 엔티티를 DTO로 변환하여 반환
+//        return documentConverter.convertToISICDTO(isic);
+//    }
+
     @Override
-    public InternationalStudentIdentityCardDTO getISICById(Long documentId) {
-        InternationalStudentIdentityCard isic = findDocumentById(documentId).getISIC();
+    public InternationalStudentIdentityCardDTO getISICById(Long isicId) {
+        // ISIC 엔티티 조회
+        InternationalStudentIdentityCard isic = isicRepository.findById(isicId)
+                .orElseThrow(() -> new DocumentNotFoundException("ISIC not found with ID: " + isicId));
 
-        if(isic==null){
-            throw new DocumentNotFoundException("ISIC not found for Document ID: "+documentId);
-        }
-
+        // ISIC 엔티티를 DTO로 변환하여 반환
         return documentConverter.convertToISICDTO(isic);
     }
-
-//    @Override
-//    public void deleteISICById(Long documentId) {
-//        Document document = findDocumentById(documentId);
-//
-//        if(document.getISIC() != null){
-//            Long isicId = document.getISIC().getId();
-//
-//            Document updatedDocument = document.toBuilder().ISIC(null).build();
-//            documentRepository.save(updatedDocument);
-//
-//            isicRepository.deleteById(isicId);
-//        }
-//    }
 
     private Document findDocumentById(Long documentId) {
         return documentRepository.findById(documentId)
