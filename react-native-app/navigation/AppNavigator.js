@@ -14,6 +14,7 @@ import TravelCertificationDetail from '../components/travelCertification/TravelC
 import TravelCertificationEdit from '../components/travelCertification/TravelCertificationEdit';
 import TravelCertificationProcess from '../components/travelCertification/TravelCertificationProcess';
 import TravelerPersonalityTest from '../screens/travelpersonalitytest/TravelPersonalityTest.js';
+import ResultScreen from '../screens/travelpersonalitytest/ResultScreen.js';
 import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScreen';
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
 import CommunityHome from '../screens/community/CommunityHome.js';
@@ -90,7 +91,12 @@ const AppNavigator = () => {
       <Stack.Screen
         name="TravelerPersonalityTest"
         component={TravelerPersonalityTest}
-        options={{ title: '여행 인증서 등록 과정' }}
+        options={{ title: '여행 유형 테스트' }}
+      />
+      <Stack.Screen
+        name="ResultScreen"
+        component={ResultScreen}
+        options={{ title: '여행 유형 테스트 결과' }}
       />
       <Stack.Screen
         name="Community"
