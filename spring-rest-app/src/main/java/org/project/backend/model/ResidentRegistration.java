@@ -24,11 +24,11 @@ public class ResidentRegistration implements Serializable{
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)  // 문서 고유번호와 연결
+    @JoinColumn(name = "document_id", nullable = true)  // 문서 고유번호와 연결
     private Document document;
 
     @Column(name = "rrn", nullable = false, length = 14)
-    private String RRN;   // 주민등록증 번호
+    private String rrn;   // 주민등록증 번호
 
     @Column(name="name", nullable = false, length = 50)
     private String name; // 사용자 이름

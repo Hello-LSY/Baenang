@@ -8,4 +8,8 @@ import java.util.Optional;
 
 public interface InternationalStudentIdentityCardRepository extends JpaRepository<InternationalStudentIdentityCard, Long > {
     Optional<InternationalStudentIdentityCard> findByDocument(Document document);
+
+    // 새로운 RRN(주민등록번호)로 검색하는 메서드 추가
+    Optional<InternationalStudentIdentityCard> findByRrn(String rrn);
+
 }

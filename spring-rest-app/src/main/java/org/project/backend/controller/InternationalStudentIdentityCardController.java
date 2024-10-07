@@ -22,63 +22,76 @@ public class InternationalStudentIdentityCardController {
     private final DocumentService documentService;
     private final InternationalStudentIdentityCardService isicService;
 
-//    @ApiOperation(value = "회원 ID로 국제학생증 생성 또는 재등록", notes = "회원 ID를 사용하여 국제학생증을 생성 또는 재등록합니다.")
-//    @PostMapping("/create-or-update/{memberId}")
-//    public ResponseEntity<InternationalStudentIdentityCardDTO> createOrUpdateISIC(
-//          @ApiParam(value = "회원 ID", required = true, example = "123") @PathVariable Long memberId,
-//          @ApiParam(value = "국제학생증 정보", required = true) @RequestBody InternationalStudentIdentityCardDTO isicDto){
-//        try{
-//           InternationalStudentIdentityCardDTO createdISIC = isicService.createOrUpdateISIC(memberId, isicDto);
-//            return ResponseEntity.status(HttpStatus.CREATED).body(createdISIC);
-//        } catch (DocumentNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Document를 찾지 못한 경우
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
-
     @ApiOperation(value = "회원 ID로 국제학생증 조회", notes = "회원 ID를 사용하여 국제학생증 정보를 조회합니다.")
     @GetMapping("/my-license/{memberId}")
-    public ResponseEntity<Object> getISIC(
-            @ApiParam(value = "회원 ID", required = true, example = "123") @PathVariable Long memberId) {
+    public ResponseEntity<Object> getISIC(@PathVariable Long memberId){
         try{
-            DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
+
+            // Document 정보 조회
+            DocumentDTO documentDTO = documentService.getDocumentByLoggedInUser();
             if (documentDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Document not found for the given member ID: " + memberId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found for the given member.");
             }
 
-            InternationalStudentIdentityCardDTO isicDTO = documentDTO.getISIC();
-            if(isicDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("ISIC not found  for member ID: " + memberId);
+            // ISIC 조회
+            Long isicId = documentDTO.getIsicId();
+            if (isicId == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ISIC not found.");
             }
 
+            // ISIC DTO로 반환
+            InternationalStudentIdentityCardDTO isicDTO = isicService.getISICById(isicId);
             return ResponseEntity.ok(isicDTO);
         } catch (DocumentNotFoundException e) {
             // Document 조회 실패 시 예외 처리
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Document not found  for member ID: " + memberId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found.");
         } catch (Exception e) {
             // 기타 예외 처리
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An unexpected error occurred while retrieving ISIC.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
         }
     }
 
+//    @ApiOperation(value = "국제학생증 ID로 조회", notes = "Document 테이블에서 isicId로 국제학생증을 조회합니다.")
+//    @GetMapping("/get/{isicId}")
+//    public ResponseEntity<InternationalStudentIdentityCardDTO> getIsicById(@PathVariable Long isicId) {
+//        try {
+//            InternationalStudentIdentityCardDTO isic = isicService.getISICById(isicId);
+//            return ResponseEntity.ok(isic);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//    }
+@ApiOperation(value = "현재 로그인한 사용자의 국제학생증 정보 조회", notes = "현재 로그인한 사용자의 국제학생증 정보를 조회합니다.")
+@GetMapping("/get")
+public ResponseEntity<?> getISICForLoggedInUser() {
+    try {
+        // 현재 로그인한 사용자의 Document 정보 조회
+        DocumentDTO documentDTO = documentService.getDocumentByLoggedInUser();
+        Long isicId = documentDTO.getIsicId();
+
+        if (isicId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("국제학생증 정보가 없습니다.");
+        }
+
+        // 국제학생증 정보 조회
+        InternationalStudentIdentityCardDTO isic = isicService.getISICById(isicId);
+        return ResponseEntity.ok(isic);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+    }
+}
+
+
 //    @ApiOperation(value = "국제학생증 삭제", notes = "회원 ID를 사용하여 국제학생증을 삭제합니다.")
 //    @DeleteMapping("/delete/{memberId}")
-//    public ResponseEntity<Void> deleteISIC(
-//            @ApiParam(value = "회원 ID", required = true, example = "123") @PathVariable Long memberId) {
+//    public ResponseEntity<Void> deleteISIC(@PathVariable Long memberId){
 //        try{
 //            DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
-//            if (documentDTO == null) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(null);  // Document를 찾지 못한 경우
-//            }
-//
 //            Long documentId = documentDTO.getDocumentId();
+//
 //            isicService.deleteISICById(documentId);
 //            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 //        } catch (Exception e) {
