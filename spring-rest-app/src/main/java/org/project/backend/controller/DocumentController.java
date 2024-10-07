@@ -78,12 +78,12 @@ public class DocumentController {
     @ApiOperation(value = "이메일 인증 요청", notes = "이름, 주민등록번호, 이메일을 기반으로 인증 요청을 보냅니다.")
     @PostMapping("/request-verification")
     public ResponseEntity<Void> requestVerification(
-            @ApiParam(value = "이름", required = true) @RequestParam String name,
+            @ApiParam(value = "이름", required = true) @RequestParam String fullName,
             @ApiParam(value = "주민등록번호", required = true) @RequestParam String rrn,
             @ApiParam(value = "이메일", required = true) @RequestParam String email) {
         try {
             // 이메일 인증 요청
-            documentService.requestVerification(name, rrn, email);
+            documentService.requestVerification(fullName, rrn, email);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IllegalArgumentException e) {
             // 잘못된 입력값 또는 회원을 찾을 수 없는 경우
@@ -99,13 +99,13 @@ public class DocumentController {
     @ApiOperation(value = "이메일 인증 코드 확인 및 문서 ID 업데이트", notes = "이메일 인증 코드 확인 후 문서 ID를 업데이트합니다.")
     @PostMapping("/verify")
     public ResponseEntity<String> verifyAndUpdateDocuments(
-            @ApiParam(value = "이름", required = true) @RequestParam String name,
+            @ApiParam(value = "이름", required = true) @RequestParam String fullName,
             @ApiParam(value = "주민등록번호", required = true) @RequestParam String rrn,
             @ApiParam(value = "이메일", required = true) @RequestParam String email,
             @ApiParam(value = "인증 코드", required = true) @RequestParam String code) {
         try {
             // 인증 코드 확인 및 문서 ID 업데이트
-            String token = documentService.verifyAndUpdateDocuments(name, rrn, email, code);
+            String token = documentService.verifyAndUpdateDocuments(fullName, rrn, email, code);
             return ResponseEntity.ok(token); // 인증 토큰 반환
         } catch (IllegalArgumentException e) {
             // 잘못된 인증 코드 또는 만료된 경우

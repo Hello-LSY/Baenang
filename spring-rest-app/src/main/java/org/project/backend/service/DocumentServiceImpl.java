@@ -214,8 +214,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     // 이메일 인증 요청 메서드
     @Override
-    public void requestVerification(String name, String rrn, String email) {
-        Member member = memberRepository.findByNameAndRegistrationNumber(name, rrn)
+    public void requestVerification(String fullName, String rrn, String email) {
+        Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, rrn)
                 .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
 
         String verificationCode = UUID.randomUUID().toString();
@@ -229,7 +229,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     // 이메일 인증 코드 확인 및 문서 ID 업데이트
     @Override
-    public String verifyAndUpdateDocuments(String name, String rrn, String email, String code) {
+    public String verifyAndUpdateDocuments(String fullName, String rrn, String email, String code) {
         // 인증 코드가 유효한지 확인
         if (!verificationCodes.containsKey(email) || !verificationCodes.get(email).equals(code)) {
             throw new IllegalArgumentException("Invalid or expired verification code");
@@ -242,7 +242,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // 인증 성공 시 토큰 생성
         String token = UUID.randomUUID().toString();
-        Member member = memberRepository.findByNameAndRegistrationNumber(name, rrn)
+        Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, rrn)
                 .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
 
         // 사용자와 연결된 문서 조회
