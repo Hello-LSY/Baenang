@@ -12,6 +12,7 @@ import TravelCertificationDetail from '../components/travelCertification/TravelC
 import TravelCertificationEdit from '../components/travelCertification/TravelCertificationEdit';
 import TravelCertificationProcess from '../components/travelCertification/TravelCertificationProcess';
 import TravelerPersonalityTest from '../screens/travelpersonalitytest/TravelPersonalityTest.js';
+import ResultScreen from '../screens/travelpersonalitytest/ResultScreen.js';
 import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScreen';
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
 import CommunityHome from '../screens/community/CommunityHome.js';
@@ -19,8 +20,8 @@ import CreatePost from '../screens/community/CreatePost';
 import EditPost from '../screens/community/EditPost';
 import UserProfile from '../screens/UserProfile.js';
 import CustomerService from '../screens/customerService/CustomerService.js';
-import Login from '../screens/login/Login';  
-import Signup from '../screens/signup/Signup';  
+import Login from '../screens/login/Login';
+import Signup from '../screens/signup/Signup';
 
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -45,7 +46,7 @@ const AppNavigator = () => {
     <Stack.Navigator initialRouteName="MainTabs">
       <Stack.Screen
         name="Login"
-        component={Login}  
+        component={Login}
         options={{ title: '로그인', headerShown: false }}
       />
       <Stack.Screen
@@ -64,7 +65,7 @@ const AppNavigator = () => {
         options={{ title: '명함 관리' }}
       />
       <Stack.Screen
-        name="CreateBusinessCard"
+        name="CreateBusinessCard" // CreateBusinessCardScreen 추가
         component={CreateBusinessCardScreen}
         options={{ title: '명함 등록' }}
       />
@@ -101,7 +102,12 @@ const AppNavigator = () => {
       <Stack.Screen
         name="TravelerPersonalityTest"
         component={TravelerPersonalityTest}
-        options={{ title: '여행 성향 테스트' }}
+        options={{ title: '여행 유형 테스트' }}
+      />
+      <Stack.Screen
+        name="ResultScreen"
+        component={ResultScreen}
+        options={{ title: '여행 유형 테스트 결과' }}
       />
       <Stack.Screen
         name="Community"
