@@ -1,3 +1,4 @@
+// components/FlagIcon.js
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
@@ -30,6 +31,7 @@ const flagComponents = {
   bnd: BnFlag,
   bhd: BhFlag,
   cad: CaFlag,
+  cny: CnFlag, 
   cnh: CnFlag,
   chf: ChFlag,
   dkk: DkFlag,

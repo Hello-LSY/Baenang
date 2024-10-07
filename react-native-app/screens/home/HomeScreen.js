@@ -8,7 +8,7 @@ import {
   Modal,
   FlatList,
   Image,
-  RefreshControl, 
+  RefreshControl,
 } from 'react-native';
 import { useAuth } from '../../redux/authState'; // useAuth 훅 사용
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
@@ -28,6 +28,7 @@ import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
 import ProfileButton from '../../components/ProfileButton'; // 유지할 프로필 버튼 컴포넌트
 import { Feather } from '@expo/vector-icons';
+import FlagIcon from '../../components/FlagIcon'; // 플래그 아이콘 컴포넌트 추가
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -85,6 +86,11 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('UserProfile');
   };
 
+  // 등락에 따른 색상 설정
+  const getTextColor = (isDecreasing) => {
+    return isDecreasing ? 'red' : 'blue'; // 하락하면 빨간색, 상승하면 파란색
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -135,14 +141,14 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.servicecontainer}>
         <ServiceButton
           title="실시간 환율"
-          subtitle="내가 여행한 곳을 한 눈에 확인해요"
+          subtitle="실시간으로 확인해요"
           imgSrc={Exchange}
           imgSize={75}
           onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
-          subtitle="내가 여행한 곳을 한 눈에 확인해요"
+          subtitle="내 여행 스타일을 알아봐요"
           imgSrc={TravelTest}
           imgSize={75}
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
@@ -167,7 +173,7 @@ const HomeScreen = ({ navigation }) => {
 
       {/* 환율 정보 섹션 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>어제보다 더 싸요!</Text>
+        <Text style={styles.sectionTitle}>실시간 환율 정보</Text>
         {loading ? (
           <Text>Loading...</Text>
         ) : (
@@ -182,9 +188,33 @@ const HomeScreen = ({ navigation }) => {
                   })
                 }
               >
-                <Text style={styles.exchangeText}>{item.currencyCode}</Text>
-                <Text style={styles.exchangeRate}>{item.exchangeRateValue}</Text>
-                <Text style={styles.exchangeChange}>{item.exchangeChangePercentage}</Text>
+                {/* 플래그 아이콘 추가 */}
+                <View style={styles.flagContainer}>
+                  <FlagIcon currencyCode={item.currencyCode.replace("(100)", "").trim()} size={40} />
+                </View>
+
+                {/* 통화 코드 및 환율 정보 */}
+                <View style={styles.exchangeInfo}>
+                  <Text style={styles.currencyCode}>{item.currencyCode}</Text>
+                  <Text style={styles.currencyName}>{item.currencyName}</Text>
+                </View>
+
+                {/* 환율 및 변동률 */}
+                <View style={styles.exchangeRateContainer}>
+                  <Text
+                    style={[
+                      styles.exchangeRate,
+                      { color: getTextColor(item.isDecreasing) }, // 등락 여부에 따른 색상 설정
+                    ]}
+                  >
+                    {item.exchangeRateValue.toFixed(2)}
+                  </Text>
+                  <Text style={styles.exchangeChange}>
+                    {item.exchangeChangePercentage !== null
+                      ? `${item.exchangeChangePercentage.toFixed(2)}%`
+                      : 'N/A'} {/* 변동률 표시 */}
+                  </Text>
+                </View>
               </TouchableOpacity>
             )}
             keyExtractor={(item) => item.currencyCode}
@@ -199,9 +229,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
         <Text style={styles.sectionSubtitle}>
-          {
-            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'
-          }
+          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'}
         </Text>
 
         <View style={styles.row}>
@@ -315,11 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  modalSubtitle: {
-    fontSize: 16,
-    color: '#777',
-    marginBottom: 20,
-  },
   editProfileButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -398,32 +421,40 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginRight: 10,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    width: 250, // 카드 크기 조정
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  exchangeText: {
+  flagContainer: {
+    marginRight: 10,
+  },
+  exchangeInfo: {
+    flex: 1,
+  },
+  currencyCode: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  currencyName: {
+    fontSize: 14,
+    color: '#555',
+  },
+  exchangeRateContainer: {
+    alignItems: 'flex-end',
   },
   exchangeRate: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4caf50',
-    marginTop: 5,
   },
   exchangeChange: {
     fontSize: 14,
-    color: 'red',
+    color: 'gray',
     marginTop: 3,
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    color: '#777',
-    marginBottom: 8,
   },
   cscenter: {
     width: '48%',
