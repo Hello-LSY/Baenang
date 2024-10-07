@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -47,4 +48,11 @@ public class Document {
 
     @Column(name = "ic", columnDefinition = "TEXT")
     private String icPath; // 출입국 사실 증명서 (이미지 파일 경로)
+
+    @Column(name = "token")
+    private String token;
+
+    @Column(name = "token_expiry")
+    private LocalDateTime tokenExpiry;
+
 }

@@ -1,42 +1,40 @@
 package org.project.backend.service;
 
 import lombok.RequiredArgsConstructor;
-//import org.project.backend.converter.DocumentConverter;
-import org.project.backend.dto.*;
-import org.project.backend.model.*;
+import org.project.backend.dto.DocumentDTO;
+import org.project.backend.model.Document;
+import org.project.backend.model.Member;
 import org.project.backend.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    @Autowired
     private final DocumentRepository documentRepository;
     private final MemberRepository memberRepository;
     private final DriverLicenseRepository driverLicenseRepository;
     private final ResidentRegistrationRepository residentRegistrationRepository;
     private final PassportRepository passportRepository;
     private final InternationalStudentIdentityCardRepository isicRepository;
+    private final MailService mailService;
 
     // 문서 생성 (현재 로그인한 사용자 기준)
     @Override
     public DocumentDTO createDocumentForLoggedInUser() {
-        Long memberId = getCurrentMemberId(); // 로그인한 사용자 memberId 가져오기
-
-        // memberId로 Member 엔티티 조회
+        Long memberId = getCurrentMemberId(); // 로그인한 사용자 ID 가져오기
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found for ID: " + memberId));
 
-        // 이미 Document가 존재하는지 확인
         if (documentRepository.findByMemberId(memberId).isPresent()) {
             throw new IllegalStateException("Member already has a document.");
         }
 
-        // Document 객체 생성, 나머지 필드는 null로 설정
         Document document = Document.builder()
                 .member(member)
                 .rrnId(null)
@@ -46,6 +44,8 @@ public class DocumentServiceImpl implements DocumentService {
                 .ticPath(null)
                 .vcPath(null)
                 .icPath(null)
+                .token(null)
+                .tokenExpiry(null)
                 .build();
 
         Document savedDocument = documentRepository.save(document);
@@ -64,66 +64,51 @@ public class DocumentServiceImpl implements DocumentService {
     // 각 문서 ID 반환 (로그인한 사용자 기준)
     @Override
     public Long getDriverLicenseIdByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getDlnId)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getDlnId();
     }
 
     @Override
     public Long getResidentRegistrationIdByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getRrnId)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getRrnId();
     }
 
     @Override
     public Long getPassportIdByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getPnId)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getPnId();
     }
 
     @Override
     public Long getISICIdByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getIsicId)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getIsicId();
     }
 
-    // 이미지 경로 반환 (로그인한 사용자 기준)
+    // 이미지 경로 반환
     @Override
     public String getTICByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getTicPath)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getTicPath();
     }
 
     @Override
     public String getVCByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getVcPath)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getVcPath();
     }
 
     @Override
     public String getICByLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        return documentRepository.findDocumentWithAllDetails(memberId)
-                .map(Document::getIcPath)
-                .orElse(null);
+        Document document = getDocumentEntityByLoggedInUser();
+        return document.getIcPath();
     }
 
     // 문서 ID 업데이트 (로그인한 사용자 기준)
     @Override
     public DocumentDTO updateDriverLicenseForLoggedInUser(Long driverLicenseId) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .dlnId(driverLicenseId)
                 .build();
@@ -133,8 +118,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateResidentRegistrationForLoggedInUser(Long residentRegistrationId) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .rrnId(residentRegistrationId)
                 .build();
@@ -144,8 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updatePassportForLoggedInUser(Long passportId) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .pnId(passportId)
                 .build();
@@ -155,8 +138,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateISICForLoggedInUser(Long isicId) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .isicId(isicId)
                 .build();
@@ -167,8 +149,7 @@ public class DocumentServiceImpl implements DocumentService {
     // 이미지 파일 경로 업데이트
     @Override
     public DocumentDTO updateTICForLoggedInUser(String updatedTicPath) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .ticPath(updatedTicPath)
                 .build();
@@ -178,8 +159,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateVCForLoggedInUser(String updatedVcPath) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .vcPath(updatedVcPath)
                 .build();
@@ -189,8 +169,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DocumentDTO updateICForLoggedInUser(String updatedIcPath) {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         Document updatedDocument = document.toBuilder()
                 .icPath(updatedIcPath)
                 .build();
@@ -201,15 +180,127 @@ public class DocumentServiceImpl implements DocumentService {
     // 문서 삭제 (로그인한 사용자 기준)
     @Override
     public void deleteDocumentForLoggedInUser() {
-        Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
+        Document document = getDocumentEntityByLoggedInUser();
         documentRepository.delete(document);
     }
 
-    // Document 엔티티 가져오기
-    private Document getDocumentEntityByMemberId(Long memberId) {
-        return documentRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Document not found for member ID: " + memberId));
+    // 주민등록번호로 문서 ID 업데이트
+    @Override
+    public void updateDocumentByRrn(String rrn) {
+        Long memberId = getCurrentMemberId();
+        Document document = getDocumentEntityByLoggedInUser();
+
+        Document.DocumentBuilder updatedDocumentBuilder = document.toBuilder();
+
+        driverLicenseRepository.findByRrn(rrn).ifPresent(driverLicense -> {
+            updatedDocumentBuilder.dlnId(driverLicense.getId());
+        });
+
+        residentRegistrationRepository.findByRrn(rrn).ifPresent(residentRegistration -> {
+            updatedDocumentBuilder.rrnId(residentRegistration.getId());
+        });
+
+        passportRepository.findByRrn(rrn).ifPresent(passport -> {
+            updatedDocumentBuilder.pnId(passport.getId());
+        });
+
+        isicRepository.findByRrn(rrn).ifPresent(isic -> {
+            updatedDocumentBuilder.isicId(isic.getId());
+        });
+
+        Document updatedDocument = updatedDocumentBuilder.build();
+        documentRepository.save(updatedDocument);
+    }
+
+    // 이메일 인증 요청 메서드
+    @Override
+    public void requestVerification(String name, String rrn, String email) {
+        Member member = memberRepository.findByNameAndRegistrationNumber(name, rrn)
+                .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
+
+        String verificationCode = UUID.randomUUID().toString();
+        verificationCodes.put(email, verificationCode);
+        verificationExpiryTimes.put(email, LocalDateTime.now().plusMinutes(5));
+
+        String subject = "Document Verification Code";
+        String message = "Your verification code is: " + verificationCode;
+        mailService.sendMail(email, subject, message);
+    }
+
+    // 이메일 인증 코드 확인 및 문서 ID 업데이트
+    @Override
+    public String verifyAndUpdateDocuments(String name, String rrn, String email, String code) {
+        // 인증 코드가 유효한지 확인
+        if (!verificationCodes.containsKey(email) || !verificationCodes.get(email).equals(code)) {
+            throw new IllegalArgumentException("Invalid or expired verification code");
+        }
+
+        // 인증 코드의 유효 기간을 확인
+        if (verificationExpiryTimes.get(email).isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Verification code has expired");
+        }
+
+        // 인증 성공 시 토큰 생성
+        String token = UUID.randomUUID().toString();
+        Member member = memberRepository.findByNameAndRegistrationNumber(name, rrn)
+                .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
+
+        // 사용자와 연결된 문서 조회
+        Document document = documentRepository.findByMemberId(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Document not found for member"));
+
+        // 문서 ID 업데이트 (rrn 값에 기반한 검색)
+        Document.DocumentBuilder updatedDocumentBuilder = document.toBuilder();
+
+        driverLicenseRepository.findByRrn(rrn).ifPresent(driverLicense -> {
+            updatedDocumentBuilder.dlnId(driverLicense.getId());
+        });
+
+        residentRegistrationRepository.findByRrn(rrn).ifPresent(residentRegistration -> {
+            updatedDocumentBuilder.rrnId(residentRegistration.getId());
+        });
+
+        passportRepository.findByRrn(rrn).ifPresent(passport -> {
+            updatedDocumentBuilder.pnId(passport.getId());
+        });
+
+        isicRepository.findByRrn(rrn).ifPresent(isic -> {
+            updatedDocumentBuilder.isicId(isic.getId());
+        });
+
+        // 토큰과 만료 시간 설정
+        Document updatedDocument = updatedDocumentBuilder
+                .token(token)
+                .tokenExpiry(LocalDateTime.now().plusMinutes(5))
+                .build();
+
+        // 업데이트된 문서 저장
+        documentRepository.save(updatedDocument);
+
+        // 인증 코드 및 만료 시간 삭제
+        verificationCodes.remove(email);
+        verificationExpiryTimes.remove(email);
+
+        return token;
+    }
+
+    // 토큰 만료 체크 및 문서 토큰 삭제
+    @Override
+    public void checkAndExpireDocumentToken() {
+        List<Document> documents = documentRepository.findAll();
+        for (Document document : documents) {
+            if (document.getTokenExpiry() != null && document.getTokenExpiry().isBefore(LocalDateTime.now())) {
+                Document updatedDocument = document.toBuilder()
+                        .dlnId(null)
+                        .rrnId(null)
+                        .pnId(null)
+                        .isicId(null)
+                        .token(null)
+                        .tokenExpiry(null)
+                        .build();
+                documentRepository.save(updatedDocument);
+            }
+        }
     }
 
     // Document 엔티티를 DTO로 변환하는 메서드
@@ -227,40 +318,11 @@ public class DocumentServiceImpl implements DocumentService {
                 .build();
     }
 
-    @Override
-    public void updateDocumentByRrn(String rrn) {
-        // 현재 로그인한 사용자의 memberId 가져오기
+    // 로그인한 사용자의 Document 엔티티 가져오기
+    private Document getDocumentEntityByLoggedInUser() {
         Long memberId = getCurrentMemberId();
-        Document document = getDocumentEntityByMemberId(memberId);
-
-        // 새로운 Document 객체를 만들기 위한 빌더 초기화
-        Document.DocumentBuilder updatedDocumentBuilder = document.toBuilder();
-
-        // 1. Driver License에서 rrn으로 검색
-        driverLicenseRepository.findByRrn(rrn).ifPresent(driverLicense -> {
-            updatedDocumentBuilder.dlnId(driverLicense.getId());
-        });
-
-        // 2. Resident Registration에서 rrn으로 검색
-        residentRegistrationRepository.findByRrn(rrn).ifPresent(residentRegistration -> {
-            updatedDocumentBuilder.rrnId(residentRegistration.getId());
-        });
-
-        // 3. Passport에서 rrn으로 검색
-        passportRepository.findByRrn(rrn).ifPresent(passport -> {
-            updatedDocumentBuilder.pnId(passport.getId());
-        });
-
-        // 4. International Student Identity Card에서 rrn으로 검색
-        isicRepository.findByRrn(rrn).ifPresent(isic -> {
-            updatedDocumentBuilder.isicId(isic.getId());
-        });
-
-        // 업데이트된 Document 객체 생성
-        Document updatedDocument = updatedDocumentBuilder.build();
-
-        // 변경된 document 저장
-        documentRepository.save(updatedDocument);
+        return documentRepository.findDocumentWithAllDetails(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Document not found for member ID: " + memberId));
     }
 
     // 현재 로그인한 사용자의 memberId를 반환하는 메서드
@@ -269,12 +331,15 @@ public class DocumentServiceImpl implements DocumentService {
 
         if (principal instanceof UserDetails) {
             String username = ((UserDetails) principal).getUsername();
-            Member member = memberRepository.findByUsername(username)
-                    .orElseThrow(() -> new IllegalArgumentException("Member not found for username: " + username));
-            return member.getId();
+            return memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("Member not found for username: " + username))
+                    .getId();
         } else {
             throw new IllegalArgumentException("Invalid user authentication.");
         }
     }
 
+    // 인증 코드 및 만료 시간 관리
+    private final Map<String, String> verificationCodes = new HashMap<>();
+    private final Map<String, LocalDateTime> verificationExpiryTimes = new HashMap<>();
 }

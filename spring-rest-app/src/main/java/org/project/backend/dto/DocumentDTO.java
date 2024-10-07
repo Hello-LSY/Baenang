@@ -2,6 +2,8 @@ package org.project.backend.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,4 +21,7 @@ public class DocumentDTO {
     private String TIC; // 여행 보험 증명서 (이미지 파일 경로)
     private String VC;  // 예방접종 증명서 (이미지 파일 경로)
     private String IC; // 출입국 사실 증명서 (이미지 파일 경로)
+
+    private String token; // 인증토큰
+    private LocalDateTime tokenExpiry; // 인증토큰 만료시간
 }

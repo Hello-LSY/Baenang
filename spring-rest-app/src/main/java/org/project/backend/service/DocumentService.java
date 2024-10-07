@@ -7,72 +7,6 @@ import org.project.backend.model.Passport;
 import org.project.backend.model.ResidentRegistration;
 
 public interface DocumentService {
-//    //create
-//    DocumentDTO createDocument(Long memberId);
-//
-//    //read
-//    DocumentDTO getDocumentByMemberId(Long memberId);
-//    DriverLicense getDriverLicenseByMemberId(Long memberId);
-//    ResidentRegistration getResidentRegistrationByMemberId(Long memberId);
-//    Passport getPassportByMemberId(Long memberId);
-//    InternationalStudentIdentityCard getISICByMemberId(Long memberId);
-//    String getTICByMemberId(Long memberId);
-//    String getVCByMemberId(Long memberId);
-//    String getICByMemberId(Long memberId);
-//
-//    //update
-//    DocumentDTO updateDriverLicense(Long memberId, DriverLicense updatedDriverLicense);
-//    DocumentDTO updateResidentRegistration(Long memberId, ResidentRegistration updatedResidentRegistration);
-//    DocumentDTO updatePassport(Long memberId, Passport updatedPassport);
-//    DocumentDTO updateISIC(Long memberId, InternationalStudentIdentityCard updatedISIC);
-//    DocumentDTO updateTIC(Long memberId, String updatedTicPath);
-//    DocumentDTO updateVC(Long memberId, String updatedVcPath);
-//    DocumentDTO updateIC(Long memberId, String updateIcPath);
-//
-//    //delete
-//    void deleteDocumentByMemberId(Long memberId);
-
-
-//    // 문서 생성 (Member ID로 새로운 Document 생성)
-//    DocumentDTO createDocument(Long memberId);
-//
-//    // 문서 읽기 (Member ID로 Document 및 세부 정보 가져오기)
-//    DocumentDTO getDocumentByMemberId(Long memberId);
-//
-//    // 각 문서 ID를 반환하는 메서드 (DriverLicense, ResidentRegistration, Passport, InternationalStudentIdentityCard 등)
-//    Long getDriverLicenseIdByMemberId(Long memberId);
-//
-//    Long getResidentRegistrationIdByMemberId(Long memberId);
-//
-//    Long getPassportIdByMemberId(Long memberId);
-//
-//    Long getISICIdByMemberId(Long memberId);
-//
-//    // 이미지 경로 반환
-//    String getTICByMemberId(Long memberId);
-//
-//    String getVCByMemberId(Long memberId);
-//
-//    String getICByMemberId(Long memberId);
-//
-//    // 문서 ID 업데이트 (인증이 성공했을 때 문서 ID 업데이트)
-//    DocumentDTO updateDriverLicense(Long memberId, Long driverLicenseId);
-//
-//    DocumentDTO updateResidentRegistration(Long memberId, Long residentRegistrationId);
-//
-//    DocumentDTO updatePassport(Long memberId, Long passportId);
-//
-//    DocumentDTO updateISIC(Long memberId, Long isicId);
-//
-//    // 이미지 파일 경로 업데이트
-//    DocumentDTO updateTIC(Long memberId, String updatedTicPath);
-//
-//    DocumentDTO updateVC(Long memberId, String updatedVcPath);
-//
-//    DocumentDTO updateIC(Long memberId, String updatedIcPath);
-//
-//    // 문서 삭제
-//    void deleteDocumentByMemberId(Long memberId);
 
     // 문서 생성 (로그인한 사용자 기준으로 새로운 Document 생성)
     DocumentDTO createDocumentForLoggedInUser();
@@ -108,4 +42,12 @@ public interface DocumentService {
     // 주민등록번호로 문서 ID 업데이트하는 메서드 추가
     void updateDocumentByRrn(String rrn);
 
+    // 이메일 인증 요청 메서드 (이름, 주민등록번호, 이메일 기반)
+    void requestVerification(String name, String rrn, String email);
+
+    // 이메일 인증 코드 확인 및 문서 ID 업데이트
+    String verifyAndUpdateDocuments(String name, String rrn, String email, String code);
+
+    // 토큰 만료 체크 및 문서 토큰 삭제
+    void checkAndExpireDocumentToken();
 }

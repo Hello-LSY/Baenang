@@ -22,6 +22,9 @@ public class DocumentConverter {
                 .ticPath(documentDTO.getTIC())
                 .vcPath(documentDTO.getVC())
                 .icPath(documentDTO.getIC())
+
+                .token(document.getToken()) // 토큰 추가
+                .tokenExpiry(document.getTokenExpiry()) // 토큰 만료 시간 추가
                 .build();
     }
 
@@ -70,6 +73,7 @@ public class DocumentConverter {
                 .issueDate(isic.getIssueDate())
                 .expiryDate(isic.getExpiryDate())
                 .imagePath(isic.getImagePath())
+                .rrn(isic.getRrn())
                 .build();
     }
 
@@ -90,6 +94,7 @@ public class DocumentConverter {
                 .authority(passport.getAuthority())
                 .issueDate(passport.getIssueDate())
                 .expiryDate(passport.getExpiryDate())
+                .rrn(passport.getRrn())
                 .build();
     }
 
