@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,8 +27,14 @@ const priorityCurrencies = [
 const ExchangeRateListScreen = ({ navigation }) => {
   const { latestExchangeRates, fetchLatestRates, loading } = useExchangeRate();
 
-  React.useEffect(() => {
-    fetchLatestRates();
+  // useRef로 API 호출을 한 번만 실행하도록 방지
+  const didFetch = useRef(false);
+
+  useEffect(() => {
+    if (!didFetch.current) {
+      fetchLatestRates();
+      didFetch.current = true; // 첫 실행 이후에는 다시 실행되지 않도록 설정
+    }
   }, []);
 
   const sortedExchangeRates = useMemo(() => {
