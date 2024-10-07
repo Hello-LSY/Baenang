@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
-  FlatList,
   Image,
   RefreshControl,
+  Animated,
+  Dimensions, // 화면 크기 가져오기
 } from 'react-native';
 import { useAuth } from '../../redux/authState'; // useAuth 훅 사용
 import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
@@ -30,11 +31,41 @@ import ProfileButton from '../../components/ProfileButton'; // 유지할 프로�
 import { Feather } from '@expo/vector-icons';
 import FlagIcon from '../../components/FlagIcon'; // 플래그 아이콘 컴포넌트 추가
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window'); // 화면 너비 가져오기
+
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(false); 
-  const { auth, logout } = useAuth(); 
+  const [refreshing, setRefreshing] = useState(false);
+  const { auth, logout } = useAuth();
   const { top5Rates, fetchTop5Rates, loading } = useExchangeRate(); // 환율 정보 가져오기
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef(null);
+
+  const ITEM_WIDTH = SCREEN_WIDTH * 0.8; // 카드의 너비를 화면의 80%로 설정
+  const SPACING = SCREEN_WIDTH * 0.05; // 카드 간 간격을 화면의 5%로 설정
+
+  useEffect(() => {
+    fetchTop5Rates(); // 컴포넌트가 마운트될 때 상위 5개 환율 정보 로드
+
+    const scrollInterval = setInterval(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({
+          x: scrollX._value + ITEM_WIDTH + SPACING, // 카드 하나의 너비 + 여백만큼 스크롤
+          animated: true,
+        });
+
+        // 스크롤이 끝에 도달하면 처음으로 돌아감
+        if (scrollX._value + ITEM_WIDTH + SPACING >= (top5Rates.length * (ITEM_WIDTH + SPACING))) {
+          scrollX.setValue(0); // 처음으로 돌아감
+          scrollViewRef.current.scrollTo({ x: 0, animated: false });
+        } else {
+          scrollX.setValue(scrollX._value + ITEM_WIDTH + SPACING);
+        }
+      }
+    }, 3000); // 3초마다 스크롤
+
+    return () => clearInterval(scrollInterval); // 컴포넌트 언마운트 시 interval 해제
+  }, [scrollX]);
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -66,10 +97,6 @@ const HomeScreen = ({ navigation }) => {
       setRefreshing(false); // 2초 후 새로고침 상태 해제
     }, 2000);
   };
-
-  useEffect(() => {
-    fetchTop5Rates(); // 컴포넌트가 마운트될 때 상위 5개 환율 정보 로드
-  }, []);
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
@@ -177,11 +204,26 @@ const HomeScreen = ({ navigation }) => {
         {loading ? (
           <Text>Loading...</Text>
         ) : (
-          <FlatList
-            data={top5Rates} // top5Rates 배열을 데이터로 설정
-            renderItem={({ item }) => (
+          <Animated.ScrollView
+            ref={scrollViewRef}
+            horizontal
+            pagingEnabled
+            snapToInterval={ITEM_WIDTH + SPACING} // 스크롤 정렬
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            style={styles.exchangeList}
+            contentContainerStyle={{ paddingHorizontal: SPACING }} // 좌우 여백 추가
+            scrollEventThrottle={16}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: false }
+            )}
+          >
+            {/* 상위 5개의 환율 정보를 두 번 반복하여 추가 */}
+            {[...top5Rates, ...top5Rates].map((item, index) => (
               <TouchableOpacity
-                style={styles.exchangeItem}
+                key={index}
+                style={[styles.exchangeItem, { width: ITEM_WIDTH, marginRight: SPACING }]} // 카드 크기 및 간격 설정
                 onPress={() =>
                   navigation.navigate('ExchangeRateDetail', {
                     currencyCode: item.currencyCode,
@@ -202,10 +244,7 @@ const HomeScreen = ({ navigation }) => {
                 {/* 환율 및 변동률 */}
                 <View style={styles.exchangeRateContainer}>
                   <Text
-                    style={[
-                      styles.exchangeRate,
-                      { color: getTextColor(item.isDecreasing) }, // 등락 여부에 따른 색상 설정
-                    ]}
+                    style={[styles.exchangeRate, { color: getTextColor(item.isDecreasing) }]} // 등락 여부에 따른 색상 설정
                   >
                     {item.exchangeRateValue.toFixed(2)}
                   </Text>
@@ -216,12 +255,8 @@ const HomeScreen = ({ navigation }) => {
                   </Text>
                 </View>
               </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.currencyCode}
-            horizontal={true} // 가로 스크롤 가능하게 설정
-            showsHorizontalScrollIndicator={false}
-            style={styles.exchangeList}
-          />
+            ))}
+          </Animated.ScrollView>
         )}
       </View>
 
@@ -414,21 +449,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   exchangeList: {
-    marginTop: 12,
+    flexDirection: 'row',
   },
   exchangeItem: {
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 15,
-    marginRight: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: 250, // 카드 크기 조정
+    marginBottom: 15,
+  },
+  exchangeItemElevated: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   flagContainer: {
     marginRight: 10,
