@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, Button, Image, StyleSheet, Alert } from "react-native";
+import { View, Text, Button, Image, StyleSheet, Alert, ImageBackground } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import * as FileSystem from "expo-file-system";
-import axios from "axios"; // axios 임포트
+import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { fetchTravelCertificates } from "../../redux/travelCertificatesSlice"; // Redux 액션
@@ -183,48 +183,67 @@ const TravelCertificationProcess = () => {
   
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>여행 인증</Text>
+    <ImageBackground 
+      source={require('../../assets/images/real.gif')}  // 배경 이미지 경로 설정
+      style={styles.backgroundGif}  // 배경 스타일 적용
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>여행 인증</Text>
 
-      <Button
-        title="방문인증하기"
-        onPress={async () => {
-          await takePhoto();
-          await getLocationAndCountry();
-        }}
-      />
+        <Button
+          title="방문인증하기"
+          onPress={async () => {
+            await takePhoto();
+            await getLocationAndCountry();
+          }}
+        />
 
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
+        {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
-      {location && (
-        <Text>
-          위치: {location.latitude}, {location.longitude}
-        </Text>
-      )}
+        {location && (
+          <Text>
+            위치: {location.latitude}, {location.longitude}
+          </Text>
+        )}
 
-      {visitedCountry && <Text>방문 국가 및 지역: {visitedCountry}</Text>}
+        {visitedCountry && <Text>방문 국가 및 지역: {visitedCountry}</Text>}
 
-      <Button title="인증 완료" onPress={handleSave} />
-    </View>
+        <Button title="인증 완료" onPress={handleSave} />
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',  // 자식 뷰의 절대 배치가 가능하도록 설정
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+  backgroundGif: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',  // 배경 GIF가 화면을 가득 채우도록 설정
+  },
+  overlayContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,  // 배경 위에 배치되도록 설정
   },
   image: {
     width: 200,
     height: 200,
     marginVertical: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#fff',  // 배경과 구분되도록 글자 색상 변경
   },
 });
 
