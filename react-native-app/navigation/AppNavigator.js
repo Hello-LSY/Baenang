@@ -43,7 +43,7 @@ const MainTabs = () => {
 
 const AppNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="MainTabs">
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         name="Login"
         component={Login}

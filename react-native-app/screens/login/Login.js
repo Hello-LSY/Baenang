@@ -1,17 +1,5 @@
-// screens/login/Login.js
-
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Alert,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Animated,
-  Easing,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Alert, Text, TouchableOpacity, StyleSheet, Image, Animated, Easing, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../redux/authState';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
@@ -47,26 +35,32 @@ const Login = ({ navigation }) => {
   });
 
   useEffect(() => {
-    if (auth.token) {
+    if (auth.token && !auth.error) {
       Alert.alert('Success', '로그인 성공');
-      navigation.navigate('HomeScreen');
+      navigation.navigate('MainTabs');
     } else if (auth.error) {
-      // auth.error가 객체일 경우 message 필드를 정확하게 가져옴
+      // 오류가 발생했을 때 오류 메시지 표시
       let errorMessage = auth.error?.message;
       if (typeof errorMessage === 'object') {
         errorMessage = errorMessage.message || '로그인 실패';
       }
-      
       Alert.alert('Error', errorMessage || '로그인 실패');
     }
-  }, [auth.token, auth.error, navigation]);
-  
-  const handleLogin = () => {
+  }, [auth, navigation]);
+
+  const handleLogin = async () => {
     if (!username || !password) {
       Alert.alert('Error', '아이디와 비밀번호를 입력하세요.');
       return;
     }
-    login(username, password);
+
+    try {
+      console.log('로그인 시도:', { username, password });
+      await login(username, password); // login 요청이 끝날 때까지 기다림
+    } catch (error) {
+      console.log('로그인 중 오류 발생:', error);
+      Alert.alert('Error', '로그인 중 문제가 발생했습니다.');
+    }
   };
 
   return (
