@@ -2,28 +2,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiClient } from './apiClient';
 import { useSelector, useDispatch } from 'react-redux';
 
-// 모든 환율 데이터 조회
-export const fetchAllExchangeRates = createAsyncThunk(
-  'exchangeRate/fetchAllExchangeRates',
-  async () => {
-    const apiClient = getApiClient();
-    const response = await apiClient.get('/api/exchange/all');
-    return response.data;
-  }
-);
-
-// 어제보다 환율이 하락한 상위 5개 통화 조회
-export const fetchTop5DecreasingRates = createAsyncThunk(
-  'exchangeRate/fetchTop5DecreasingRates',
+// 모든 환율 데이터 및 등락률 포함 조회
+export const fetchAllRatesWithChange = createAsyncThunk(
+  'exchangeRate/fetchAllRatesWithChange',
   async (_, { getState }) => {
     const { auth } = getState(); // auth 상태에서 토큰을 가져옴
     const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
-    const response = await apiClient.get('/api/exchange/top5-decreasing');
-
-    return response.data.map((item) => ({
-      ...item,
-      isDecreasing: item.exchangeChangePercentage < 0, // 하락했으면 true
-    }));
+    const response = await apiClient.get('/api/exchange/all-with-change');
+    return response.data;
   }
 );
 
@@ -51,8 +37,7 @@ export const fetchLatestExchangeRates = createAsyncThunk(
 const exchangeRateSlice = createSlice({
   name: 'exchangeRate',
   initialState: {
-    allExchangeRates: [],
-    top5Rates: [], // 하락한 상위 5개 통화
+    allRatesWithChange: [], // 모든 환율 데이터를 저장
     exchangeRateHistory: {}, // 통화별 환율 히스토리
     latestExchangeRates: [], // 최신 환율 정보
     loading: false,
@@ -61,30 +46,17 @@ const exchangeRateSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // 모든 환율 데이터
-      .addCase(fetchAllExchangeRates.pending, (state) => {
+      // 모든 환율 데이터와 등락률 포함
+      .addCase(fetchAllRatesWithChange.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchAllExchangeRates.fulfilled, (state, action) => {
+      .addCase(fetchAllRatesWithChange.fulfilled, (state, action) => {
         state.loading = false;
-        state.allExchangeRates = action.payload;
+        state.allRatesWithChange = action.payload;
       })
-      .addCase(fetchAllExchangeRates.rejected, (state) => {
+      .addCase(fetchAllRatesWithChange.rejected, (state) => {
         state.loading = false;
-        state.error = 'Failed to fetch all exchange rates';
-      })
-
-      // 어제보다 환율이 하락한 상위 5개 통화
-      .addCase(fetchTop5DecreasingRates.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchTop5DecreasingRates.fulfilled, (state, action) => {
-        state.loading = false;
-        state.top5Rates = action.payload;
-      })
-      .addCase(fetchTop5DecreasingRates.rejected, (state) => {
-        state.loading = false;
-        state.error = 'Failed to fetch top 5 decreasing rates';
+        state.error = 'Failed to fetch all rates with change';
       })
 
       // 특정 통화의 환율 히스토리
@@ -120,20 +92,15 @@ const exchangeRateSlice = createSlice({
 export const useExchangeRate = () => {
   const dispatch = useDispatch();
   const { 
-    allExchangeRates, 
-    top5Rates, 
+    allRatesWithChange, 
     exchangeRateHistory, 
     latestExchangeRates, 
     loading, 
     error 
   } = useSelector((state) => state.exchangeRate);
 
-  const fetchAllRates = () => {
-    dispatch(fetchAllExchangeRates());
-  };
-
-  const fetchTop5Rates = () => {
-    dispatch(fetchTop5DecreasingRates());
+  const fetchAllRatesWithChangeData = () => {
+    dispatch(fetchAllRatesWithChange());
   };
 
   const fetchRateHistory = (currencyCode) => {
@@ -145,14 +112,12 @@ export const useExchangeRate = () => {
   };
 
   return {
-    allExchangeRates,
-    top5Rates,
+    allRatesWithChange,
     exchangeRateHistory,
     latestExchangeRates,
     loading,
     error,
-    fetchAllRates,
-    fetchTop5Rates,
+    fetchAllRatesWithChangeData,
     fetchRateHistory,
     fetchLatestRates,
   };

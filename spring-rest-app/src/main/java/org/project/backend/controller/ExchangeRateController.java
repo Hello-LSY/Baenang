@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.project.backend.dto.ExchangeRateDTO;
 import org.project.backend.exception.exchange.ExchangeRateNotFoundException;
 import org.project.backend.service.ExchangeRateService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.List;
 public class ExchangeRateController {
 
     private final ExchangeRateService exchangeRateService;
+    private static final Logger logger = LoggerFactory.getLogger(ExchangeRateController.class); // Logger 초기화
 
     @ApiOperation(value = "환율 데이터 저장", notes = "특정 날짜와 데이터 타입에 따라 환율 데이터를 저장합니다.")
     @GetMapping(value = "/save", produces = "application/json")
@@ -49,16 +52,24 @@ public class ExchangeRateController {
         }
     }
 
-    @ApiOperation(value = "환율이 가장 많이 감소한 상위 5개 국가 조회", notes = "어제와 오늘의 환율을 비교하여 가장 많이 감소한 상위 5개 국가를 조회합니다.")
-    @GetMapping(value = "/top5-decreasing", produces = "application/json")
-    public ResponseEntity<List<ExchangeRateDTO>> getTop5DecreasingRates() {
+    @ApiOperation(value = "모든 국가의 환율 변동 조회", notes = "모든 국가에 대한 환율 변동 정보를 조회합니다.")
+    @GetMapping(value = "/all-with-change", produces = "application/json")
+    public ResponseEntity<List<ExchangeRateDTO>> getAllRatesWithChange() {
         try {
-            List<ExchangeRateDTO> decreasingRates = exchangeRateService.getAllRatesSortedByDecreaseThenIncrease();
-            return ResponseEntity.ok(decreasingRates);
+            List<ExchangeRateDTO> allRatesWithChange = exchangeRateService.getAllRatesSortedByDecreaseThenIncrease();
+            return ResponseEntity.ok(allRatesWithChange);
+        } catch (ExchangeRateNotFoundException e) {
+            logger.error("ExchangeRateNotFoundException: " + e.getMessage(), e); // 예외 로그 추가
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            logger.error("Unexpected error occurred: " + e.getMessage(), e); // 전체 예외 처리 로그
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
+
+
 
     @ApiOperation(value = "특정 통화 코드의 환율 기록 조회", notes = "특정 통화 코드의 환율 변동 기록을 조회합니다.")
     @GetMapping(value = "/{currencyCode}", produces = "application/json")
