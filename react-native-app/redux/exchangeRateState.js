@@ -19,7 +19,11 @@ export const fetchTop5DecreasingRates = createAsyncThunk(
     const { auth } = getState(); // auth 상태에서 토큰을 가져옴
     const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
     const response = await apiClient.get('/api/exchange/top5-decreasing');
-    return response.data;
+
+    return response.data.map((item) => ({
+      ...item,
+      isDecreasing: item.exchangeChangePercentage < 0, // 하락했으면 true
+    }));
   }
 );
 
@@ -29,7 +33,7 @@ export const fetchExchangeRateHistory = createAsyncThunk(
   async (currencyCode, { getState }) => {
     const { auth } = getState(); // auth 상태에서 토큰을 가져옴
     const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
-    const response = await apiClient.get(`/api/exchange/history/${currencyCode}`);
+    const response = await apiClient.get(`/api/exchange/${currencyCode}`);
     return { currencyCode, history: response.data }; // 통화 코드와 함께 반환
   }
 );
@@ -112,6 +116,7 @@ const exchangeRateSlice = createSlice({
   },
 });
 
+// 커스텀 훅으로 환율 상태를 불러오고 액션을 디스패치하는 함수 정의
 export const useExchangeRate = () => {
   const dispatch = useDispatch();
   const { 

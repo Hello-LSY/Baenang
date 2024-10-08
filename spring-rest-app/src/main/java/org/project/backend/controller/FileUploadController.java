@@ -3,6 +3,7 @@ package org.project.backend.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +19,8 @@ import java.nio.file.Paths;
 @Api(tags = "File Upload API", description = "파일 업로드 API")  // Swagger 설명 추가
 public class FileUploadController {
 
-    // 파일을 저장할 로컬 경로 (예: C:/uploads)
-    private static final String UPLOAD_DIR = "C:/uploads/";
+    @Value("${file.upload-dir}")
+    private String UPLOAD_DIR;
 
     @ApiOperation(value = "이미지 파일 업로드", notes = "이미지 파일을 서버에 업로드합니다.")
     @PostMapping("/upload")

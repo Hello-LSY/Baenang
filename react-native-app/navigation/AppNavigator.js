@@ -1,24 +1,27 @@
-// navigation/AppNavigator.js
-
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import BusinessCardScreen from '../screens/businessCard/BusinessCardScreen';
-import CreateBusinessCardScreen from '../screens/businessCard/CreateBusinessCardScreen'; // CreateBusinessCardScreen 추가
-import UpdateBusinessCardScreen from '../screens/businessCard/UpdateBusinessCardScreen'; // UpdateBusinessCardScreen 사용
+import CreateBusinessCardScreen from '../screens/businessCard/CreateBusinessCardScreen';
+import UpdateBusinessCardScreen from '../screens/businessCard/UpdateBusinessCardScreen';
 import TravelCertificationMain from '../screens/travelCertification/TravelCertificationMain';
 import TravelCertificationList from '../screens/travelCertification/TravelCertificationList';
 import TravelCertificationDetail from '../components/travelCertification/TravelCertificationDetail';
 import TravelCertificationEdit from '../components/travelCertification/TravelCertificationEdit';
 import TravelCertificationProcess from '../components/travelCertification/TravelCertificationProcess';
 import TravelerPersonalityTest from '../screens/travelpersonalitytest/TravelPersonalityTest.js';
+import ResultScreen from '../screens/travelpersonalitytest/ResultScreen.js';
 import ExchangeRateListScreen from '../screens/exchangeRate/ExchangeRateListScreen';
 import ExchangeRateDetailScreen from '../screens/exchangeRate/ExchangeRateDetailScreen.js';
-import Community from '../screens/community/Community.js';
+import CommunityHome from '../screens/community/CommunityHome.js';
+import CreatePost from '../screens/community/CreatePost';
+import EditPost from '../screens/community/EditPost';
 import UserProfile from '../screens/UserProfile.js';
 import CustomerService from '../screens/customerService/CustomerService.js';
+import Login from '../screens/login/Login';
+import Signup from '../screens/signup/Signup';
 
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -33,13 +36,24 @@ const MainTabs = () => {
       }}
     >
       <Tab.Screen name="홈" component={HomeScreen} />
-      <Tab.Screen name="커뮤니티" component={Community} />
+      <Tab.Screen name="커뮤니티" component={CommunityHome} />
     </Tab.Navigator>
   );
 };
+
 const AppNavigator = () => {
   return (
     <Stack.Navigator initialRouteName="MainTabs">
+      <Stack.Screen
+        name="Login"
+        component={Login}
+        options={{ title: '로그인', headerShown: false }}
+      />
+      <Stack.Screen
+        name="Signup"
+        component={Signup}
+        options={{ title: '회원가입' }}
+      />
       <Stack.Screen
         name="MainTabs"
         component={MainTabs}
@@ -88,12 +102,27 @@ const AppNavigator = () => {
       <Stack.Screen
         name="TravelerPersonalityTest"
         component={TravelerPersonalityTest}
-        options={{ title: '여행 인증서 등록 과정' }}
+        options={{ title: '여행 유형 테스트' }}
+      />
+      <Stack.Screen
+        name="ResultScreen"
+        component={ResultScreen}
+        options={{ title: '여행 유형 테스트 결과' }}
       />
       <Stack.Screen
         name="Community"
-        component={Community}
+        component={CommunityHome}
         options={{ title: '커뮤니티' }}
+      />
+      <Stack.Screen
+        name="CreatePost"
+        component={CreatePost}
+        options={{ title: '게시글 작성' }}
+      />
+      <Stack.Screen
+        name="EditPost"
+        component={EditPost}
+        options={{ title: '게시글 수정' }}
       />
       <Stack.Screen
         name="ExchangeRateListScreen"

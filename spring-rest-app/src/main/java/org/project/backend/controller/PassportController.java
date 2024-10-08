@@ -22,40 +22,41 @@ public class PassportController {
     private final DocumentService documentService;
     private final PassportService passportService;
 
-//    @ApiOperation(value = "회원 ID로 여권 생성 또는 재등록", notes = "회원 ID를 사용하여 여권 생성 또는 재등록합니다.")
-//    @PostMapping("/create-or-update/{memberId}")
-//    public ResponseEntity<PassportDTO> createOrUpdatePassword(
-//            @ApiParam(value = "회원 ID", required = true) @PathVariable Long memberId,
-//            @ApiParam(value = "여권 정보", required = true) @RequestBody PassportDTO passportDTO) {
-//        try {
-//            PassportDTO createdPassport = passportService.createOrUpdatePassport(memberId, passportDTO);
-//            return ResponseEntity.status(HttpStatus.CREATED).body(createdPassport);
-//        } catch (DocumentNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Document를 찾지 못한 경우
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
-
     @ApiOperation(value = "회원 ID로 여권 조회", notes = "회원 ID를 사용하여 여권 정보를 조회합니다.")
     @GetMapping("/my-license/{memberId}")
     public ResponseEntity<Object> getPassport(
         @ApiParam(value = "회원 ID", required = true, example = "12345")
         @PathVariable Long memberId) {
         try {
+//            // (1) memberId로 document 정보 조회
+//            DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
+//            if (documentDTO == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found for the given member.");
+//            }
+//
+//            // (2) documentId로 Passport 조회
+//            Long passportDTO = documentDTO.getPnId();
+//            if (passportDTO == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Passport not found.");
+//            }
+//
+//            // 성공적으로 Passport 조회 시
+//            return ResponseEntity.ok(passportDTO);
+
             // (1) memberId로 document 정보 조회
-            DocumentDTO documentDTO = documentService.getDocumentByMemberId(memberId);
+            DocumentDTO documentDTO = documentService.getDocumentByLoggedInUser();
             if (documentDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found for the given member.");
             }
 
-            // (2) documentId로 Passport 조회
-            PassportDTO passportDTO = documentDTO.getPN();
-            if (passportDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Passport not found.");
+            // (2) document에서 여권 ID 조회
+            Long passportId = documentDTO.getPnId();
+            if (passportId == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Passport not found for the given member.");
             }
 
-            // 성공적으로 Passport 조회 시
+            // (3) Passport 정보 조회
+            PassportDTO passportDTO = passportService.getPassportById(passportId);
             return ResponseEntity.ok(passportDTO);
         } catch (DocumentNotFoundException e) {
             // Document 조회 실패 시 예외 처리
@@ -65,7 +66,40 @@ public class PassportController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
         }
+
     }
+
+//    @ApiOperation(value = "여권 ID로 조회", notes = "Document 테이블에서 pnId로 여권을 조회합니다.")
+//    @GetMapping("/get/{pnId}")
+//    public ResponseEntity<PassportDTO> getPassportById(@PathVariable Long pnId) {
+//        try {
+//            PassportDTO passport = passportService.getPassportById(pnId);
+//            return ResponseEntity.ok(passport);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//    }
+@ApiOperation(value = "현재 로그인한 사용자의 여권 정보 조회", notes = "현재 로그인한 사용자의 여권 정보를 조회합니다.")
+@GetMapping("/get")
+public ResponseEntity<?> getPassportForLoggedInUser() {
+    try {
+        // 현재 로그인한 사용자의 Document 정보 조회
+        DocumentDTO documentDTO = documentService.getDocumentByLoggedInUser();
+        Long pnId = documentDTO.getPnId();
+
+        if (pnId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("여권 정보가 없습니다.");
+        }
+
+        // 여권 정보 조회
+        PassportDTO passport = passportService.getPassportById(pnId);
+        return ResponseEntity.ok(passport);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+    }
+}
 
 //    @ApiOperation(value = "여권 삭제", notes = "회원 ID를 사용하여 여권을 삭제합니다.")
 //    @DeleteMapping("/delete/{memberId}")
