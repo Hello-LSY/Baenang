@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  ProgressBarAndroid,
-} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { ProgressBar } from 'react-native-paper';
 
 const questions = [
   {
@@ -231,14 +225,14 @@ const TravelerPersonalityTest = ({navigation}) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* 진행률(프로그레스바) */}
-      <ProgressBarAndroid
-        styleAttr="Horizontal"
-        indeterminate={false}
-        progress={progress}
-        color="#2196F3"
-        style={styles.progressBar}
-      />
+      {/* 진행률 (프로그레스바) */}
+      <View style={styles.progressBarWrapper}>
+        <ProgressBar
+          progress={progress}
+          color="#2196F3"
+          style={styles.progressBar}
+        />
+      </View>
 
       {/* 질문 번호 */}
       <Text style={styles.questionNumber}>{questionNumber}</Text>
@@ -326,15 +320,23 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#a0a0a0',
   },
-  progressBar: {
-    width: '100%',
-    marginBottom: 40,
-  },
   submitButtonText:{
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
     fontSize: 15,
+  },
+  progressBar: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#e0e0e0',
+    width: '100%',
+
+  },
+  progressBarWrapper: {
+    width: '80%',
+    paddingHorizontal: 20,
+    marginBottom: 40,
   },
 });
 
