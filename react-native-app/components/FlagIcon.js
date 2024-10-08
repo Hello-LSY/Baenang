@@ -14,6 +14,7 @@ import GBFlag from '../assets/flags/gb.svg';
 import HkFlag from '../assets/flags/hk.svg';
 import IdFlag from '../assets/flags/id.svg';
 import JpFlag from '../assets/flags/jp.svg';
+import KrFlag from '../assets/flags/kr.svg';
 import KwFlag from '../assets/flags/kw.svg';
 import MyFlag from '../assets/flags/my.svg';
 import NoFlag from '../assets/flags/no.svg';
@@ -31,7 +32,7 @@ const flagComponents = {
   bnd: BnFlag,
   bhd: BhFlag,
   cad: CaFlag,
-  cny: CnFlag, 
+  cny: CnFlag,
   cnh: CnFlag,
   chf: ChFlag,
   dkk: DkFlag,
@@ -39,6 +40,7 @@ const flagComponents = {
   hkd: HkFlag,
   idr: IdFlag,
   jpy: JpFlag,
+  krw: KrFlag,
   kwd: KwFlag,
   myr: MyFlag,
   nok: NoFlag,
