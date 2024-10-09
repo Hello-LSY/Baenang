@@ -26,8 +26,6 @@ const DocumentModal = ({ visible, document, onClose, navigation }) => {
     (state) => state.document
   );
 
-  console.log("Document : ", document);
-
   // getDocument 호출 및 token 만료 여부 확인
   useEffect(() => {
     if (visible && document) {
