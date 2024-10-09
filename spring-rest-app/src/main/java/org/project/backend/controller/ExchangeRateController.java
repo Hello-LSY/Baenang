@@ -53,7 +53,7 @@ public class ExchangeRateController {
     @GetMapping(value = "/top5-decreasing", produces = "application/json")
     public ResponseEntity<List<ExchangeRateDTO>> getTop5DecreasingRates() {
         try {
-            List<ExchangeRateDTO> decreasingRates = exchangeRateService.getTop5DecreasingRates();
+            List<ExchangeRateDTO> decreasingRates = exchangeRateService.getAllRatesSortedByDecreaseThenIncrease();
             return ResponseEntity.ok(decreasingRates);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
