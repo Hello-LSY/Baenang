@@ -15,8 +15,9 @@ import FlagIcon from '../../components/FlagIcon';
 const screenWidth = Dimensions.get('window').width;
 
 const formatDate = (dateArray) => {
+  if (!dateArray || dateArray.length < 2) return '';
   const [year, month, day] = dateArray;
-  return `${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}`;
+  return `${String(month).padStart(2, '0')}.${day ? String(day).padStart(2, '0') : ''}`;
 };
 
 const groupByWeek = (data) => {
@@ -49,7 +50,7 @@ const groupByMonth = (data) => {
       months[month].reduce((sum, value) => sum + value, 0) /
       months[month].length;
     return {
-      recordedAt: [data[0].recordedAt[0], month],
+      recordedAt: [data[0].recordedAt[0], month, 1],
       exchangeRateValue: average,
     };
   });
@@ -57,6 +58,7 @@ const groupByMonth = (data) => {
 
 const ExchangeRateDetailScreen = ({ route }) => {
   const { currencyCode } = route.params;
+  const cleanedCurrencyCode = currencyCode.replace("(100)", "").trim();
   const { exchangeRateHistory, fetchRateHistory, loading } = useExchangeRate();
   const [chartType, setChartType] = useState('daily');
   const [krwAmount, setKrwAmount] = useState('');
@@ -118,24 +120,14 @@ const ExchangeRateDetailScreen = ({ route }) => {
   }
 
   const latestRate =
-    historyData.length > 0 ? historyData[0].exchangeRateValue : 0;
-
-  const CurrencySelector = ({ currencyCode, onChange }) => (
-    <TouchableOpacity
-      style={styles.currencySelector}
-      onPress={() => onChange(currencyCode)}
-    >
-      <FlagIcon currencyCode={currencyCode} size={24} />
-      <Text style={styles.currencyCode}>{currencyCode}</Text>
-    </TouchableOpacity>
-  );
+    historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.currencyInfo}>
-          <FlagIcon currencyCode={currencyCode} size={24} />
-          <Text style={styles.currencyCode}>{currencyCode}</Text>
+          <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+          <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
         </View>
         <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} KRW</Text>
         <Text style={styles.changeRate}>▼ 11.70 -0.87%</Text>
@@ -146,8 +138,8 @@ const ExchangeRateDetailScreen = ({ route }) => {
         <Text style={styles.calculatorTitle}>환율계산기</Text>
         <View style={styles.inputContainer}>
           <View style={styles.currencySelector}>
-            <FlagIcon currencyCode={currencyCode} size={24} />
-            <Text style={styles.currencyCode}>{currencyCode}</Text>
+            <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+            <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
           </View>
           <TextInput
             style={styles.input}
@@ -160,7 +152,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
             placeholder="0"
           />
           <Text style={styles.formattedAmount}>
-            {formatAmount(foreignAmount, currencyCode)}
+            {formatAmount(foreignAmount, cleanedCurrencyCode)}
           </Text>
         </View>
         <Text style={styles.equalSign}>=</Text>
@@ -227,6 +219,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
               backgroundGradientTo: '#ffffff',
               color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
               strokeWidth: 2,
+              labelColor: () => '#666',
             }}
             bezier
             style={styles.chart}
@@ -334,19 +327,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    fontSize: 16,
-    marginBottom: 4,
-  },
   formattedAmount: {
     fontSize: 12,
     color: '#666',
-    paddingLeft: 8, // input의 paddingHorizontal과 동일한 값 사용
+    paddingLeft: 8,
   },
 });
 
