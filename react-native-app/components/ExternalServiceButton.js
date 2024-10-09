@@ -32,7 +32,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   title: {
+    height: 30,
+    lineHeight: 30,
     fontSize: 15,
+    fontWeight: 'bold',
+    color: '#343E40'
   },
   image: {
     width: 30,
