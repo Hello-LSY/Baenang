@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Button } from 'react-native';
+import { BASE_URL } from '../../constants/config';
 
 const TravelCertificationDetail = ({ route, navigation }) => {
   // route.params로 전달된 item을 받아옴
@@ -8,7 +9,7 @@ const TravelCertificationDetail = ({ route, navigation }) => {
   console.log('item : ', item)
 
   // 이미지가 저장된 서버 URL과 결합하여 완전한 이미지 URL을 생성
-  const imageUrl = `http://10.0.2.2:8080/uploads/${item.imagepath}`;
+  const imageUrl = `${BASE_URL}/uploads/${item.imagepath}`;
 
   return (
     <View style={styles.container}>
