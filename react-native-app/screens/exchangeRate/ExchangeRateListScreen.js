@@ -12,16 +12,14 @@ import FlagIcon from '../../components/FlagIcon';
 const priorityCurrencies = [
   'USD',
   'JPY',
-  'EUR',
   'CNH',
+  'EUR',
   'GBP',
   'AUD',
   'CAD',
   'NZD',
-  'THB',
-  'VND',
   'HKD',
-  'TWD',
+  'CHF',
 ];
 
 const ExchangeRateListScreen = ({ navigation }) => {

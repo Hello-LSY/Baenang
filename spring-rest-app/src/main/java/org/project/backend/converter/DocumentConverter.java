@@ -44,6 +44,9 @@ public class DocumentConverter {
                 .TIC(document.getTicPath())
                 .VC(document.getVcPath())
                 .IC(document.getIcPath())
+
+                .token(document.getToken()) // 토큰 추가
+                .tokenExpiry(document.getTokenExpiry()) // 토큰 만료 시간 추가
                 .build();
     }
 

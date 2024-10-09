@@ -271,7 +271,7 @@ public class DocumentServiceImpl implements DocumentService {
         // 토큰과 만료 시간 설정
         Document updatedDocument = updatedDocumentBuilder
                 .token(token)
-                .tokenExpiry(LocalDateTime.now().plusMinutes(5))
+                .tokenExpiry(LocalDateTime.now().plusMinutes(60))
                 .build();
 
         // 업데이트된 문서 저장
@@ -315,6 +315,8 @@ public class DocumentServiceImpl implements DocumentService {
                 .TIC(document.getTicPath())
                 .VC(document.getVcPath())
                 .IC(document.getIcPath())
+                .token(document.getToken()) // 토큰 추가
+                .tokenExpiry(document.getTokenExpiry()) // 토큰 만료 시간 추가
                 .build();
     }
 

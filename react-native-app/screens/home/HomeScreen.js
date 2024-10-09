@@ -138,7 +138,6 @@ const HomeScreen = ({ navigation }) => {
       {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
-          style={styles.serviceButton}
           title="여행자 명함"
           subtitle="여행 중 만난 인연을 이 안에 넣어요"
           imgSrc={BussinessCard}
@@ -146,7 +145,6 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('BusinessCard')}
         />
         <ServiceButton
-          style={styles.serviceButton}
           title="여행 인증서"
           subtitle="내가 여행한 곳을 한 눈에 확인해요"
           imgSrc={TravelCertification}
@@ -390,14 +388,12 @@ const styles = StyleSheet.create({
   },
   servicecontainer: {
     flexDirection: 'row',
-    paddingHorizontal: 10,
-    width: '100%',
     justifyContent: 'space-between',
-    marginTop: 16,
+    paddingHorizontal: 10,
   },
   section: {
     marginTop: 16,
-    padding: 8,
+    padding: 10,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
