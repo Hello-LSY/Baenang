@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -39,11 +39,9 @@ const HomeScreen = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
   const { allRatesWithChange, fetchAllRatesWithChangeData, loading } = useExchangeRate();
-  const scrollX = new Animated.Value(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const slideIntervalRef = useRef(null);
 
-  useEffect(() => {
-    fetchAllRatesWithChangeData();
-  }, []);
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -66,6 +64,25 @@ const HomeScreen = ({ navigation }) => {
     '#FFB268',
     '#FFD974',
   ];
+
+  useEffect(() => {
+    fetchAllRatesWithChangeData();
+    startAutoSlide();
+
+    return () => {
+      clearInterval(slideIntervalRef.current);
+    };
+  }, []);
+
+  const startAutoSlide = () => {
+    slideIntervalRef.current = setInterval(() => {
+      handleNext();
+    }, 3000); // 3초마다 자동으로 슬라이드 전환
+  };
+
+  const stopAutoSlide = () => {
+    clearInterval(slideIntervalRef.current);
+  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -90,28 +107,36 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('UserProfile');
   };
 
-  const getPercentageColor = (decreasing) => {
-    return decreasing ? 'blue' : 'red';
+  const getPercentageSymbol = (exchangeChangePercentage) => {
+    if (exchangeChangePercentage === null || exchangeChangePercentage === undefined || exchangeChangePercentage === 0) {
+      return '';  // 값 변동이 없으면 기호 없음
+    }
+    return exchangeChangePercentage > 0 ? '▲' : '▼';  // 양수는 ▲, 음수는 ▼
+  };
+  
+  const getPercentageColor = (exchangeChangePercentage) => {
+    if (exchangeChangePercentage === null || exchangeChangePercentage === undefined || exchangeChangePercentage === 0) {
+      return 'gray';  // 값 변동이 없으면 회색
+    }
+    return exchangeChangePercentage > 0 ? 'red' : 'blue';  // 양수는 빨간색, 음수는 파란색
   };
 
   const handleNext = () => {
-    if (currentIndex < allRatesWithChange.length - 1) {
-      Animated.spring(scrollX, {
-        toValue: (currentIndex + 1) * SCREEN_WIDTH * 0.7,
-        useNativeDriver: true,
-      }).start();
-      setCurrentIndex(currentIndex + 1);
-    }
+    stopAutoSlide();
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      return nextIndex < allRatesWithChange.length ? nextIndex : 0; // 마지막 슬라이드에서 첫 번째로 돌아가기
+    });
+    startAutoSlide();
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      Animated.spring(scrollX, {
-        toValue: (currentIndex - 1) * SCREEN_WIDTH * 0.7,
-        useNativeDriver: true,
-      }).start();
-      setCurrentIndex(currentIndex - 1);
-    }
+    stopAutoSlide();
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - 1;
+      return nextIndex >= 0 ? nextIndex : allRatesWithChange.length - 1; // 첫 번째에서 마지막으로 돌아가기
+    });
+    startAutoSlide();
   };
 
   const handleExchangeRateClick = (currencyCode) => {
@@ -140,14 +165,14 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.servicecontainer}>
         <ServiceButton
           title="여행자 명함"
-          subtitle="여행 중 만난 인연을 이 안에 넣어요"
+          subtitle="여행 중 만난 인연을 이 안에 넣어요!"
           imgSrc={BussinessCard}
           imgSize={75}
           onPress={() => navigation.navigate('BusinessCard')}
         />
         <ServiceButton
           title="여행 인증서"
-          subtitle="내가 여행한 곳을 한 눈에 확인해요"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요!"
           imgSrc={TravelCertification}
           imgSize={75}
           onPress={() => navigation.navigate('TravelCertificationMain')}
@@ -155,15 +180,15 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.servicecontainer}>
         <ServiceButton
-          title="실시간 환율"
-          subtitle="실시간으로 확인해요"
+          title="환율 보기"
+          subtitle="여행가기전에 환율을 확인해요!"
           imgSrc={Exchange}
           imgSize={75}
           onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
-          subtitle="내 여행 스타일을 알아봐요"
+          subtitle="당신의 여행 스타일은?"
           imgSrc={TravelTest}
           imgSize={75}
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
@@ -192,12 +217,15 @@ const HomeScreen = ({ navigation }) => {
                   <Text style={styles.currencyName}>{allRatesWithChange[currentIndex]?.currencyName}</Text>
                 </View>
                 <View style={styles.exchangeRateContainer}>
-                  <Text style={[styles.exchangeRate, { color: 'black' }]}> {allRatesWithChange[currentIndex]?.exchangeRateValue.toFixed(2)}</Text>
+                  <Text style={[styles.exchangeRate, { color: 'black' }]}>
+                    {allRatesWithChange[currentIndex]?.exchangeRateValue.toFixed(2)}
+                  </Text>
                   <Text
-                    style={[styles.exchangeChange, { color: getPercentageColor(allRatesWithChange[currentIndex]?.decreasing) }]}
+                    style={[styles.exchangeChange, { color: getPercentageColor(allRatesWithChange[currentIndex]?.exchangeChangePercentage) }]}
                   >
+                    {getPercentageSymbol(allRatesWithChange[currentIndex]?.exchangeChangePercentage)}
                     {allRatesWithChange[currentIndex]?.exchangeChangePercentage !== null
-                      ? `${allRatesWithChange[currentIndex].exchangeChangePercentage >= 0 ? '+' : ''}${allRatesWithChange[currentIndex].exchangeChangePercentage.toFixed(2)}%`
+                      ? `${Math.abs(allRatesWithChange[currentIndex].exchangeChangePercentage.toFixed(2))}%`
                       : 'N/A'}
                   </Text>
                 </View>
@@ -213,7 +241,7 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.section}>
-      <Text style={styles.sectionTitle}>외부 서비스</Text>
+        <Text style={styles.sectionTitle}>외부 서비스</Text>
         <View style={styles.row}>
           <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
           <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
@@ -227,8 +255,6 @@ const HomeScreen = ({ navigation }) => {
           <ExternalServiceButton title="아고다" imgSrc={agoda} />
         </View>
       </View>
-
-      
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터</Text>
@@ -408,8 +434,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  sectionSubtitle:{
-    marginTop:5,
+  sectionSubtitle: {
+    marginTop: 5,
   },
   row: {
     flexDirection: 'row',
