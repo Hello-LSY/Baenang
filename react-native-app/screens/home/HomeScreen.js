@@ -29,6 +29,7 @@ import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
 import ProfileButton from '../../components/ProfileButton';
 import { Feather, AntDesign } from '@expo/vector-icons';
+import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -207,6 +208,21 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
         />
       </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>실시간 환율</Text>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : latestExchangeRates.length > 0 ? (
+          <ExchangeRateCarousel
+            latestExchangeRates={latestExchangeRates}
+            onItemPress={(currencyCode) =>
+              handleExchangeRateClick(currencyCode)
+            }
+          />
+        ) : (
+          <Text>환율 정보가 없습니다.</Text>
+        )}
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>실시간 환율</Text>
@@ -244,7 +260,7 @@ const HomeScreen = ({ navigation }) => {
                     ]?.currencyCode
                       .replace('(100)', '')
                       .trim()}
-                    size={40}
+                    size={36}
                   />
                 </View>
                 <View style={styles.exchangeInfo}>
