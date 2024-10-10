@@ -56,8 +56,21 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentDTO getDocumentByLoggedInUser() {
         Long memberId = getCurrentMemberId();
-        Document document = documentRepository.findDocumentWithAllDetails(memberId)
+
+        // 로그인한 사용자의 문서 존재 여부 확인
+        Optional<Document> optionalDocument = documentRepository.findDocumentWithAllDetails(memberId);
+
+        // 문서가 없으면 자동으로 생성
+        if (optionalDocument.isEmpty()) {
+            createDocumentForLoggedInUser();
+            // 문서 생성 후 다시 조회
+            optionalDocument = documentRepository.findDocumentWithAllDetails(memberId);
+        }
+
+        // 문서가 있으면 반환, 없으면 예외 처리
+        Document document = optionalDocument
                 .orElseThrow(() -> new IllegalArgumentException("Document not found for member ID: " + memberId));
+
         return convertToDTO(document);
     }
 
@@ -215,9 +228,21 @@ public class DocumentServiceImpl implements DocumentService {
     // 이메일 인증 요청 메서드
     @Override
     public void requestVerification(String fullName, String rrn, String email) {
+        // 현재 로그인한 사용자 정보 가져오기
+        Long memberId = getCurrentMemberId(); // 로그인한 사용자 ID 가져오기
+        Member currentMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // 로그인한 사용자의 이름과 주민등록번호가 입력된 값과 일치하는지 확인
+        if (!currentMember.getFullName().equals(fullName) || !currentMember.getRegistrationNumber().equals(rrn)) {
+            throw new IllegalArgumentException("Logged-in user's fullName and rrn do not match the provided information.");
+        }
+
+        // 이름과 주민등록번호로 멤버 찾기 (실제 로직에서는 불필요할 수 있음)
         Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, rrn)
                 .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
 
+        // 인증 코드 생성 및 이메일 전송
         String verificationCode = UUID.randomUUID().toString();
         verificationCodes.put(email, verificationCode);
         verificationExpiryTimes.put(email, LocalDateTime.now().plusMinutes(5));
@@ -271,7 +296,7 @@ public class DocumentServiceImpl implements DocumentService {
         // 토큰과 만료 시간 설정
         Document updatedDocument = updatedDocumentBuilder
                 .token(token)
-                .tokenExpiry(LocalDateTime.now().plusMinutes(5))
+                .tokenExpiry(LocalDateTime.now().plusMinutes(60))
                 .build();
 
         // 업데이트된 문서 저장
@@ -315,6 +340,8 @@ public class DocumentServiceImpl implements DocumentService {
                 .TIC(document.getTicPath())
                 .VC(document.getVcPath())
                 .IC(document.getIcPath())
+                .token(document.getToken()) // 토큰 추가
+                .tokenExpiry(document.getTokenExpiry()) // 토큰 만료 시간 추가
                 .build();
     }
 

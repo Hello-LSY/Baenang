@@ -14,17 +14,16 @@ const ExternalServiceButton = ({ title, imgSrc, onPress }) => (
 
 const styles = StyleSheet.create({
   button: {
+    flex: 1,
     backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 10,
-    marginVertical: 10,
+    marginVertical: 7,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    marginHorizontal: 5,
-    width: '47%',
+    marginHorizontal: 7,
     height: 60,
     alignItems: 'center',
     justifyContent: 'center',
@@ -33,11 +32,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   title: {
-    fontSize: 14,
+    height: 30,
+    lineHeight: 30,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#343E40'
   },
   image: {
-    width: 25,
-    height: 25,
+    width: 30,
+    height: 30,
     borderRadius: 5,
     marginRight: 10,
   },

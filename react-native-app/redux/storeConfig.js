@@ -1,12 +1,14 @@
 // redux/storeConfig.js
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './authSlice';
-import businessCardReducer from './businessCardSlice';
-import travelCertificatesReducer from './travelCertificatesSlice';
-import exchangeRateReducer from './exchangeRateState';
-import postReducer from './postSlice';
-import friendReducer from './friendSlice';
-import commentReducer from './commentSlice'
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./authSlice";
+import businessCardReducer from "./businessCardSlice";
+import travelCertificatesReducer from "./travelCertificatesSlice";
+import exchangeRateReducer from "./exchangeRateState";
+import postReducer from "./postSlice";
+import friendReducer from "./friendSlice";
+import commentReducer from "./commentSlice";
+import documentReducer from "./documentSlice";
+import documentItemReducer from "./documentItemSlice";
 
 const storeConfig = configureStore({
   reducer: {
@@ -17,6 +19,8 @@ const storeConfig = configureStore({
     post: postReducer,
     comment: commentReducer,
     friend: friendReducer,
+    document: documentReducer,
+    documentItem : documentItemReducer,
   },
 });
 
