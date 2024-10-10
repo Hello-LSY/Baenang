@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   countryText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   dateText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#999',
   },
 });
