@@ -15,6 +15,5 @@ public class ExchangeRateDTO {
     private String currencyName;
     private Double exchangeRateValue;
     private LocalDateTime recordedAt;
-    private boolean isDecreasing; // 하락 여부
     private Double exchangeChangePercentage;
 }

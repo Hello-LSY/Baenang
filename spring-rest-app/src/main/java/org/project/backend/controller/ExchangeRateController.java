@@ -52,25 +52,6 @@ public class ExchangeRateController {
         }
     }
 
-    @ApiOperation(value = "모든 국가의 환율 변동 조회", notes = "모든 국가에 대한 환율 변동 정보를 조회합니다.")
-    @GetMapping(value = "/all-with-change", produces = "application/json")
-    public ResponseEntity<List<ExchangeRateDTO>> getAllRatesWithChange() {
-        try {
-            List<ExchangeRateDTO> allRatesWithChange = exchangeRateService.getAllRatesSortedByDecreaseThenIncrease();
-            return ResponseEntity.ok(allRatesWithChange);
-        } catch (ExchangeRateNotFoundException e) {
-            logger.error("ExchangeRateNotFoundException: " + e.getMessage(), e); // 예외 로그 추가
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
-        } catch (Exception e) {
-            logger.error("Unexpected error occurred: " + e.getMessage(), e); // 전체 예외 처리 로그
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        }
-    }
-
-
-
     @ApiOperation(value = "특정 통화 코드의 환율 기록 조회", notes = "특정 통화 코드의 환율 변동 기록을 조회합니다.")
     @GetMapping(value = "/{currencyCode}", produces = "application/json")
     public ResponseEntity<List<ExchangeRateDTO>> getExchangeRateByCurrencyCode(
