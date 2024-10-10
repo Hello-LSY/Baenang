@@ -38,10 +38,10 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
-  const { allRatesWithChange, fetchAllRatesWithChangeData, loading } = useExchangeRate();
+  const { allRatesWithChange, fetchAllRatesWithChangeData, loading } =
+    useExchangeRate();
   const scrollX = useRef(new Animated.Value(0)).current;
   const slideIntervalRef = useRef(null);
-
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -108,17 +108,25 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const getPercentageSymbol = (exchangeChangePercentage) => {
-    if (exchangeChangePercentage === null || exchangeChangePercentage === undefined || exchangeChangePercentage === 0) {
-      return '';  // 값 변동이 없으면 기호 없음
+    if (
+      exchangeChangePercentage === null ||
+      exchangeChangePercentage === undefined ||
+      exchangeChangePercentage === 0
+    ) {
+      return ''; // 값 변동이 없으면 기호 없음
     }
-    return exchangeChangePercentage > 0 ? '▲' : '▼';  // 양수는 ▲, 음수는 ▼
+    return exchangeChangePercentage > 0 ? '▲' : '▼'; // 양수는 ▲, 음수는 ▼
   };
-  
+
   const getPercentageColor = (exchangeChangePercentage) => {
-    if (exchangeChangePercentage === null || exchangeChangePercentage === undefined || exchangeChangePercentage === 0) {
-      return 'gray';  // 값 변동이 없으면 회색
+    if (
+      exchangeChangePercentage === null ||
+      exchangeChangePercentage === undefined ||
+      exchangeChangePercentage === 0
+    ) {
+      return 'gray'; // 값 변동이 없으면 회색
     }
-    return exchangeChangePercentage > 0 ? 'red' : 'blue';  // 양수는 빨간색, 음수는 파란색
+    return exchangeChangePercentage > 0 ? 'red' : 'blue'; // 양수는 빨간색, 음수는 파란색
   };
 
   const handleNext = () => {
@@ -146,7 +154,9 @@ const HomeScreen = ({ navigation }) => {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
@@ -159,7 +169,11 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       <ScrollView style={styles.container}>
-        <DocumentWallet2 title="내 문서" documents={documents} backgroundColors={backgroundColors} />
+        <DocumentWallet2
+          title="내 문서"
+          documents={documents}
+          backgroundColors={backgroundColors}
+        />
       </ScrollView>
 
       <View style={styles.servicecontainer}>
@@ -200,39 +214,91 @@ const HomeScreen = ({ navigation }) => {
         {loading ? (
           <Text>Loading...</Text>
         ) : allRatesWithChange.length > 0 ? (
-          <Animated.View style={[styles.exchangeRateWrapper, { transform: [{ translateX: scrollX }] }]}>
-            <TouchableOpacity onPress={handlePrevious} disabled={currentIndex === 0}>
-              <AntDesign name="left" size={24} color={currentIndex === 0 ? '#ccc' : '#000'} />
+          <Animated.View
+            style={[
+              styles.exchangeRateWrapper,
+              { transform: [{ translateX: scrollX }] },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={handlePrevious}
+              disabled={currentIndex === 0}
+            >
+              <AntDesign
+                name="left"
+                size={24}
+                color={currentIndex === 0 ? '#ccc' : '#000'}
+              />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleExchangeRateClick(allRatesWithChange[currentIndex]?.currencyCode)}>
+            <TouchableOpacity
+              onPress={() =>
+                handleExchangeRateClick(
+                  allRatesWithChange[currentIndex]?.currencyCode
+                )
+              }
+            >
               <View style={styles.exchangeItem}>
                 <View style={styles.flagContainer}>
                   <FlagIcon
-                    currencyCode={allRatesWithChange[currentIndex]?.currencyCode.replace("(100)", "").trim()}
+                    currencyCode={allRatesWithChange[currentIndex]?.currencyCode
+                      .replace('(100)', '')
+                      .trim()}
                     size={40}
                   />
                 </View>
                 <View style={styles.exchangeInfo}>
-                  <Text style={styles.currencyCode}>{allRatesWithChange[currentIndex]?.currencyCode}</Text>
-                  <Text style={styles.currencyName}>{allRatesWithChange[currentIndex]?.currencyName}</Text>
+                  <Text style={styles.currencyCode}>
+                    {allRatesWithChange[currentIndex]?.currencyCode}
+                  </Text>
+                  <Text style={styles.currencyName}>
+                    {allRatesWithChange[currentIndex]?.currencyName}
+                  </Text>
                 </View>
                 <View style={styles.exchangeRateContainer}>
                   <Text style={[styles.exchangeRate, { color: 'black' }]}>
-                    {allRatesWithChange[currentIndex]?.exchangeRateValue.toFixed(2)}
+                    {allRatesWithChange[
+                      currentIndex
+                    ]?.exchangeRateValue.toFixed(2)}
                   </Text>
                   <Text
-                    style={[styles.exchangeChange, { color: getPercentageColor(allRatesWithChange[currentIndex]?.exchangeChangePercentage) }]}
+                    style={[
+                      styles.exchangeChange,
+                      {
+                        color: getPercentageColor(
+                          allRatesWithChange[currentIndex]
+                            ?.exchangeChangePercentage
+                        ),
+                      },
+                    ]}
                   >
-                    {getPercentageSymbol(allRatesWithChange[currentIndex]?.exchangeChangePercentage)}
-                    {allRatesWithChange[currentIndex]?.exchangeChangePercentage !== null
-                      ? `${Math.abs(allRatesWithChange[currentIndex].exchangeChangePercentage.toFixed(2))}%`
+                    {getPercentageSymbol(
+                      allRatesWithChange[currentIndex]?.exchangeChangePercentage
+                    )}
+                    {allRatesWithChange[currentIndex]
+                      ?.exchangeChangePercentage !== null
+                      ? `${Math.abs(
+                          allRatesWithChange[
+                            currentIndex
+                          ].exchangeChangePercentage.toFixed(2)
+                        )}%`
                       : 'N/A'}
                   </Text>
                 </View>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleNext} disabled={currentIndex === allRatesWithChange.length - 1}>
-              <AntDesign name="right" size={24} color={currentIndex === allRatesWithChange.length - 1 ? '#ccc' : '#000'} />
+            <TouchableOpacity
+              onPress={handleNext}
+              disabled={currentIndex === allRatesWithChange.length - 1}
+            >
+              <AntDesign
+                name="right"
+                size={24}
+                color={
+                  currentIndex === allRatesWithChange.length - 1
+                    ? '#ccc'
+                    : '#000'
+                }
+              />
             </TouchableOpacity>
           </Animated.View>
         ) : (
@@ -259,7 +325,9 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터</Text>
         <Text style={styles.sectionSubtitle}>
-          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'}
+          {
+            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'
+          }
         </Text>
 
         <View style={styles.row}>
@@ -305,15 +373,34 @@ const HomeScreen = ({ navigation }) => {
             />
             <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
 
-            <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
-              <Feather name="edit" size={20} color="#333" style={styles.modalButtonIcon} />
+            <TouchableOpacity
+              style={styles.editProfileButton}
+              onPress={handleEditProfile}
+            >
+              <Feather
+                name="edit"
+                size={20}
+                color="#333"
+                style={styles.modalButtonIcon}
+              />
               <Text style={styles.editProfileButtonText}>개인정보 수정</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Feather name="log-out" size={20} color="#fff" style={styles.modalButtonIcon} />
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <Feather
+                name="log-out"
+                size={20}
+                color="#fff"
+                style={styles.modalButtonIcon}
+              />
               <Text style={styles.logoutButtonText}>로그아웃</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={toggleModal}
+            >
               <Text style={styles.modalCloseButtonText}>닫기</Text>
             </TouchableOpacity>
           </View>
