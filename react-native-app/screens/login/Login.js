@@ -36,7 +36,7 @@ const Login = ({ navigation }) => {
 
   useEffect(() => {
     if (auth.token && !auth.error) {
-      Alert.alert('Success', '로그인 성공');
+      // Alert.alert('Success', '로그인 성공');
       navigation.navigate('MainTabs');
     } else if (auth.error) {
       // 오류가 발생했을 때 오류 메시지 표시
@@ -44,7 +44,7 @@ const Login = ({ navigation }) => {
       if (typeof errorMessage === 'object') {
         errorMessage = errorMessage.message || '로그인 실패';
       }
-      Alert.alert('Error', errorMessage || '로그인 실패');
+      Alert.alert('Error', errorMessage || '아이디 혹은 비밀번호가 일치하지 않습니다.');
     }
   }, [auth, navigation]);
 
