@@ -38,10 +38,9 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
-  const { allRatesWithChange, fetchAllRatesWithChangeData, loading } = useExchangeRate();
+  const { latestExchangeRates, fetchLatestRates, loading } = useExchangeRate();
   const scrollX = useRef(new Animated.Value(0)).current;
   const slideIntervalRef = useRef(null);
-
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -66,7 +65,7 @@ const HomeScreen = ({ navigation }) => {
   ];
 
   useEffect(() => {
-    fetchAllRatesWithChangeData();
+    fetchLatestRates(); // 최신 환율 데이터를 가져옴
     startAutoSlide();
 
     return () => {
@@ -86,7 +85,7 @@ const HomeScreen = ({ navigation }) => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchAllRatesWithChangeData();
+    fetchLatestRates();
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
@@ -125,7 +124,7 @@ const HomeScreen = ({ navigation }) => {
     stopAutoSlide();
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex + 1;
-      return nextIndex < allRatesWithChange.length ? nextIndex : 0; // 마지막 슬라이드에서 첫 번째로 돌아가기
+      return nextIndex < latestExchangeRates.length ? nextIndex : 0; // 마지막 슬라이드에서 첫 번째로 돌아가기
     });
     startAutoSlide();
   };
@@ -134,7 +133,7 @@ const HomeScreen = ({ navigation }) => {
     stopAutoSlide();
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex - 1;
-      return nextIndex >= 0 ? nextIndex : allRatesWithChange.length - 1; // 첫 번째에서 마지막으로 돌아가기
+      return nextIndex >= 0 ? nextIndex : latestExchangeRates.length - 1; // 첫 번째에서 마지막으로 돌아가기
     });
     startAutoSlide();
   };
@@ -199,40 +198,40 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.sectionTitle}>실시간 환율</Text>
         {loading ? (
           <Text>Loading...</Text>
-        ) : allRatesWithChange.length > 0 ? (
+        ) : latestExchangeRates.length > 0 ? (
           <Animated.View style={[styles.exchangeRateWrapper, { transform: [{ translateX: scrollX }] }]}>
             <TouchableOpacity onPress={handlePrevious} disabled={currentIndex === 0}>
               <AntDesign name="left" size={24} color={currentIndex === 0 ? '#ccc' : '#000'} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleExchangeRateClick(allRatesWithChange[currentIndex]?.currencyCode)}>
+            <TouchableOpacity onPress={() => handleExchangeRateClick(latestExchangeRates[currentIndex]?.currencyCode)}>
               <View style={styles.exchangeItem}>
                 <View style={styles.flagContainer}>
                   <FlagIcon
-                    currencyCode={allRatesWithChange[currentIndex]?.currencyCode.replace("(100)", "").trim()}
+                    currencyCode={latestExchangeRates[currentIndex]?.currencyCode.replace("(100)", "").trim()}
                     size={40}
                   />
                 </View>
                 <View style={styles.exchangeInfo}>
-                  <Text style={styles.currencyCode}>{allRatesWithChange[currentIndex]?.currencyCode}</Text>
-                  <Text style={styles.currencyName}>{allRatesWithChange[currentIndex]?.currencyName}</Text>
+                  <Text style={styles.currencyCode}>{latestExchangeRates[currentIndex]?.currencyCode}</Text>
+                  <Text style={styles.currencyName}>{latestExchangeRates[currentIndex]?.currencyName}</Text>
                 </View>
                 <View style={styles.exchangeRateContainer}>
                   <Text style={[styles.exchangeRate, { color: 'black' }]}>
-                    {allRatesWithChange[currentIndex]?.exchangeRateValue.toFixed(2)}
+                    {latestExchangeRates[currentIndex]?.exchangeRateValue.toFixed(2)}
                   </Text>
                   <Text
-                    style={[styles.exchangeChange, { color: getPercentageColor(allRatesWithChange[currentIndex]?.exchangeChangePercentage) }]}
+                    style={[styles.exchangeChange, { color: getPercentageColor(latestExchangeRates[currentIndex]?.exchangeChangePercentage) }]}
                   >
-                    {getPercentageSymbol(allRatesWithChange[currentIndex]?.exchangeChangePercentage)}
-                    {allRatesWithChange[currentIndex]?.exchangeChangePercentage !== null
-                      ? `${Math.abs(allRatesWithChange[currentIndex].exchangeChangePercentage.toFixed(2))}%`
+                    {getPercentageSymbol(latestExchangeRates[currentIndex]?.exchangeChangePercentage)}
+                    {latestExchangeRates[currentIndex]?.exchangeChangePercentage !== null
+                      ? `${Math.abs(latestExchangeRates[currentIndex].exchangeChangePercentage.toFixed(2))}%`
                       : 'N/A'}
                   </Text>
                 </View>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleNext} disabled={currentIndex === allRatesWithChange.length - 1}>
-              <AntDesign name="right" size={24} color={currentIndex === allRatesWithChange.length - 1 ? '#ccc' : '#000'} />
+            <TouchableOpacity onPress={handleNext} disabled={currentIndex === latestExchangeRates.length - 1}>
+              <AntDesign name="right" size={24} color={currentIndex === latestExchangeRates.length - 1 ? '#ccc' : '#000'} />
             </TouchableOpacity>
           </Animated.View>
         ) : (

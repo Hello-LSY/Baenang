@@ -16,6 +16,7 @@ import FlagIcon from '../../components/FlagIcon';
 
 const screenWidth = Dimensions.get('window').width;
 
+// 날짜 형식 변환 함수
 const formatDate = (dateArray) => {
   if (!dateArray || dateArray.length < 2) return '';
   const [year, month, day] = dateArray;
@@ -76,31 +77,17 @@ const ExchangeRateDetailScreen = ({ route }) => {
   const [chartType, setChartType] = useState('daily');
   const [krwAmount, setKrwAmount] = useState('');
   const [foreignAmount, setForeignAmount] = useState('');
-  const [selectedRate, setSelectedRate] = useState(null); // 선택된 환율 값을 저장
-  const [selectedDate, setSelectedDate] = useState(''); // 선택된 날짜를 저장
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 }); // 툴팁 위치
-  const [tooltipOpacity] = useState(new Animated.Value(0)); // 툴팁 애니메이션
-
-  const formatAmount = (amount, currency) => {
-    if (!amount) return '';
-    const formattedAmount = parseFloat(amount).toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    });
-    return currency === 'KRW'
-      ? `${formattedAmount} 원`
-      : `${formattedAmount} ${currency}`;
-  };
+  const [selectedRate, setSelectedRate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipOpacity] = useState(new Animated.Value(0));
 
   useEffect(() => {
     fetchRateHistory(currencyCode);
   }, [currencyCode]);
 
   useEffect(() => {
-    if (
-      exchangeRateHistory[currencyCode] &&
-      exchangeRateHistory[currencyCode].length > 0
-    ) {
+    if (exchangeRateHistory[currencyCode] && exchangeRateHistory[currencyCode].length > 0) {
       const latestRate = exchangeRateHistory[currencyCode][0]?.exchangeRateValue ?? 0;
       calculateForeignToKRW(foreignAmount, latestRate);
     }
@@ -126,14 +113,13 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   const showTooltip = (value, x, y, index) => {
     setSelectedRate(value);
-    setSelectedDate(formatDate(historyData[index].recordedAt)); // 선택된 날짜 저장
+    setSelectedDate(formatDate(historyData[index].recordedAt));
 
-    // 화면의 오른쪽 끝에서 툴팁이 잘리지 않도록 좌표를 조정
     const adjustedX = x > screenWidth - 150 ? screenWidth - 150 : x + 10;
     
     setTooltipPosition({
       x: adjustedX + 2,
-      y: y + 15, // 포인트 위에 툴팁 표시
+      y: y + 15,
     });
 
     Animated.timing(tooltipOpacity, {
@@ -150,7 +136,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
       useNativeDriver: true,
     }).start(() => {
       setSelectedRate(null);
-      setSelectedDate(''); // 툴팁이 사라질 때 날짜도 초기화
+      setSelectedDate('');
     });
   };
 
@@ -162,25 +148,17 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   if (chartType === 'weekly') {
     historyData = groupByWeek(historyData);
-    historyData = limitData(historyData, 4); // 최근 12주
+    historyData = limitData(historyData, 4); // 최근 4주
   } else if (chartType === 'monthly') {
     historyData = groupByMonth(historyData);
     historyData = limitData(historyData, 12); // 최근 12개월
   } else {
-    historyData = limitData(historyData, 10); // 최근 30일
+    historyData = limitData(historyData, 30); // 최근 30일
   }
 
-  // 현재 및 이전 데이터 추출
-  const latestRate =
-    historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue ?? 0 : 0;
-  const previousRate =
-    historyData.length > 1 ? historyData[historyData.length - 2].exchangeRateValue ?? null : null;
-
-  // 등락률 계산
+  const latestRate = historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
+  const previousRate = historyData.length > 1 ? historyData[historyData.length - 2].exchangeRateValue : null;
   const latestChangePercentage = calculateChangePercentage(latestRate, previousRate);
-
-  const latestRecordedAt =
-    historyData.length > 0 ? historyData[historyData.length - 1]?.recordedAt ?? null : null;
 
   return (
     <TouchableWithoutFeedback onPress={hideTooltip}>
@@ -198,14 +176,6 @@ const ExchangeRateDetailScreen = ({ route }) => {
               </Text>
             ) : (
               <Text style={styles.changeRate}>N/A</Text>
-            )}
-            {/* 가장 최근 업데이트 시간을 표시 */}
-            {latestRecordedAt ? (
-              <Text style={styles.updateTime}>
-                {`업데이트: ${formatDate(latestRecordedAt)}`}
-              </Text>
-            ) : (
-              <Text style={styles.updateTime}>업데이트 정보 없음</Text>
             )}
           </View>
 
@@ -226,9 +196,6 @@ const ExchangeRateDetailScreen = ({ route }) => {
                 }}
                 placeholder="0"
               />
-              <Text style={styles.formattedAmount}>
-                {formatAmount(foreignAmount, cleanedCurrencyCode)}
-              </Text>
             </View>
             <Text style={styles.equalSign}>=</Text>
             <View style={styles.inputContainer}>
@@ -246,9 +213,6 @@ const ExchangeRateDetailScreen = ({ route }) => {
                 }}
                 placeholder="0"
               />
-              <Text style={styles.formattedAmount}>
-                {formatAmount(krwAmount, 'KRW')}
-              </Text>
             </View>
           </View>
 
@@ -282,14 +246,14 @@ const ExchangeRateDetailScreen = ({ route }) => {
                   chartConfig={{
                     backgroundGradientFrom: '#ffffff',
                     backgroundGradientTo: '#ffffff',
-                    color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`, // 파란색 유지
+                    color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
                     strokeWidth: 2,
                     labelColor: () => '#666',
                   }}
                   bezier
                   style={styles.chart}
                   onDataPointClick={({ value, x, y, index }) => {
-                    showTooltip(value, x, y, index); // 데이터 포인트 클릭 시 툴팁 표시
+                    showTooltip(value, x, y, index);
                   }}
                 />
 
@@ -343,11 +307,6 @@ const styles = StyleSheet.create({
     color: 'red',
     marginTop: 4,
   },
-  updateTime: {
-    fontSize: 12,
-    color: 'gray',
-    marginTop: 4,
-  },
   calculatorContainer: {
     padding: 16,
     borderBottomWidth: 1,
@@ -358,13 +317,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  currencyInputContainer: {
+  inputContainer: {
     marginBottom: 16,
-  },
-  currencySelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
   },
   input: {
     height: 40,
@@ -411,7 +365,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tooltipBubble: {
-    backgroundColor: 'rgba(50, 50, 50, 0.8)', // 회색 톤에 투명도 추가
+    backgroundColor: 'rgba(50, 50, 50, 0.8)',
     padding: 6,
     borderRadius: 4,
   },
@@ -424,14 +378,6 @@ const styles = StyleSheet.create({
     color: '#bbb',
     fontSize: 12,
     marginBottom: 2,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  formattedAmount: {
-    fontSize: 12,
-    color: '#666',
-    paddingLeft: 8,
   },
 });
 
