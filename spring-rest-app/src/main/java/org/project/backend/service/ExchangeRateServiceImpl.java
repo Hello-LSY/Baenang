@@ -100,71 +100,6 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<ExchangeRateDTO> getAllRatesSortedByDecreaseThenIncrease() {
-        LocalDate lastBusinessDay = getPreviousBusinessDay(LocalDate.now());
-        LocalDate previousBusinessDay = getPreviousBusinessDay(lastBusinessDay.minusDays(1));
-
-        logger.info("Last business day: {}, Previous business day: {}", lastBusinessDay, previousBusinessDay);
-
-        List<ExchangeRate> lastBusinessDayRates = fetchRatesWithFallback(lastBusinessDay);
-        List<ExchangeRate> previousBusinessDayRates = fetchRatesWithFallback(previousBusinessDay);
-
-        if (lastBusinessDayRates.isEmpty() || previousBusinessDayRates.isEmpty()) {
-            logger.warn("One of the days does not have rates: Last: {}, Previous: {}", lastBusinessDayRates.isEmpty(), previousBusinessDayRates.isEmpty());
-            return Collections.emptyList();
-        }
-
-        // 통화 코드와 날짜를 키로 사용하여 맵 생성
-        Map<String, ExchangeRate> previousDayRateMap = previousBusinessDayRates.stream()
-                .collect(Collectors.toMap(
-                        rate -> rate.getCurrencyCode() + "_" + rate.getRecordedAt().toLocalDate(),  // 통화 코드와 날짜를 결합하여 키로 사용
-                        rate -> rate,
-                        BinaryOperator.maxBy(Comparator.comparing(ExchangeRate::getRecordedAt))
-                ));
-
-        // 하락한 환율 리스트
-        List<ExchangeRateDTO> decreasingRates = lastBusinessDayRates.stream()
-                .filter(rate -> {
-                    String currencyKey = rate.getCurrencyCode() + "_" + previousBusinessDay;
-                    ExchangeRate previousRate = previousDayRateMap.get(currencyKey);
-
-                    if (previousRate != null) {
-                        double rateDifference = rate.getExchangeRateValue() - previousRate.getExchangeRateValue();
-                        logger.info("Currency code: {}, Last day rate: {}, Previous day rate: {}, Difference: {}",
-                                rate.getCurrencyCode(), rate.getExchangeRateValue(), previousRate.getExchangeRateValue(), rateDifference);
-                        return rateDifference < 0;  // 하락한 경우만 필터링
-                    }
-                    return false;
-                })
-                .map(rate -> convertToDTO(rate, previousDayRateMap.get(rate.getCurrencyCode() + "_" + previousBusinessDay).getExchangeRateValue()))
-                .sorted(Comparator.comparingDouble(ExchangeRateDTO::getExchangeRateValue))
-                .collect(Collectors.toList());
-
-        logger.info("Decreasing rates: {}", decreasingRates);
-
-        // 상승한 환율 리스트
-        List<ExchangeRateDTO> increasingRates = lastBusinessDayRates.stream()
-                .filter(rate -> {
-                    String currencyKey = rate.getCurrencyCode() + "_" + previousBusinessDay;
-                    ExchangeRate previousRate = previousDayRateMap.get(currencyKey);
-
-                    if (previousRate != null) {
-                        double rateDifference = rate.getExchangeRateValue() - previousRate.getExchangeRateValue();
-                        logger.info("Currency code: {}, Last day rate: {}, Previous day rate: {}, Difference: {}",
-                                rate.getCurrencyCode(), rate.getExchangeRateValue(), previousRate.getExchangeRateValue(), rateDifference);
-                        return rateDifference > 0;  // 상승한 경우만 필터링
-                    }
-                    return false;
-                })
-                .map(rate -> convertToDTO(rate, previousDayRateMap.get(rate.getCurrencyCode() + "_" + previousBusinessDay).getExchangeRateValue()))
-                .sorted(Comparator.comparingDouble(ExchangeRateDTO::getExchangeRateValue))
-                .collect(Collectors.toList());
-
-        decreasingRates.addAll(increasingRates);
-
-        return decreasingRates;
-    }
 
     @Override
     public List<ExchangeRateDTO> getExchangeRateByCurrencyCode(String currencyCode) {
@@ -192,12 +127,40 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     @Override
     public List<ExchangeRateDTO> getLatestExchangeRates() {
+        // 최신 영업일을 먼저 가져옴
         LocalDate latestBusinessDay = getPreviousBusinessDay(LocalDate.now());
-        List<ExchangeRate> latestRates = fetchRatesWithFallback(latestBusinessDay);
+        LocalDate previousBusinessDay = getPreviousBusinessDay(latestBusinessDay.minusDays(1));
 
-        return latestRates.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        logger.info("Fetching exchange rates for latest business day: {}, and previous business day: {}",
+                latestBusinessDay, previousBusinessDay);
+
+        // 최신 영업일 환율 데이터를 가져옴
+        List<ExchangeRate> latestRates = fetchRatesWithFallback(latestBusinessDay);
+        // 이전 영업일 환율 데이터를 가져옴
+        List<ExchangeRate> previousRates = fetchRatesWithFallback(previousBusinessDay);
+
+        // 이전 영업일의 데이터를 통화 코드별로 매핑
+        Map<String, ExchangeRate> previousRatesMap = previousRates.stream()
+                .collect(Collectors.toMap(
+                        ExchangeRate::getCurrencyCode,
+                        rate -> rate,
+                        BinaryOperator.maxBy(Comparator.comparing(ExchangeRate::getRecordedAt))
+                ));
+
+        // 최신일의 데이터를 통화 코드별로 매핑하면서 중복 제거
+        Map<String, ExchangeRateDTO> latestRatesMap = latestRates.stream()
+                .collect(Collectors.toMap(
+                        ExchangeRate::getCurrencyCode,
+                        rate -> {
+                            ExchangeRate previousRate = previousRatesMap.get(rate.getCurrencyCode());
+                            Double previousRateValue = previousRate != null ? previousRate.getExchangeRateValue() : null;
+                            return convertToDTO(rate, previousRateValue);
+                        },
+                        (existing, replacement) -> existing  // 중복된 통화 코드에 대해 기존 데이터 유지
+                ));
+
+        // 최신 데이터를 반환
+        return new ArrayList<>(latestRatesMap.values());
     }
 
     private ExchangeRateDTO convertToDTO(ExchangeRate exchangeRate) {
@@ -227,19 +190,12 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
                 .build();
     }
 
-
-
-
     private LocalDate getPreviousBusinessDay(LocalDate date) {
-        if (LocalTime.now().isBefore(LocalTime.of(11, 1))) {
-            date = date.minusDays(1);
-        }
         while (isNonBusinessDay(date)) {
             date = date.minusDays(1);
         }
         return date;
     }
-
     private boolean isNonBusinessDay(LocalDate date) {
         return date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY || holidays.contains(date);
     }
