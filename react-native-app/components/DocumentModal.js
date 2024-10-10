@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -6,14 +6,17 @@ import {
   Pressable,
   TextInput,
   StyleSheet,
+  Animated,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   requestVerification,
   verifyDocument,
   getDocument,
-  clearDocumentState, // 추가
+  clearDocumentState,
 } from "../redux/documentSlice"; // Redux 액션
+import { Ionicons } from "@expo/vector-icons"; // Ionicons 사용
 
 const DocumentModal = ({ visible, document, onClose, navigation }) => {
   const [email, setEmail] = useState("");
@@ -25,6 +28,27 @@ const DocumentModal = ({ visible, document, onClose, navigation }) => {
   const { isLoading, verificationRequested, documentInfo, error } = useSelector(
     (state) => state.document
   );
+
+  const slideAnim = useRef(new Animated.Value(-500)).current;
+
+  // 모달 표시 여부에 따른 애니메이션 효과
+  useEffect(() => {
+    if (visible) {
+      // 모달이 열릴 때 애니메이션 실행
+      Animated.timing(slideAnim, {
+        toValue: 0, // 최종 위치 (화면 중앙)
+        duration: 300, // 애니메이션 지속 시간
+        useNativeDriver: true, // 네이티브 드라이버 사용
+      }).start();
+    } else {
+      // 모달이 닫힐 때 애니메이션 실행
+      Animated.timing(slideAnim, {
+        toValue: -500, // 모달이 화면 위로 사라짐
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, slideAnim]);
 
   // getDocument 호출 및 token 만료 여부 확인
   useEffect(() => {
@@ -49,8 +73,6 @@ const DocumentModal = ({ visible, document, onClose, navigation }) => {
           documentInfo.tokenExpiry[6] // 밀리초
         )
       : null;
-
-    console.log("tokenExpiry: ", tokenExpiry, "now: ", now); // 토큰 만료 시간과 현재 시간 확인
 
     // 토큰이 만료된 경우 상태 초기화 및 인증 요청 단계로 되돌림
     if (!documentInfo?.token || (tokenExpiry && tokenExpiry <= now)) {
@@ -114,106 +136,125 @@ const DocumentModal = ({ visible, document, onClose, navigation }) => {
 
   return (
     <Modal
-      animationType="slide"
+      animationType="none"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={onClose} // 안드로이드 뒤로가기 버튼 동작 설정
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>{document?.title || "문서 인증"}</Text>
-          {document?.isNew && <Text style={styles.newTag}>NEW</Text>}
+      {/* 모달 외부를 클릭했을 때 모달이 닫히도록 설정 */}
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        {/* 모달 내부를 클릭했을 때 모달이 닫히지 않도록 설정 */}
+        <Animated.View style={[styles.centeredView, { transform: [{translateY: slideAnim}]} ]}>
+          <View style={styles.modalView}>
+            {/* 닫기 버튼 */}
+            <Pressable style={styles.closeButton} onPress={onClose}>
+              <Ionicons name="close" size={24} color="black" />
+            </Pressable>
 
-          <Text style={styles.instructionText}>
-            본인 인증을 완료해야 합니다.
-          </Text>
+            {/* 선택한 문서와 new 버튼 */}
+            <Text style={styles.modalText}>{document?.title || "문서 인증"}</Text>
+            {document?.isNew && <Text style={styles.newTag}>NEW</Text>}
 
-          {!verificationRequested && (
-            <>
-              <Text>이름:</Text>
-              <TextInput
-                style={styles.input}
-                value={fullName}
-                onChangeText={setFullName}
-                placeholder="이름"
-              />
+            {/* 본인인증 필요 시 모달 */}
+            <Text style={styles.instructionText}>
+              본인 인증을 완료해야 합니다.
+            </Text>
 
-              <Text>이메일을 입력하세요:</Text>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="이메일"
-                keyboardType="email-address"
-              />
+            {!verificationRequested && (
+              <>
+                <View style={styles.inputRow}>
+                  <Text style={styles.inputLabel}>이름</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={fullName}
+                    onChangeText={setFullName}
+                    placeholder="이름"
+                  />
+                </View>
 
-              <Text>주민등록번호를 입력하세요:</Text>
-              <TextInput
-                style={styles.input}
-                value={rrn}
-                onChangeText={setRrn}
-                placeholder="주민등록번호"
-              />
+                <View style={styles.inputRow}>
+                  <Text style={styles.inputLabel}>이메일</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="이메일"
+                    keyboardType="email-address"
+                  />
+                </View>
 
-              {isLoading && <Text>요청 중...</Text>}
-              {error && <Text style={{ color: "red" }}>{error}</Text>}
-              <Pressable
-                style={[styles.button, styles.buttonRequest]}
-                onPress={handleRequestVerification}
-                disabled={isLoading}
-              >
-                <Text style={styles.textStyle}>인증 코드 요청</Text>
-              </Pressable>
-            </>
-          )}
+                <View style={styles.inputRow}>
+                  <Text style={styles.inputLabel}>주민등록번호</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={rrn}
+                    onChangeText={setRrn}
+                    placeholder="주민등록번호"
+                  />
+                </View>
 
-          {verificationRequested && (
-            <>
-              <Text>이메일로 전송된 인증 코드를 입력하세요:</Text>
-              <TextInput
-                style={styles.input}
-                value={code}
-                onChangeText={setCode}
-                placeholder="인증 코드"
-              />
-              {isLoading && <Text>인증 중...</Text>}
-              {documentInfo && (
-                <Text style={{ color: "green" }}>인증 성공!</Text>
-              )}
-              {error && <Text style={{ color: "red" }}>{error}</Text>}
-              <Pressable
-                style={[styles.button, styles.buttonVerify]}
-                onPress={handleVerification}
-                disabled={isLoading}
-              >
-                <Text style={styles.textStyle}>인증</Text>
-              </Pressable>
-            </>
-          )}
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={onClose}
-          >
-            <Text style={styles.textStyle}>닫기</Text>
-          </Pressable>
-        </View>
-      </View>
+                {isLoading && <Text>요청 중...</Text>}
+                {error && <Text style={{ color: "red" }}>{error}</Text>}
+                <Pressable
+                  style={[styles.button, styles.buttonRequest]}
+                  onPress={handleRequestVerification}
+                  disabled={isLoading}
+                >
+                  <Text style={styles.textStyle}>인증 코드 요청</Text>
+                </Pressable>
+              </>
+            )}
+
+            {/* 코드 전송 후 코드입력 모달 */}
+            {verificationRequested && (
+              <>
+                <Text style={{ marginBottom:20, color: "red" }}>인증코드가 이메일로 발송되었습니다.</Text>
+                <Text style={styles.inputLabel}>인증 코드</Text>
+                <TextInput
+                  style={styles.input}
+                  value={code}
+                  onChangeText={setCode}
+                  placeholder="인증 코드"
+                />
+                {isLoading && <Text>인증 중...</Text>}
+                {documentInfo && (
+                  <Text style={{ color: "green" }}>인증 성공!</Text>
+                )}
+                {error && <Text style={{ color: "red" }}>{error}</Text>}
+                
+                <Pressable
+                  style={[styles.button, styles.buttonRequest]}
+                  onPress={handleVerification}
+                  disabled={isLoading}
+                >
+                  <Text style={styles.textStyle}>인증</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </Animated.View>
+      </Pressable>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  centeredView: {
+  backdrop: {
     flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // 배경을 반투명 검정색으로 설정
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
+  },
+  centeredView: {
+    width: '100%',
+    alignItems: "center",
+    justifyContent: "center",
   },
   modalView: {
-    margin: 20,
+    width: '80%',
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 30,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -224,20 +265,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  closeButton: {
+    position: 'absolute',
+    top: 10, // 모달 상단에 위치
+    right: 10, // 모달 우측에 위치
+    backgroundColor: 'transparent', // 버튼 배경 투명
+    borderRadius: 15,
+    padding: 5,
+  },
   button: {
     borderRadius: 20,
     padding: 10,
     elevation: 2,
     marginTop: 10,
   },
-  buttonClose: {
-    backgroundColor: "#f44336",
-  },
   buttonRequest: {
     backgroundColor: "#2196F3",
-  },
-  buttonVerify: {
-    backgroundColor: "#4CAF50",
   },
   textStyle: {
     color: "white",
@@ -259,6 +302,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
+  instructionText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 30,
+  },
+  inputRow: {
+    width: '100%',
+    marginBottom: 20,
+  },
   input: {
     width: "100%",
     borderBottomWidth: 1,
@@ -266,11 +318,10 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginVertical: 10,
   },
-  instructionText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 10,
-  },
+  inputLabel: {
+    fontWeight: 'bold',
+    fontSize: 15,
+  }
 });
 
 export default DocumentModal;
