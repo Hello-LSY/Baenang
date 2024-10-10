@@ -2,17 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiClient } from './apiClient';
 import { useSelector, useDispatch } from 'react-redux';
 
-// 모든 환율 데이터 및 등락률 포함 조회
-export const fetchAllRatesWithChange = createAsyncThunk(
-  'exchangeRate/fetchAllRatesWithChange',
-  async (_, { getState }) => {
-    const { auth } = getState(); // auth 상태에서 토큰을 가져옴
-    const apiClient = getApiClient(auth.token); // 토큰을 포함하여 API 클라이언트 생성
-    const response = await apiClient.get('/api/exchange/all-with-change');
-    return response.data;
-  }
-);
-
 // 특정 통화의 환율 히스토리 조회 
 export const fetchExchangeRateHistory = createAsyncThunk(
   'exchangeRate/fetchExchangeRateHistory',
@@ -37,7 +26,6 @@ export const fetchLatestExchangeRates = createAsyncThunk(
 const exchangeRateSlice = createSlice({
   name: 'exchangeRate',
   initialState: {
-    allRatesWithChange: [], // 모든 환율 데이터를 저장
     exchangeRateHistory: {}, // 통화별 환율 히스토리
     latestExchangeRates: [], // 최신 환율 정보
     loading: false,
@@ -46,19 +34,6 @@ const exchangeRateSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // 모든 환율 데이터와 등락률 포함
-      .addCase(fetchAllRatesWithChange.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchAllRatesWithChange.fulfilled, (state, action) => {
-        state.loading = false;
-        state.allRatesWithChange = action.payload;
-      })
-      .addCase(fetchAllRatesWithChange.rejected, (state) => {
-        state.loading = false;
-        state.error = 'Failed to fetch all rates with change';
-      })
-
       // 특정 통화의 환율 히스토리
       .addCase(fetchExchangeRateHistory.pending, (state) => {
         state.loading = true;
@@ -92,16 +67,11 @@ const exchangeRateSlice = createSlice({
 export const useExchangeRate = () => {
   const dispatch = useDispatch();
   const { 
-    allRatesWithChange, 
     exchangeRateHistory, 
     latestExchangeRates, 
     loading, 
     error 
   } = useSelector((state) => state.exchangeRate);
-
-  const fetchAllRatesWithChangeData = () => {
-    dispatch(fetchAllRatesWithChange());
-  };
 
   const fetchRateHistory = (currencyCode) => {
     dispatch(fetchExchangeRateHistory(currencyCode));
@@ -112,12 +82,10 @@ export const useExchangeRate = () => {
   };
 
   return {
-    allRatesWithChange,
     exchangeRateHistory,
     latestExchangeRates,
     loading,
     error,
-    fetchAllRatesWithChangeData,
     fetchRateHistory,
     fetchLatestRates,
   };

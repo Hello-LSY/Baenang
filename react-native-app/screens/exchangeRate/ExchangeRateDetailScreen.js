@@ -7,6 +7,8 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  Animated,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useExchangeRate } from '../../redux/exchangeRateState';
@@ -14,19 +16,20 @@ import FlagIcon from '../../components/FlagIcon';
 
 const screenWidth = Dimensions.get('window').width;
 
+// 날짜 형식 변환 함수
 const formatDate = (dateArray) => {
   if (!dateArray || dateArray.length < 2) return '';
   const [year, month, day] = dateArray;
   return `${String(month).padStart(2, '0')}.${day ? String(day).padStart(2, '0') : ''}`;
 };
 
+// 주별, 월별 그룹화 함수들
 const groupByWeek = (data) => {
   const weeks = [];
   for (let i = 0; i < data.length; i += 7) {
     const weekData = data.slice(i, i + 7);
     const average =
-      weekData.reduce((sum, item) => sum + item.exchangeRateValue, 0) /
-      weekData.length;
+      weekData.reduce((sum, item) => sum + item.exchangeRateValue, 0) / weekData.length;
     weeks.push({
       recordedAt: weekData[0].recordedAt,
       exchangeRateValue: average,
@@ -47,13 +50,24 @@ const groupByMonth = (data) => {
 
   return Object.keys(months).map((month) => {
     const average =
-      months[month].reduce((sum, value) => sum + value, 0) /
-      months[month].length;
+      months[month].reduce((sum, value) => sum + value, 0) / months[month].length;
     return {
       recordedAt: [data[0].recordedAt[0], month, 1],
       exchangeRateValue: average,
     };
   });
+};
+
+// 등락률 계산 함수
+const calculateChangePercentage = (currentRate, previousRate) => {
+  if (!previousRate || previousRate === 0) return null; // 이전 값이 없거나 0일 때
+  const change = ((currentRate - previousRate) / previousRate) * 100;
+  return change.toFixed(2); // 소수점 2자리까지 표현
+};
+
+// 데이터 제한 함수
+const limitData = (data, limit) => {
+  return data.slice(Math.max(data.length - limit, 0));
 };
 
 const ExchangeRateDetailScreen = ({ route }) => {
@@ -63,28 +77,18 @@ const ExchangeRateDetailScreen = ({ route }) => {
   const [chartType, setChartType] = useState('daily');
   const [krwAmount, setKrwAmount] = useState('');
   const [foreignAmount, setForeignAmount] = useState('');
-
-  const formatAmount = (amount, currency) => {
-    if (!amount) return '';
-    const formattedAmount = parseFloat(amount).toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    });
-    return currency === 'KRW'
-      ? `${formattedAmount} 원`
-      : `${formattedAmount} ${currency}`;
-  };
+  const [selectedRate, setSelectedRate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipOpacity] = useState(new Animated.Value(0));
 
   useEffect(() => {
     fetchRateHistory(currencyCode);
   }, [currencyCode]);
 
   useEffect(() => {
-    if (
-      exchangeRateHistory[currencyCode] &&
-      exchangeRateHistory[currencyCode].length > 0
-    ) {
-      const latestRate = exchangeRateHistory[currencyCode][0].exchangeRateValue;
+    if (exchangeRateHistory[currencyCode] && exchangeRateHistory[currencyCode].length > 0) {
+      const latestRate = exchangeRateHistory[currencyCode][0]?.exchangeRateValue ?? 0;
       calculateForeignToKRW(foreignAmount, latestRate);
     }
   }, [foreignAmount, exchangeRateHistory, currencyCode]);
@@ -107,6 +111,35 @@ const ExchangeRateDetailScreen = ({ route }) => {
     }
   };
 
+  const showTooltip = (value, x, y, index) => {
+    setSelectedRate(value);
+    setSelectedDate(formatDate(historyData[index].recordedAt));
+
+    const adjustedX = x > screenWidth - 150 ? screenWidth - 150 : x + 10;
+    
+    setTooltipPosition({
+      x: adjustedX + 2,
+      y: y + 15,
+    });
+
+    Animated.timing(tooltipOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideTooltip = () => {
+    Animated.timing(tooltipOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedRate(null);
+      setSelectedDate('');
+    });
+  };
+
   if (loading) {
     return <Text>Loading...</Text>;
   }
@@ -115,120 +148,133 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   if (chartType === 'weekly') {
     historyData = groupByWeek(historyData);
+    historyData = limitData(historyData, 4); // 최근 4주
   } else if (chartType === 'monthly') {
     historyData = groupByMonth(historyData);
+    historyData = limitData(historyData, 12); // 최근 12개월
+  } else {
+    historyData = limitData(historyData, 30); // 최근 30일
   }
 
-  const latestRate =
-    historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
+  const latestRate = historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
+  const previousRate = historyData.length > 1 ? historyData[historyData.length - 2].exchangeRateValue : null;
+  const latestChangePercentage = calculateChangePercentage(latestRate, previousRate);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.currencyInfo}>
-          <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
-          <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
-        </View>
-        <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} KRW</Text>
-        <Text style={styles.changeRate}>▼ 11.70 -0.87%</Text>
-        <Text style={styles.updateTime}>09:13 17:17 • 실시간</Text>
-      </View>
-
-      <View style={styles.calculatorContainer}>
-        <Text style={styles.calculatorTitle}>환율계산기</Text>
-        <View style={styles.inputContainer}>
-          <View style={styles.currencySelector}>
-            <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
-            <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
-          </View>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={foreignAmount}
-            onChangeText={(value) => {
-              setForeignAmount(value);
-              calculateForeignToKRW(value, latestRate);
-            }}
-            placeholder="0"
-          />
-          <Text style={styles.formattedAmount}>
-            {formatAmount(foreignAmount, cleanedCurrencyCode)}
-          </Text>
-        </View>
-        <Text style={styles.equalSign}>=</Text>
-        <View style={styles.inputContainer}>
-          <View style={styles.currencySelector}>
-            <FlagIcon currencyCode="KRW" size={24} />
-            <Text style={styles.currencyCode}>KRW</Text>
-          </View>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={krwAmount}
-            onChangeText={(value) => {
-              setKrwAmount(value);
-              calculateKRWToForeign(value, latestRate);
-            }}
-            placeholder="0"
-          />
-          <Text style={styles.formattedAmount}>
-            {formatAmount(krwAmount, 'KRW')}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.chartContainer}>
-        <View style={styles.chartTypeSelector}>
-          {['daily', 'weekly', 'monthly'].map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={[
-                styles.chartTypeButton,
-                chartType === type && styles.chartTypeButtonActive,
-              ]}
-              onPress={() => setChartType(type)}
-            >
-              <Text
-                style={[
-                  styles.chartTypeText,
-                  chartType === type && styles.chartTypeTextActive,
-                ]}
-              >
-                {type === 'daily'
-                  ? '일별'
-                  : type === 'weekly'
-                  ? '주별'
-                  : '월별'}
+    <TouchableWithoutFeedback onPress={hideTooltip}>
+      <View style={styles.container}>
+        <ScrollView>
+          <View style={styles.header}>
+            <View style={styles.currencyInfo}>
+              <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+              <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
+            </View>
+            <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} 원</Text>
+            {latestChangePercentage !== null ? (
+              <Text style={[styles.changeRate, { color: latestChangePercentage >= 0 ? 'red' : 'blue' }]}>
+                {latestChangePercentage >= 0 ? '▲' : '▼'} {latestChangePercentage}%
               </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+            ) : (
+              <Text style={styles.changeRate}>N/A</Text>
+            )}
+          </View>
 
-        {historyData.length > 0 ? (
-          <LineChart
-            data={{
-              labels: historyData.map((data) => formatDate(data.recordedAt)),
-              datasets: [
-                { data: historyData.map((data) => data.exchangeRateValue) },
-              ],
-            }}
-            width={screenWidth - 32}
-            height={220}
-            chartConfig={{
-              backgroundGradientFrom: '#ffffff',
-              backgroundGradientTo: '#ffffff',
-              color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-              strokeWidth: 2,
-              labelColor: () => '#666',
-            }}
-            bezier
-            style={styles.chart}
-          />
-        ) : (
-          <Text>No history available</Text>
-        )}
+          <View style={styles.calculatorContainer}>
+            <Text style={styles.calculatorTitle}>환율계산기</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.currencySelector}>
+                <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+                <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={foreignAmount}
+                onChangeText={(value) => {
+                  setForeignAmount(value);
+                  calculateForeignToKRW(value, latestRate);
+                }}
+                placeholder="0"
+              />
+            </View>
+            <Text style={styles.equalSign}>=</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.currencySelector}>
+                <FlagIcon currencyCode="KRW" size={24} />
+                <Text style={styles.currencyCode}>KRW</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={krwAmount}
+                onChangeText={(value) => {
+                  setKrwAmount(value);
+                  calculateKRWToForeign(value, latestRate);
+                }}
+                placeholder="0"
+              />
+            </View>
+          </View>
+
+          <View style={styles.chartContainer}>
+            <View style={styles.chartTypeSelector}>
+              {['daily', 'weekly', 'monthly'].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[styles.chartTypeButton, chartType === type && styles.chartTypeButtonActive]}
+                  onPress={() => {
+                    setChartType(type);
+                    hideTooltip();  // 버튼을 누를 때 툴팁을 숨기기
+                  }}
+                >
+                  <Text style={[styles.chartTypeText, chartType === type && styles.chartTypeTextActive]}>
+                    {type === 'daily' ? '일별' : type === 'weekly' ? '주별' : '월별'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {historyData.length > 0 ? (
+              <>
+                <LineChart
+                  data={{
+                    labels: historyData.map((data) => formatDate(data.recordedAt)),
+                    datasets: [{ data: historyData.map((data) => data.exchangeRateValue) }],
+                  }}
+                  width={screenWidth - 32}
+                  height={220}
+                  chartConfig={{
+                    backgroundGradientFrom: '#ffffff',
+                    backgroundGradientTo: '#ffffff',
+                    color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                    strokeWidth: 2,
+                    labelColor: () => '#666',
+                  }}
+                  bezier
+                  style={styles.chart}
+                  onDataPointClick={({ value, x, y, index }) => {
+                    showTooltip(value, x, y, index);
+                  }}
+                />
+
+                {selectedRate && (
+                  <Animated.View
+                    style={[styles.tooltip, { left: tooltipPosition.x, top: tooltipPosition.y, opacity: tooltipOpacity }]}
+                  >
+                    <View style={styles.tooltipBubble}>
+                      <Text style={styles.tooltipDate}>{selectedDate}</Text>
+                      <Text style={styles.tooltipText}>{selectedRate.toFixed(2)} 원</Text>
+                    </View>
+                  </Animated.View>
+                )}
+              </>
+            ) : (
+              <Text>No history available</Text>
+            )}
+          </View>
+        </ScrollView>
       </View>
-    </ScrollView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -261,11 +307,6 @@ const styles = StyleSheet.create({
     color: 'red',
     marginTop: 4,
   },
-  updateTime: {
-    fontSize: 12,
-    color: 'gray',
-    marginTop: 4,
-  },
   calculatorContainer: {
     padding: 16,
     borderBottomWidth: 1,
@@ -276,13 +317,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  currencyInputContainer: {
+  inputContainer: {
     marginBottom: 16,
-  },
-  currencySelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
   },
   input: {
     height: 40,
@@ -324,13 +360,24 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 16,
   },
-  inputContainer: {
-    marginBottom: 16,
+  tooltip: {
+    position: 'absolute',
+    alignItems: 'center',
   },
-  formattedAmount: {
+  tooltipBubble: {
+    backgroundColor: 'rgba(50, 50, 50, 0.8)',
+    padding: 6,
+    borderRadius: 4,
+  },
+  tooltipText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  tooltipDate: {
+    color: '#bbb',
     fontSize: 12,
-    color: '#666',
-    paddingLeft: 8,
+    marginBottom: 2,
   },
 });
 
