@@ -8,11 +8,11 @@ import {
   Modal,
   Image,
   RefreshControl,
+  Dimensions,
   Animated,
-  Dimensions, // 화면 크기 가져오기
 } from 'react-native';
-import { useAuth } from '../../redux/authState'; // useAuth 훅 사용
-import { useExchangeRate } from '../../redux/exchangeRateState'; // 환율 정보를 불러오기 위한 훅
+import { useAuth } from '../../redux/authState';
+import { useExchangeRate } from '../../redux/exchangeRateState';
 import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
@@ -27,45 +27,20 @@ import agoda from '../../assets/icons/아고다.png';
 import booking from '../../assets/icons/부킹닷컴.png';
 import airbnb from '../../assets/icons/에어비앤비.png';
 import CustomButton from '../../components/CustomButton';
-import ProfileButton from '../../components/ProfileButton'; // 유지할 프로필 버튼 컴포넌트
-import { Feather } from '@expo/vector-icons';
-import FlagIcon from '../../components/FlagIcon'; // 플래그 아이콘 컴포넌트 추가
+import ProfileButton from '../../components/ProfileButton';
+import { Feather, AntDesign } from '@expo/vector-icons';
+import FlagIcon from '../../components/FlagIcon';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window'); // 화면 너비 가져오기
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
-  const { top5Rates, fetchTop5Rates, loading } = useExchangeRate(); // 환율 정보 가져오기
+  const { latestExchangeRates, fetchLatestRates, loading } = useExchangeRate();
   const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef(null);
-
-  const ITEM_WIDTH = SCREEN_WIDTH * 0.8; // 카드의 너비를 화면의 80%로 설정
-  const SPACING = SCREEN_WIDTH * 0.05; // 카드 간 간격을 화면의 5%로 설정
-
-  useEffect(() => {
-    fetchTop5Rates(); // 컴포넌트가 마운트될 때 상위 5개 환율 정보 로드
-
-    const scrollInterval = setInterval(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollTo({
-          x: scrollX._value + ITEM_WIDTH + SPACING, // 카드 하나의 너비 + 여백만큼 스크롤
-          animated: true,
-        });
-
-        // 스크롤이 끝에 도달하면 처음으로 돌아감
-        if (scrollX._value + ITEM_WIDTH + SPACING >= (top5Rates.length * (ITEM_WIDTH + SPACING))) {
-          scrollX.setValue(0); // 처음으로 돌아감
-          scrollViewRef.current.scrollTo({ x: 0, animated: false });
-        } else {
-          scrollX.setValue(scrollX._value + ITEM_WIDTH + SPACING);
-        }
-      }
-    }, 3000); // 3초마다 스크롤
-
-    return () => clearInterval(scrollInterval); // 컴포넌트 언마운트 시 interval 해제
-  }, [scrollX]);
+  const slideIntervalRef = useRef(null);
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -89,12 +64,30 @@ const HomeScreen = ({ navigation }) => {
     '#FFD974',
   ];
 
-  // 새로고침을 위한 함수
+  useEffect(() => {
+    fetchLatestRates(); // 최신 환율 데이터를 가져옴
+    startAutoSlide();
+
+    return () => {
+      clearInterval(slideIntervalRef.current);
+    };
+  }, []);
+
+  const startAutoSlide = () => {
+    slideIntervalRef.current = setInterval(() => {
+      handleNext();
+    }, 3000); // 3초마다 자동으로 슬라이드 전환
+  };
+
+  const stopAutoSlide = () => {
+    clearInterval(slideIntervalRef.current);
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
-    fetchTop5Rates(); // 환율 정보 새로 가져오기
+    fetchLatestRates();
     setTimeout(() => {
-      setRefreshing(false); // 2초 후 새로고침 상태 해제
+      setRefreshing(false);
     }, 2000);
   };
 
@@ -103,9 +96,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    logout(); // 로그아웃 함수 호출
-    toggleModal(); // 모달 닫기
-    navigation.navigate('Login'); // 로그인 화면으로 이동
+    logout();
+    toggleModal();
+    navigation.navigate('Login');
   };
 
   const handleEditProfile = () => {
@@ -113,19 +106,57 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('UserProfile');
   };
 
-  // 등락에 따른 색상 설정
-  const getTextColor = (isDecreasing) => {
-    return isDecreasing ? 'red' : 'blue'; // 하락하면 빨간색, 상승하면 파란색
+  const getPercentageSymbol = (exchangeChangePercentage) => {
+    if (
+      exchangeChangePercentage === null ||
+      exchangeChangePercentage === undefined ||
+      exchangeChangePercentage === 0
+    ) {
+      return ''; // 값 변동이 없으면 기호 없음
+    }
+    return exchangeChangePercentage > 0 ? '▲' : '▼'; // 양수는 ▲, 음수는 ▼
+  };
+
+  const getPercentageColor = (exchangeChangePercentage) => {
+    if (
+      exchangeChangePercentage === null ||
+      exchangeChangePercentage === undefined ||
+      exchangeChangePercentage === 0
+    ) {
+      return 'gray'; // 값 변동이 없으면 회색
+    }
+    return exchangeChangePercentage > 0 ? 'red' : 'blue'; // 양수는 빨간색, 음수는 파란색
+  };
+
+  const handleNext = () => {
+    stopAutoSlide();
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      return nextIndex < latestExchangeRates.length ? nextIndex : 0; // 마지막 슬라이드에서 첫 번째로 돌아가기
+    });
+    startAutoSlide();
+  };
+
+  const handlePrevious = () => {
+    stopAutoSlide();
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - 1;
+      return nextIndex >= 0 ? nextIndex : latestExchangeRates.length - 1; // 첫 번째에서 마지막으로 돌아가기
+    });
+    startAutoSlide();
+  };
+
+  const handleExchangeRateClick = (currencyCode) => {
+    navigation.navigate('ExchangeRateDetail', { currencyCode });
   };
 
   return (
     <ScrollView
       style={styles.container}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> // 새로고침 기능 추가
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {/* 상단 로고와 제목 */}
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerGreeting}>즐거운 여행 되세요,</Text>
@@ -133,11 +164,9 @@ const HomeScreen = ({ navigation }) => {
             {auth.nickname ? `${auth.nickname} 님` : '즐거운 여행 되세요'}
           </Text>
         </View>
-        {/* 프로필 버튼 유지 */}
         <ProfileButton onPress={toggleModal} />
       </View>
 
-      {/* 내 문서 섹션 */}
       <ScrollView style={styles.container}>
         <DocumentWallet2
           title="내 문서"
@@ -146,18 +175,17 @@ const HomeScreen = ({ navigation }) => {
         />
       </ScrollView>
 
-      {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
           title="여행자 명함"
-          subtitle="여행 중 만난 인연을 이 안에 넣어요"
+          subtitle="여행 중 만난 인연을 이 안에 넣어요!"
           imgSrc={BussinessCard}
           imgSize={75}
           onPress={() => navigation.navigate('BusinessCard')}
         />
         <ServiceButton
           title="여행 인증서"
-          subtitle="내가 여행한 곳을 한 눈에 확인해요"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요!"
           imgSrc={TravelCertification}
           imgSize={75}
           onPress={() => navigation.navigate('TravelCertificationMain')}
@@ -165,23 +193,123 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.servicecontainer}>
         <ServiceButton
-          title="실시간 환율"
-          subtitle="실시간으로 확인해요"
+          title="환율 보기"
+          subtitle="여행가기전에 환율을 확인해요!"
           imgSrc={Exchange}
           imgSize={75}
           onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
-          subtitle="내 여행 스타일을 알아봐요"
+          subtitle="당신의 여행 스타일은?"
           imgSrc={TravelTest}
           imgSize={75}
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
         />
       </View>
 
-      {/* 외부 서비스 섹션 */}
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>실시간 환율</Text>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : latestExchangeRates.length > 0 ? (
+          <Animated.View
+            style={[
+              styles.exchangeRateWrapper,
+              { transform: [{ translateX: scrollX }] },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={handlePrevious}
+              disabled={currentIndex === 0}
+            >
+              <AntDesign
+                name="left"
+                size={24}
+                color={currentIndex === 0 ? '#ccc' : '#000'}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                handleExchangeRateClick(
+                  latestExchangeRates[currentIndex]?.currencyCode
+                )
+              }
+            >
+              <View style={styles.exchangeItem}>
+                <View style={styles.flagContainer}>
+                  <FlagIcon
+                    currencyCode={latestExchangeRates[
+                      currentIndex
+                    ]?.currencyCode
+                      .replace('(100)', '')
+                      .trim()}
+                    size={40}
+                  />
+                </View>
+                <View style={styles.exchangeInfo}>
+                  <Text style={styles.currencyCode}>
+                    {latestExchangeRates[currentIndex]?.currencyCode}
+                  </Text>
+                  <Text style={styles.currencyName}>
+                    {latestExchangeRates[currentIndex]?.currencyName}
+                  </Text>
+                </View>
+                <View style={styles.exchangeRateContainer}>
+                  <Text style={[styles.exchangeRate, { color: 'black' }]}>
+                    {latestExchangeRates[
+                      currentIndex
+                    ]?.exchangeRateValue.toFixed(2)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.exchangeChange,
+                      {
+                        color: getPercentageColor(
+                          latestExchangeRates[currentIndex]
+                            ?.exchangeChangePercentage
+                        ),
+                      },
+                    ]}
+                  >
+                    {getPercentageSymbol(
+                      latestExchangeRates[currentIndex]
+                        ?.exchangeChangePercentage
+                    )}
+                    {latestExchangeRates[currentIndex]
+                      ?.exchangeChangePercentage !== null
+                      ? `${Math.abs(
+                          latestExchangeRates[
+                            currentIndex
+                          ].exchangeChangePercentage.toFixed(2)
+                        )}%`
+                      : 'N/A'}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleNext}
+              disabled={currentIndex === latestExchangeRates.length - 1}
+            >
+              <AntDesign
+                name="right"
+                size={24}
+                color={
+                  currentIndex === latestExchangeRates.length - 1
+                    ? '#ccc'
+                    : '#000'
+                }
+              />
+            </TouchableOpacity>
+          </Animated.View>
+        ) : (
+          <Text>환율 정보가 없습니다.</Text>
+        )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>외부 서비스</Text>
         <View style={styles.row}>
           <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
           <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
@@ -196,73 +324,12 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* 환율 정보 섹션 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>실시간 환율 정보</Text>
-        {loading ? (
-          <Text>Loading...</Text>
-        ) : (
-          <Animated.ScrollView
-            ref={scrollViewRef}
-            horizontal
-            pagingEnabled
-            snapToInterval={ITEM_WIDTH + SPACING} // 스크롤 정렬
-            decelerationRate="fast"
-            showsHorizontalScrollIndicator={false}
-            style={styles.exchangeList}
-            contentContainerStyle={{ paddingHorizontal: SPACING }} // 좌우 여백 추가
-            scrollEventThrottle={16}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
-            )}
-          >
-            {/* 상위 5개의 환율 정보를 두 번 반복하여 추가 */}
-            {[...top5Rates, ...top5Rates].map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.exchangeItem, { width: ITEM_WIDTH, marginRight: SPACING }]} // 카드 크기 및 간격 설정
-                onPress={() =>
-                  navigation.navigate('ExchangeRateDetail', {
-                    currencyCode: item.currencyCode,
-                  })
-                }
-              >
-                {/* 플래그 아이콘 추가 */}
-                <View style={styles.flagContainer}>
-                  <FlagIcon currencyCode={item.currencyCode.replace("(100)", "").trim()} size={40} />
-                </View>
-
-                {/* 통화 코드 및 환율 정보 */}
-                <View style={styles.exchangeInfo}>
-                  <Text style={styles.currencyCode}>{item.currencyCode}</Text>
-                  <Text style={styles.currencyName}>{item.currencyName}</Text>
-                </View>
-
-                {/* 환율 및 변동률 */}
-                <View style={styles.exchangeRateContainer}>
-                  <Text
-                    style={[styles.exchangeRate, { color: getTextColor(item.isDecreasing) }]} // 등락 여부에 따른 색상 설정
-                  >
-                    {item.exchangeRateValue.toFixed(2)}
-                  </Text>
-                  <Text style={styles.exchangeChange}>
-                    {item.exchangeChangePercentage !== null
-                      ? `${item.exchangeChangePercentage.toFixed(2)}%`
-                      : 'N/A'} {/* 변동률 표시 */}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </Animated.ScrollView>
-        )}
-      </View>
-
-      {/* 고객센터 섹션 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
+        <Text style={styles.sectionTitle}>고객센터</Text>
         <Text style={styles.sectionSubtitle}>
-          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'}
+          {
+            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'
+          }
         </Text>
 
         <View style={styles.row}>
@@ -294,7 +361,6 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* 프로필 설정 모달 */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -304,20 +370,39 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Image
-              source={{ uri: 'https://via.placeholder.com/150' }} // 프로필 사진 (임시 이미지)
+              source={{ uri: 'https://via.placeholder.com/150' }}
               style={styles.profileImage}
             />
             <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
 
-            <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
-              <Feather name="edit" size={20} color="#333" style={styles.modalButtonIcon} />
+            <TouchableOpacity
+              style={styles.editProfileButton}
+              onPress={handleEditProfile}
+            >
+              <Feather
+                name="edit"
+                size={20}
+                color="#333"
+                style={styles.modalButtonIcon}
+              />
               <Text style={styles.editProfileButtonText}>개인정보 수정</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Feather name="log-out" size={20} color="#fff" style={styles.modalButtonIcon} />
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <Feather
+                name="log-out"
+                size={20}
+                color="#fff"
+                style={styles.modalButtonIcon}
+              />
               <Text style={styles.logoutButtonText}>로그아웃</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={toggleModal}
+            >
               <Text style={styles.modalCloseButtonText}>닫기</Text>
             </TouchableOpacity>
           </View>
@@ -426,8 +511,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   section: {
-    marginTop: 16,
-    padding: 10,
+    padding: 9,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -437,15 +521,20 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  sectionSubtitle: {
+    marginTop: 5,
   },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  exchangeList: {
+  exchangeRateWrapper: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   exchangeItem: {
     backgroundColor: '#fff',
@@ -455,13 +544,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 15,
-  },
-  exchangeItemElevated: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,
+    width: SCREEN_WIDTH * 0.7,
   },
   flagContainer: {
     marginRight: 10,
@@ -481,7 +564,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   exchangeRate: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   exchangeChange: {

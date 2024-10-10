@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.project.backend.dto.ExchangeRateDTO;
 import org.project.backend.exception.exchange.ExchangeRateNotFoundException;
 import org.project.backend.service.ExchangeRateService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.List;
 public class ExchangeRateController {
 
     private final ExchangeRateService exchangeRateService;
+    private static final Logger logger = LoggerFactory.getLogger(ExchangeRateController.class); // Logger 초기화
 
     @ApiOperation(value = "환율 데이터 저장", notes = "특정 날짜와 데이터 타입에 따라 환율 데이터를 저장합니다.")
     @GetMapping(value = "/save", produces = "application/json")
@@ -46,17 +49,6 @@ public class ExchangeRateController {
             return ResponseEntity.ok(exchangeRates); // 성공적으로 조회된 데이터를 반환
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 오류 발생 시 500 반환
-        }
-    }
-
-    @ApiOperation(value = "환율이 가장 많이 감소한 상위 5개 국가 조회", notes = "어제와 오늘의 환율을 비교하여 가장 많이 감소한 상위 5개 국가를 조회합니다.")
-    @GetMapping(value = "/top5-decreasing", produces = "application/json")
-    public ResponseEntity<List<ExchangeRateDTO>> getTop5DecreasingRates() {
-        try {
-            List<ExchangeRateDTO> decreasingRates = exchangeRateService.getAllRatesSortedByDecreaseThenIncrease();
-            return ResponseEntity.ok(decreasingRates);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

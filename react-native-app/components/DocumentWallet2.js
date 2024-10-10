@@ -12,6 +12,7 @@ import {
 
 import DocumentCard2 from './DocumentCard2';
 import DocumentModal from './DocumentModal';
+import { useNavigation } from '@react-navigation/native'; // navigation 추가
 
 if (
   Platform.OS === 'android' &&
@@ -30,6 +31,8 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   const animatedHeight = useRef(new Animated.Value(0)).current;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+
+  const navigation = useNavigation(); // navigation 가져오기
 
   useLayoutEffect(() => {
     const toValue = expanded
@@ -93,6 +96,7 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
         visible={modalVisible}
         document={selectedDocument}
         onClose={() => setModalVisible(false)}
+        navigation={navigation} // navigation 전달
       />
     </View>
   );

@@ -1,22 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useExchangeRate } from '../../redux/exchangeRateState';
-import { Picker } from '@react-native-picker/picker'; // 변경된 Picker import
+import FlagIcon from '../../components/FlagIcon';
 
 const screenWidth = Dimensions.get('window').width;
 
+// 날짜 형식 변환 함수
 const formatDate = (dateArray) => {
+  if (!dateArray || dateArray.length < 2) return '';
   const [year, month, day] = dateArray;
-  return `${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}`;
+  return `${String(month).padStart(2, '0')}.${day ? String(day).padStart(2, '0') : ''}`;
 };
 
-// 주별로 데이터를 그룹화하는 함수
+// 주별, 월별 그룹화 함수들
 const groupByWeek = (data) => {
   const weeks = [];
   for (let i = 0; i < data.length; i += 7) {
     const weekData = data.slice(i, i + 7);
-    const average = weekData.reduce((sum, item) => sum + item.exchangeRateValue, 0) / weekData.length;
+    const average =
+      weekData.reduce((sum, item) => sum + item.exchangeRateValue, 0) / weekData.length;
     weeks.push({
       recordedAt: weekData[0].recordedAt,
       exchangeRateValue: average,
@@ -25,34 +38,107 @@ const groupByWeek = (data) => {
   return weeks;
 };
 
-// 월별로 데이터를 그룹화하는 함수
 const groupByMonth = (data) => {
   const months = {};
   data.forEach((item) => {
-    const month = item.recordedAt[1]; // month
+    const month = item.recordedAt[1];
     if (!months[month]) {
       months[month] = [];
     }
     months[month].push(item.exchangeRateValue);
   });
-  
+
   return Object.keys(months).map((month) => {
-    const average = months[month].reduce((sum, value) => sum + value, 0) / months[month].length;
+    const average =
+      months[month].reduce((sum, value) => sum + value, 0) / months[month].length;
     return {
-      recordedAt: [data[0].recordedAt[0], month], // year, month
+      recordedAt: [data[0].recordedAt[0], month, 1],
       exchangeRateValue: average,
     };
   });
 };
 
+// 등락률 계산 함수
+const calculateChangePercentage = (currentRate, previousRate) => {
+  if (!previousRate || previousRate === 0) return null; // 이전 값이 없거나 0일 때
+  const change = ((currentRate - previousRate) / previousRate) * 100;
+  return change.toFixed(2); // 소수점 2자리까지 표현
+};
+
+// 데이터 제한 함수
+const limitData = (data, limit) => {
+  return data.slice(Math.max(data.length - limit, 0));
+};
+
 const ExchangeRateDetailScreen = ({ route }) => {
   const { currencyCode } = route.params;
+  const cleanedCurrencyCode = currencyCode.replace("(100)", "").trim();
   const { exchangeRateHistory, fetchRateHistory, loading } = useExchangeRate();
-  const [chartType, setChartType] = useState('daily'); // 기본 차트 타입은 '일별'
+  const [chartType, setChartType] = useState('daily');
+  const [krwAmount, setKrwAmount] = useState('');
+  const [foreignAmount, setForeignAmount] = useState('');
+  const [selectedRate, setSelectedRate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipOpacity] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    fetchRateHistory(currencyCode); // 특정 통화의 환율 히스토리 로드
+    fetchRateHistory(currencyCode);
   }, [currencyCode]);
+
+  useEffect(() => {
+    if (exchangeRateHistory[currencyCode] && exchangeRateHistory[currencyCode].length > 0) {
+      const latestRate = exchangeRateHistory[currencyCode][0]?.exchangeRateValue ?? 0;
+      calculateForeignToKRW(foreignAmount, latestRate);
+    }
+  }, [foreignAmount, exchangeRateHistory, currencyCode]);
+
+  const calculateForeignToKRW = (value, rate) => {
+    if (value && !isNaN(value)) {
+      const calculated = (parseFloat(value) * rate).toFixed(2);
+      setKrwAmount(calculated);
+    } else {
+      setKrwAmount('');
+    }
+  };
+
+  const calculateKRWToForeign = (value, rate) => {
+    if (value && !isNaN(value)) {
+      const calculated = (parseFloat(value) / rate).toFixed(2);
+      setForeignAmount(calculated);
+    } else {
+      setForeignAmount('');
+    }
+  };
+
+  const showTooltip = (value, x, y, index) => {
+    setSelectedRate(value);
+    setSelectedDate(formatDate(historyData[index].recordedAt));
+
+    const adjustedX = x > screenWidth - 150 ? screenWidth - 150 : x + 10;
+    
+    setTooltipPosition({
+      x: adjustedX + 2,
+      y: y + 15,
+    });
+
+    Animated.timing(tooltipOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideTooltip = () => {
+    Animated.timing(tooltipOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedRate(null);
+      setSelectedDate('');
+    });
+  };
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -60,66 +146,238 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   let historyData = exchangeRateHistory[currencyCode] || [];
 
-  // 차트 타입에 따라 데이터 필터링
   if (chartType === 'weekly') {
     historyData = groupByWeek(historyData);
+    historyData = limitData(historyData, 4); // 최근 4주
   } else if (chartType === 'monthly') {
     historyData = groupByMonth(historyData);
+    historyData = limitData(historyData, 12); // 최근 12개월
+  } else {
+    historyData = limitData(historyData, 30); // 최근 30일
   }
 
-  // 첫 번째 데이터의 연도를 가져옴 (모든 데이터는 같은 연도에 속한다고 가정)
-  const year = historyData.length > 0 ? historyData[0].recordedAt[0] : '';
+  const latestRate = historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
+  const previousRate = historyData.length > 1 ? historyData[historyData.length - 2].exchangeRateValue : null;
+  const latestChangePercentage = calculateChangePercentage(latestRate, previousRate);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{year}년 {currencyCode} 환율 히스토리</Text>
+    <TouchableWithoutFeedback onPress={hideTooltip}>
+      <View style={styles.container}>
+        <ScrollView>
+          <View style={styles.header}>
+            <View style={styles.currencyInfo}>
+              <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+              <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
+            </View>
+            <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} 원</Text>
+            {latestChangePercentage !== null ? (
+              <Text style={[styles.changeRate, { color: latestChangePercentage >= 0 ? 'red' : 'blue' }]}>
+                {latestChangePercentage >= 0 ? '▲' : '▼'} {latestChangePercentage}%
+              </Text>
+            ) : (
+              <Text style={styles.changeRate}>N/A</Text>
+            )}
+          </View>
 
-      {/* 일별, 주별, 월별 선택을 위한 Picker */}
-      <Picker
-        selectedValue={chartType}
-        style={styles.picker}
-        onValueChange={(itemValue) => setChartType(itemValue)}
-      >
-        <Picker.Item label="일별" value="daily" />
-        <Picker.Item label="주별" value="weekly" />
-        <Picker.Item label="월별" value="monthly" />
-      </Picker>
+          <View style={styles.calculatorContainer}>
+            <Text style={styles.calculatorTitle}>환율계산기</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.currencySelector}>
+                <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+                <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={foreignAmount}
+                onChangeText={(value) => {
+                  setForeignAmount(value);
+                  calculateForeignToKRW(value, latestRate);
+                }}
+                placeholder="0"
+              />
+            </View>
+            <Text style={styles.equalSign}>=</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.currencySelector}>
+                <FlagIcon currencyCode="KRW" size={24} />
+                <Text style={styles.currencyCode}>KRW</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={krwAmount}
+                onChangeText={(value) => {
+                  setKrwAmount(value);
+                  calculateKRWToForeign(value, latestRate);
+                }}
+                placeholder="0"
+              />
+            </View>
+          </View>
 
-      {historyData.length > 0 ? (
-        <LineChart
-          data={{
-            labels: historyData.map((data) => formatDate(data.recordedAt)),
-            datasets: [{ data: historyData.map((data) => data.exchangeRateValue) }],
-          }}
-          width={screenWidth * 0.9}
-          height={220}
-          chartConfig={{
-            backgroundGradientFrom: "#f0f8ff",
-            backgroundGradientTo: "#fff",
-            color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-          }}
-        />
-      ) : (
-        <Text>No history available</Text>
-      )}
-    </View>
+          <View style={styles.chartContainer}>
+            <View style={styles.chartTypeSelector}>
+              {['daily', 'weekly', 'monthly'].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[styles.chartTypeButton, chartType === type && styles.chartTypeButtonActive]}
+                  onPress={() => {
+                    setChartType(type);
+                    hideTooltip();  // 버튼을 누를 때 툴팁을 숨기기
+                  }}
+                >
+                  <Text style={[styles.chartTypeText, chartType === type && styles.chartTypeTextActive]}>
+                    {type === 'daily' ? '일별' : type === 'weekly' ? '주별' : '월별'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {historyData.length > 0 ? (
+              <>
+                <LineChart
+                  data={{
+                    labels: historyData.map((data) => formatDate(data.recordedAt)),
+                    datasets: [{ data: historyData.map((data) => data.exchangeRateValue) }],
+                  }}
+                  width={screenWidth - 32}
+                  height={220}
+                  chartConfig={{
+                    backgroundGradientFrom: '#ffffff',
+                    backgroundGradientTo: '#ffffff',
+                    color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                    strokeWidth: 2,
+                    labelColor: () => '#666',
+                  }}
+                  bezier
+                  style={styles.chart}
+                  onDataPointClick={({ value, x, y, index }) => {
+                    showTooltip(value, x, y, index);
+                  }}
+                />
+
+                {selectedRate && (
+                  <Animated.View
+                    style={[styles.tooltip, { left: tooltipPosition.x, top: tooltipPosition.y, opacity: tooltipOpacity }]}
+                  >
+                    <View style={styles.tooltipBubble}>
+                      <Text style={styles.tooltipDate}>{selectedDate}</Text>
+                      <Text style={styles.tooltipText}>{selectedRate.toFixed(2)} 원</Text>
+                    </View>
+                  </Animated.View>
+                )}
+              </>
+            ) : (
+              <Text>No history available</Text>
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#ffffff',
   },
-  title: {
+  header: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  currencyInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currencyCode: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  exchangeRate: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+  changeRate: {
+    fontSize: 14,
+    color: 'red',
+    marginTop: 4,
+  },
+  calculatorContainer: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  calculatorTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  picker: {
-    height: 50,
-    width: 150,
+  inputContainer: {
     marginBottom: 16,
+  },
+  input: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    fontSize: 16,
+  },
+  equalSign: {
+    fontSize: 24,
+    textAlign: 'center',
+    marginVertical: 8,
+  },
+  chartContainer: {
+    padding: 16,
+  },
+  chartTypeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  chartTypeButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+  },
+  chartTypeButtonActive: {
+    backgroundColor: '#007AFF',
+  },
+  chartTypeText: {
+    color: '#333',
+  },
+  chartTypeTextActive: {
+    color: '#ffffff',
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  tooltip: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  tooltipBubble: {
+    backgroundColor: 'rgba(50, 50, 50, 0.8)',
+    padding: 6,
+    borderRadius: 4,
+  },
+  tooltipText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  tooltipDate: {
+    color: '#bbb',
+    fontSize: 12,
+    marginBottom: 2,
   },
 });
 
