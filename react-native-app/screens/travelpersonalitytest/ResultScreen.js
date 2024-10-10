@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 
 // 이미지 파일을 여행자 유형에 맞게 불러오기
@@ -22,7 +22,7 @@ const travelerImages = {
     'Balanced Traveler': balanced,
 };
 
-const ResultScreen = ({ route }) => {
+const ResultScreen = ({ route, navigation }) => {
     const { result } = route.params;
 
     // 결과 데이터를 바탕으로 여행자 유형을 반환하는 함수
@@ -42,10 +42,7 @@ const ResultScreen = ({ route }) => {
     const renderProgressBarsHorizontal = () => {
         return Object.keys(result).map((key) => (
             <View key={key} style={styles.horizontalContainer}>
-                {/* 항목명 */}
                 <Text style={styles.progressBarLabel}>{key}:</Text>
-                
-                {/* ProgressBar를 감싸는 View */}
                 <View style={styles.progressBarWrapper}>
                     <ProgressBar
                         progress={result[key] / 100} // 0 ~ 1의 값으로 변환
@@ -53,8 +50,6 @@ const ResultScreen = ({ route }) => {
                         style={styles.horizontalProgressBar} // 스타일 수정
                     />
                 </View>
-                
-                {/* 퍼센티지 값 */}
                 <Text style={styles.progressValue}>{result[key]}%</Text>
             </View>
         ));
@@ -109,6 +104,10 @@ const ResultScreen = ({ route }) => {
         }
     };
 
+    const handleGoHome = () => {
+        navigation.navigate('MainTabs'); // 홈으로 이동하는 함수
+    };
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>여행 테스트 결과</Text>
@@ -129,6 +128,11 @@ const ResultScreen = ({ route }) => {
 
             {/* 각 속성에 대한 Progress Bar 표시 */}
             {renderProgressBarsHorizontal()}
+
+            {/* '홈으로 이동' 버튼 */}
+            <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>
+                <Text style={styles.homeButtonText}>홈으로 이동</Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 };
@@ -184,13 +188,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
         color: '#4b8efc', // 여행자 유형 텍스트 색상 설정
-        textAlign: 'center', // 텍스트 가운데 정렬
+        textAlign: 'center',
     },
     travelerTypeEng: {
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 20,
-        textAlign: 'center', // 텍스트 가운데 정렬
+        textAlign: 'center',
     },
     resultMessage: {
         fontSize: 18,
@@ -201,6 +205,26 @@ const styles = StyleSheet.create({
     resultMessageContainer: {
         padding: 20,
         width: '100%',
+    },
+    homeButton: {
+        backgroundColor: '#4b8efc', // 귀여운 파란색 배경
+        borderRadius: 25, // 동그랗게 만듦
+        paddingVertical: 10,
+        paddingHorizontal: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 150, // 버튼 크기
+        marginTop: 30, // 상단과 간격을 줌
+        shadowColor: '#000', // 그림자 효과 추가
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 5, // 안드로이드 그림자 효과
+    },
+    homeButtonText: {
+        color: '#fff', // 텍스트 색상
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 

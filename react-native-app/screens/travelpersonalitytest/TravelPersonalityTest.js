@@ -284,60 +284,75 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#ffffff', // 전체 배경을 밝은 톤으로 설정
   },
   questionNumber: {
-    fontSize: 20,
+    fontSize: 24, // 질문 번호 크기를 키움
     fontWeight: 'bold',
-    marginBottom: 30,
+    color: '#333', // 다크 그레이 색상으로 가독성 향상
+    marginBottom: 20,
   },
   question: {
-    fontSize: 18,
-    marginBottom: 50,
+    fontSize: 20, // 질문 텍스트 크기
+    marginBottom: 40,
     textAlign: 'center',
+    color: '#4A4A4A', // 약간 진한 그레이
+    paddingHorizontal: 20,
   },
   option: {
-    backgroundColor: '#ffffff',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 100,
+    backgroundColor: '#ffffff', // 옵션 배경을 흰색으로
+    paddingVertical: 15,
+    marginVertical: 10, // 위아래 여백 추가
+    borderRadius: 25, // 둥글게 처리
     width: '80%',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1, // 옵션에 테두리 추가
+    borderColor: '#D1D5DB', // 연한 그레이로 테두리 색상 설정
+    shadowColor: '#000', // 그림자 추가
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 1, // 그림자 효과를 위한 설정 (안드로이드)
   },
   selectedOption: {
-    backgroundColor: '#BBDEFB',
+    backgroundColor: '#e6f4ff',
+    borderColor: '#0c94fb' // 선택된 옵션을 더 눈에 띄게 파란색 계열로 변경
   },
   submitButton: {
-    backgroundColor: '#2196F3',
-    // padding: 10,
+    backgroundColor: '#42A5F5', // 버튼 색상을 진한 파란색으로
     marginTop: 30,
-    borderRadius: 100,
-    width: '50%',
-    height: '7%',
+    borderRadius: 25,
+    width: '60%', // 버튼 크기 설정
+    height: 50, // 높이를 고정하여 일관된 버튼 크기 유지
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   disabledButton: {
-    backgroundColor: '#a0a0a0',
+    backgroundColor: '#B0BEC5', // 비활성화된 버튼 색상
   },
-  submitButtonText:{
+  submitButtonText: {
     fontWeight: 'bold',
-    color: 'white',
+    color: '#fff',
     textAlign: 'center',
-    fontSize: 15,
+    fontSize: 16,
   },
   progressBar: {
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#e0e0e0',
+    height: 12, // 프로그레스바 높이를 살짝 키움
+    borderRadius: 6,
+    backgroundColor: '#E3F2FD', // 밝은 블루 계열로 설정
     width: '100%',
-
   },
   progressBarWrapper: {
-    width: '80%',
-    paddingHorizontal: 20,
+    width: '90%', // 넓이를 더 넓게 설정하여 화면에 맞춤
     marginBottom: 40,
   },
 });
+
 
 export default TravelerPersonalityTest;
