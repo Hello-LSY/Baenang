@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -31,19 +31,17 @@ import ProfileButton from '../../components/ProfileButton';
 import { Feather, AntDesign } from '@expo/vector-icons';
 import FlagIcon from '../../components/FlagIcon';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window'); // 화면 너비 가져오기
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
-  const { allRatesWithChange, fetchAllRatesWithChangeData, loading } = useExchangeRate(); // 전체 환율 정보 가져오기
-  const scrollX = new Animated.Value(0);
+  const { allRatesWithChange, fetchAllRatesWithChangeData, loading } = useExchangeRate();
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const slideIntervalRef = useRef(null);
 
-  useEffect(() => {
-    fetchAllRatesWithChangeData(); // 컴포넌트가 마운트될 때 전체 환율 정보 로드
-  }, []);
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -67,11 +65,30 @@ const HomeScreen = ({ navigation }) => {
     '#FFD974',
   ];
 
+  useEffect(() => {
+    fetchAllRatesWithChangeData();
+    startAutoSlide();
+
+    return () => {
+      clearInterval(slideIntervalRef.current);
+    };
+  }, []);
+
+  const startAutoSlide = () => {
+    slideIntervalRef.current = setInterval(() => {
+      handleNext();
+    }, 3000); // 3초마다 자동으로 슬라이드 전환
+  };
+
+  const stopAutoSlide = () => {
+    clearInterval(slideIntervalRef.current);
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
-    fetchAllRatesWithChangeData(); // 환율 정보 새로 가져오기
+    fetchAllRatesWithChangeData();
     setTimeout(() => {
-      setRefreshing(false); // 2초 후 새로고침 상태 해제
+      setRefreshing(false);
     }, 2000);
   };
 
@@ -80,9 +97,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    logout(); // 로그아웃 함수 호출
-    toggleModal(); // 모달 닫기
-    navigation.navigate('Login'); // 로그인 화면으로 이동
+    logout();
+    toggleModal();
+    navigation.navigate('Login');
   };
 
   const handleEditProfile = () => {
@@ -90,28 +107,40 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('UserProfile');
   };
 
-  const getPercentageColor = (decreasing) => {
-    return decreasing ? 'blue' : 'red';
+  const getPercentageSymbol = (exchangeChangePercentage) => {
+    if (exchangeChangePercentage === null || exchangeChangePercentage === undefined || exchangeChangePercentage === 0) {
+      return '';  // 값 변동이 없으면 기호 없음
+    }
+    return exchangeChangePercentage > 0 ? '▲' : '▼';  // 양수는 ▲, 음수는 ▼
+  };
+  
+  const getPercentageColor = (exchangeChangePercentage) => {
+    if (exchangeChangePercentage === null || exchangeChangePercentage === undefined || exchangeChangePercentage === 0) {
+      return 'gray';  // 값 변동이 없으면 회색
+    }
+    return exchangeChangePercentage > 0 ? 'red' : 'blue';  // 양수는 빨간색, 음수는 파란색
   };
 
   const handleNext = () => {
-    if (currentIndex < allRatesWithChange.length - 1) {
-      Animated.spring(scrollX, {
-        toValue: (currentIndex + 1) * SCREEN_WIDTH * 0.7,
-        useNativeDriver: true,
-      }).start();
-      setCurrentIndex(currentIndex + 1);
-    }
+    stopAutoSlide();
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      return nextIndex < allRatesWithChange.length ? nextIndex : 0; // 마지막 슬라이드에서 첫 번째로 돌아가기
+    });
+    startAutoSlide();
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      Animated.spring(scrollX, {
-        toValue: (currentIndex - 1) * SCREEN_WIDTH * 0.7,
-        useNativeDriver: true,
-      }).start();
-      setCurrentIndex(currentIndex - 1);
-    }
+    stopAutoSlide();
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - 1;
+      return nextIndex >= 0 ? nextIndex : allRatesWithChange.length - 1; // 첫 번째에서 마지막으로 돌아가기
+    });
+    startAutoSlide();
+  };
+
+  const handleExchangeRateClick = (currencyCode) => {
+    navigation.navigate('ExchangeRateDetail', { currencyCode });
   };
 
   return (
@@ -119,7 +148,6 @@ const HomeScreen = ({ navigation }) => {
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* 상단 로고와 제목 */}
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerGreeting}>즐거운 여행 되세요,</Text>
@@ -130,23 +158,21 @@ const HomeScreen = ({ navigation }) => {
         <ProfileButton onPress={toggleModal} />
       </View>
 
-      {/* 내 문서 섹션 */}
       <ScrollView style={styles.container}>
         <DocumentWallet2 title="내 문서" documents={documents} backgroundColors={backgroundColors} />
       </ScrollView>
 
-      {/* 여행자 명함, 여행 인증서 섹션 */}
       <View style={styles.servicecontainer}>
         <ServiceButton
           title="여행자 명함"
-          subtitle="여행 중 만난 인연을 이 안에 넣어요"
+          subtitle="여행 중 만난 인연을 이 안에 넣어요!"
           imgSrc={BussinessCard}
           imgSize={75}
           onPress={() => navigation.navigate('BusinessCard')}
         />
         <ServiceButton
           title="여행 인증서"
-          subtitle="내가 여행한 곳을 한 눈에 확인해요"
+          subtitle="내가 여행한 곳을 한 눈에 확인해요!"
           imgSrc={TravelCertification}
           imgSize={75}
           onPress={() => navigation.navigate('TravelCertificationMain')}
@@ -154,23 +180,68 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.servicecontainer}>
         <ServiceButton
-          title="실시간 환율"
-          subtitle="실시간으로 확인해요"
+          title="환율 보기"
+          subtitle="여행가기전에 환율을 확인해요!"
           imgSrc={Exchange}
           imgSize={75}
           onPress={() => navigation.navigate('ExchangeRateListScreen')}
         />
         <ServiceButton
           title="여행자 테스트"
-          subtitle="내 여행 스타일을 알아봐요"
+          subtitle="당신의 여행 스타일은?"
           imgSrc={TravelTest}
           imgSize={75}
           onPress={() => navigation.navigate('TravelerPersonalityTest')}
         />
       </View>
 
-      {/* 외부 서비스 섹션 */}
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>실시간 환율</Text>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : allRatesWithChange.length > 0 ? (
+          <Animated.View style={[styles.exchangeRateWrapper, { transform: [{ translateX: scrollX }] }]}>
+            <TouchableOpacity onPress={handlePrevious} disabled={currentIndex === 0}>
+              <AntDesign name="left" size={24} color={currentIndex === 0 ? '#ccc' : '#000'} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleExchangeRateClick(allRatesWithChange[currentIndex]?.currencyCode)}>
+              <View style={styles.exchangeItem}>
+                <View style={styles.flagContainer}>
+                  <FlagIcon
+                    currencyCode={allRatesWithChange[currentIndex]?.currencyCode.replace("(100)", "").trim()}
+                    size={40}
+                  />
+                </View>
+                <View style={styles.exchangeInfo}>
+                  <Text style={styles.currencyCode}>{allRatesWithChange[currentIndex]?.currencyCode}</Text>
+                  <Text style={styles.currencyName}>{allRatesWithChange[currentIndex]?.currencyName}</Text>
+                </View>
+                <View style={styles.exchangeRateContainer}>
+                  <Text style={[styles.exchangeRate, { color: 'black' }]}>
+                    {allRatesWithChange[currentIndex]?.exchangeRateValue.toFixed(2)}
+                  </Text>
+                  <Text
+                    style={[styles.exchangeChange, { color: getPercentageColor(allRatesWithChange[currentIndex]?.exchangeChangePercentage) }]}
+                  >
+                    {getPercentageSymbol(allRatesWithChange[currentIndex]?.exchangeChangePercentage)}
+                    {allRatesWithChange[currentIndex]?.exchangeChangePercentage !== null
+                      ? `${Math.abs(allRatesWithChange[currentIndex].exchangeChangePercentage.toFixed(2))}%`
+                      : 'N/A'}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleNext} disabled={currentIndex === allRatesWithChange.length - 1}>
+              <AntDesign name="right" size={24} color={currentIndex === allRatesWithChange.length - 1 ? '#ccc' : '#000'} />
+            </TouchableOpacity>
+          </Animated.View>
+        ) : (
+          <Text>환율 정보가 없습니다.</Text>
+        )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>외부 서비스</Text>
         <View style={styles.row}>
           <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
           <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
@@ -185,50 +256,10 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* 환율 정보 섹션 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>실시간 환율 정보</Text>
-        {loading ? (
-          <Text>Loading...</Text>
-        ) : (
-          <Animated.View style={[styles.exchangeRateWrapper, { transform: [{ translateX: scrollX }] }]}>
-            <TouchableOpacity onPress={handlePrevious} disabled={currentIndex === 0}>
-              <AntDesign name="left" size={24} color={currentIndex === 0 ? '#ccc' : '#000'} />
-            </TouchableOpacity>
-            <View style={styles.exchangeItem}>
-              <View style={styles.flagContainer}>
-                <FlagIcon
-                  currencyCode={allRatesWithChange[currentIndex].currencyCode.replace("(100)", "").trim()}
-                  size={40}
-                />
-              </View>
-              <View style={styles.exchangeInfo}>
-                <Text style={styles.currencyCode}>{allRatesWithChange[currentIndex].currencyCode}</Text>
-                <Text style={styles.currencyName}>{allRatesWithChange[currentIndex].currencyName}</Text>
-              </View>
-              <View style={styles.exchangeRateContainer}>
-                <Text style={[styles.exchangeRate, { color: 'black' }]}> {allRatesWithChange[currentIndex].exchangeRateValue.toFixed(2)}</Text>
-                <Text
-                  style={[styles.exchangeChange, { color: getPercentageColor(allRatesWithChange[currentIndex].decreasing) }]}
-                >
-                  {allRatesWithChange[currentIndex].exchangeChangePercentage !== null
-                    ? `${allRatesWithChange[currentIndex].exchangeChangePercentage >= 0 ? '+' : ''}${allRatesWithChange[currentIndex].exchangeChangePercentage.toFixed(2)}%`
-                    : 'N/A'}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity onPress={handleNext} disabled={currentIndex === allRatesWithChange.length - 1}>
-              <AntDesign name="right" size={24} color={currentIndex === allRatesWithChange.length - 1 ? '#ccc' : '#000'} />
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-      </View>
-
-      {/* 고객센터 섹션 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>고객센터 1588-XXXX</Text>
+        <Text style={styles.sectionTitle}>고객센터</Text>
         <Text style={styles.sectionSubtitle}>
-          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00'}
+          {'운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'}
         </Text>
 
         <View style={styles.row}>
@@ -260,7 +291,6 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* 프로필 설정 모달 */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -392,8 +422,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   section: {
-    marginTop: 16,
-    padding: 10,
+    padding: 9,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -403,7 +432,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  sectionSubtitle: {
+    marginTop: 5,
   },
   row: {
     flexDirection: 'row',

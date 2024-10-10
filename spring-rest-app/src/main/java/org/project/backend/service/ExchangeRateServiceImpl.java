@@ -166,18 +166,29 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         return decreasingRates;
     }
 
-
-
     @Override
     public List<ExchangeRateDTO> getExchangeRateByCurrencyCode(String currencyCode) {
         List<ExchangeRate> exchangeRates = exchangeRateRepository.findByCurrencyCode(currencyCode);
         if (exchangeRates.isEmpty()) {
             throw new ExchangeRateNotFoundException("No exchange rate data found for currency code: " + currencyCode);
         }
+
+        // 등락률을 계산할 수 있는 가장 최근 영업일과 이전 영업일 가져오기
+        LocalDate lastBusinessDay = getPreviousBusinessDay(LocalDate.now());
+        LocalDate previousBusinessDay = getPreviousBusinessDay(lastBusinessDay.minusDays(1));
+
+        // 해당 통화의 최근 영업일 환율과 이전 영업일 환율 가져오기
+        Optional<ExchangeRate> lastRateOptional = exchangeRateRepository.findByCurrencyCodeAndRecordedAt(currencyCode, lastBusinessDay.atStartOfDay());
+        Optional<ExchangeRate> previousRateOptional = exchangeRateRepository.findByCurrencyCodeAndRecordedAt(currencyCode, previousBusinessDay.atStartOfDay());
+
+        Double previousRate = previousRateOptional.map(ExchangeRate::getExchangeRateValue).orElse(null);
+
+        // 등락률을 계산하고 반환
         return exchangeRates.stream()
-                .map(this::convertToDTO)
+                .map(rate -> convertToDTO(rate, previousRate))
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public List<ExchangeRateDTO> getLatestExchangeRates() {
@@ -201,23 +212,21 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     private ExchangeRateDTO convertToDTO(ExchangeRate exchangeRate, Double previousRate) {
         Double changePercentage = null;
-        Boolean isDecreasing = null;
 
         if (previousRate != null && previousRate != 0) {
             changePercentage = ((exchangeRate.getExchangeRateValue() - previousRate) / previousRate) * 100;
-            isDecreasing = exchangeRate.getExchangeRateValue() < previousRate;
         }
-        logger.info("isDecreasing :" + isDecreasing);
+
         return ExchangeRateDTO.builder()
                 .id(exchangeRate.getId())
                 .currencyCode(exchangeRate.getCurrencyCode())
                 .currencyName(exchangeRate.getCurrencyName())
                 .exchangeRateValue(exchangeRate.getExchangeRateValue())
                 .recordedAt(exchangeRate.getRecordedAt())
-                .isDecreasing(isDecreasing)  // Optional 사용하여 기본값 처리
-                .exchangeChangePercentage(changePercentage)
+                .exchangeChangePercentage(changePercentage)  // 변동률
                 .build();
     }
+
 
 
 

@@ -64,6 +64,7 @@ const authSlice = createSlice({
     builder
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -77,7 +78,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Login failed';
+        state.error = action.payload ? action.payload : 'Login failed';
+        state.token = null; // 로그인 실패 시 token 초기화 
       })
       .addCase(loadCredentials.fulfilled, (state, action) => {
         state.token = action.payload.token;
