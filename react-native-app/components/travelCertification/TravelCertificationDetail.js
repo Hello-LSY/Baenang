@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Button } from 'react-native';
 import { BASE_URL } from '../../constants/config';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 
 const TravelCertificationDetail = ({ route, navigation }) => {
   // route.params로 전달된 item을 받아옴
@@ -56,6 +56,23 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 10,
     marginBottom: 20,
+  },
+  confirmButton: {
+    backgroundColor: '#fff', // 버튼 배경색
+    borderColor: '#007AFF', // 테두리 색상
+    borderWidth: 1, // 테두리 두께
+    borderRadius: 25, // 동그란 모양을 위해 반경 설정
+    width: 80, // 버튼의 너비
+    height: 40, // 버튼의 높이
+    justifyContent: 'center', // 버튼 안 텍스트 중앙 정렬
+    alignItems: 'center', // 버튼 안 텍스트 수평 중앙 정렬
+    alignSelf: 'center', // 부모 뷰 기준 중앙 정렬
+    // marginTop: 3, // 상단 여백
+  },
+  buttonText: {
+    color: '#007AFF', // 텍스트 색상
+    fontSize: 16, // 텍스트 크기
+    fontWeight: 'bold', // 텍스트 굵기
   },
 });
 
