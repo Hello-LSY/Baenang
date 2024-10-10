@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, Alert, ImageBackground, TouchableOpacity } from "react-native";
+import { View, Text, Image, StyleSheet, Alert, ImageBackground, TouchableOpacity, ActivityIndicator } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import * as FileSystem from "expo-file-system";
@@ -12,17 +12,16 @@ const TravelCertificationProcess = () => {
   const [imageUri, setImageUri] = useState(null);
   const [location, setLocation] = useState(null);
   const [visitedCountry, setVisitedCountry] = useState(null);
-  const [showLocation, setShowLocation] = useState(false); // 위치 정보를 표시할지 결정하는 상태 변수
+  const [loading, setLoading] = useState(true); // 로딩 상태
+
   const username = "exampleUser";
   const navigation = useNavigation();
   const dispatch = useDispatch(); // Redux dispatch 사용
 
-  // 컴포넌트가 처음 렌더링될 때 위치 정보를 가져오는 useEffect
   useEffect(() => {
     getLocationAndCountry();
-  }, []); // 빈 배열을 전달하여 처음 로드될 때만 호출되게 함
+  }, []);
 
-  // 위치 정보를 가져오는 함수
   const getLocationAndCountry = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -48,7 +47,7 @@ const TravelCertificationProcess = () => {
         const country = geocode[0].country;
         const region = geocode[0].region;
         setVisitedCountry(`${country}-${region}`);
-        setShowLocation(true); // 위치 정보를 보이게 설정
+        setLoading(false); // 로딩 상태 해제
       } else {
         alert("국가 정보를 가져올 수 없습니다.");
       }
@@ -58,7 +57,6 @@ const TravelCertificationProcess = () => {
     }
   };
 
-  // 카메라를 사용하여 사진 촬영
   const takePhoto = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -93,7 +91,6 @@ const TravelCertificationProcess = () => {
     }
   };
 
-  // 인증 저장 처리 함수
   const handleSave = async () => {
     if (!imageUri || !location || !visitedCountry) {
       alert("사진과 위치 정보가 필요합니다.");
@@ -137,31 +134,40 @@ const TravelCertificationProcess = () => {
       style={styles.backgroundGif} // 배경 스타일 적용
     >
       <View style={styles.container}>
-        {/* 상단에 인증할 위치 표시 */}
-        {showLocation && visitedCountry && (
+        {/* 로딩 중일 때 기본 로딩 애니메이션 사용 */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007AFF" />
+          </View>
+        ) : (
           <Text style={styles.topLocationText}>
-            현재 인증할 위치는 '{visitedCountry}'입니다.
+            현재 인증할 위치는 {'\n'} '{visitedCountry}' 입니다.
           </Text>
         )}
 
-        {/* <Text style={styles.title}>여행 인증</Text> */}
+        {/* 버튼들이 있는 하단 영역 */}
+        <View style={styles.buttonContainer}>
+          {!imageUri && (
+            <TouchableOpacity
+              style={styles.customButton}
+              onPress={takePhoto}
+            >
+              <Text style={styles.customButtonText}>방문 인증하기</Text>
+            </TouchableOpacity>
+          )}
 
-        {/* 방문 인증하기 버튼 */}
-        <TouchableOpacity
-          style={styles.customButton}
-          onPress={takePhoto}
-        >
-          <Text style={styles.customButtonText}>방문 인증하기</Text>
-        </TouchableOpacity>
+          {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
-        {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-
-        <TouchableOpacity
-          style={styles.customButton}
-          onPress={handleSave}
-        >
-          <Text style={styles.customButtonText}>인증 완료</Text>
-        </TouchableOpacity>
+          {/* '인증 완료' 버튼을 조건부로 숨김 */}
+          {imageUri && (
+          <TouchableOpacity
+            style={[styles.customButton, { display: imageUri ? 'flex' : 'none' }]} // 버튼 숨기기 처리 및 스타일 병합
+            onPress={handleSave}
+          >
+            <Text style={styles.customButtonText}>인증 완료</Text>
+          </TouchableOpacity>
+          )}
+        </View>
       </View>
     </ImageBackground>
   );
@@ -180,17 +186,22 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  loadingContainer: {
+    position: 'absolute',
+    top: '20%', // 텍스트와 동일한 위치에 로딩 애니메이션을 배치
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 170, // 하단에 고정
+    alignItems: 'center',
+  },
   topLocationText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
-    position: 'absolute',  // 위치를 절대값으로 설정
-    top: 100,  // 화면 상단에서의 거리 설정 (단위를 픽셀로 설정)
-    left: 0,  // 왼쪽에서의 거리 설정
-    right: 0,  // 오른쪽에서의 거리 설정
-    paddingVertical: 10,
-    // backgroundColor: 'rgba(255, 255, 255, 0.8)',  // 텍스트 배경을 살짝 투명하게 설정
+    marginBottom: 400,
   },
   customButton: {
     backgroundColor: '#fff',
@@ -201,6 +212,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     marginVertical: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   customButtonText: {
     fontSize: 18,
