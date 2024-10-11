@@ -238,8 +238,11 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("Logged-in user's fullName and rrn do not match the provided information.");
         }
 
+        // 주민등록번호에서 하이픈을 제거하는 함수
+        String formatRRN = rrn.replaceAll("-", ""); // 하이픈 제거
+
         // 이름과 주민등록번호로 멤버 찾기 (실제 로직에서는 불필요할 수 있음)
-        Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, rrn)
+        Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, formatRRN)
                 .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
 
         // 인증 코드 생성 및 이메일 전송
@@ -265,9 +268,12 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("Verification code has expired");
         }
 
+        // 주민등록번호에서 하이픈을 제거하는 함수
+        String formatRRN = rrn.replaceAll("-", ""); // 하이픈 제거
+
         // 인증 성공 시 토큰 생성
         String token = UUID.randomUUID().toString();
-        Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, rrn)
+        Member member = memberRepository.findByFullNameAndRegistrationNumber(fullName, formatRRN)
                 .orElseThrow(() -> new IllegalArgumentException("No member found with the provided name and rrn"));
 
         // 사용자와 연결된 문서 조회
@@ -275,6 +281,8 @@ public class DocumentServiceImpl implements DocumentService {
                 .orElseThrow(() -> new IllegalArgumentException("Document not found for member"));
 
         // 문서 ID 업데이트 (rrn 값에 기반한 검색)
+        StringBuffer buf = new StringBuffer(formatRRN);
+        rrn = buf.insert(6,"-").toString();
         Document.DocumentBuilder updatedDocumentBuilder = document.toBuilder();
 
         driverLicenseRepository.findByRrn(rrn).ifPresent(driverLicense -> {
