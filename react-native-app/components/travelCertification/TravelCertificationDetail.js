@@ -1,78 +1,157 @@
 import React from 'react';
 import { BASE_URL } from '../../constants/config';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
+import { useDispatch } from 'react-redux';
+import { deleteCertificate } from '../../redux/travelCertificatesSlice';
+import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons';
 
 const TravelCertificationDetail = ({ route, navigation }) => {
-  // route.params로 전달된 item을 받아옴
+  const dispatch = useDispatch();
   const { item } = route.params;
-
-  console.log('item : ', item)
-
-  // 이미지가 저장된 서버 URL과 결합하여 완전한 이미지 URL을 생성
   const imageUrl = `${BASE_URL}/uploads/${item.imagepath}`;
 
+  const handleDeleteItem = () => {
+    Alert.alert('삭제 확인', '정말로 이 인증서를 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        onPress: () => {
+          axios
+            .delete(
+              `${BASE_URL}/api/travel-certificates/delete/${item.travelid}`
+            )
+            .then(() => {
+              Alert.alert('삭제 완료', '여행 인증서가 삭제되었습니다.');
+              dispatch(deleteCertificate(item.travelid));
+              navigation.goBack();
+            })
+            .catch((error) => {
+              console.error('삭제 오류:', error);
+              Alert.alert('삭제 실패', '여행 인증서를 삭제할 수 없습니다.');
+            });
+        },
+      },
+    ]);
+  };
+
+  const handleEditItem = () => {
+    navigation.navigate('TravelCertificationEdit', { item });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>여행확인서</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>이름: {item.username}</Text>
-        <Text style={styles.infoText}>지역: {item.visitedcountry.split('-')[0]} {item.visitedcountry.split('-')[1]}</Text>
-        <Text style={styles.infoText}>일자: {item.traveldate}</Text>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.title}>여행 인증서</Text>
+          <TouchableOpacity onPress={handleEditItem}>
+            <Ionicons name="create-outline" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
 
-      {/* 이미지가 완전한 URL로 변경됨 */}
-      <Image
-        source={{ uri: imageUrl }} // 이미지 경로를 URI로 사용
-        style={styles.image}
-        resizeMode="cover"
-      />
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
 
-      <Button title="확인" onPress={() => navigation.goBack()} />
-    </View>
+        <View style={styles.infoContainer}>
+          <InfoItem label="이름" value={item.username} />
+          <InfoItem
+            label="지역"
+            value={`${item.visitedcountry.split('-')[0]} ${
+              item.visitedcountry.split('-')[1]
+            }`}
+          />
+          <InfoItem label="일자" value={item.traveldate} />
+        </View>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDeleteItem}
+        >
+          <Text style={styles.deleteButtonText}>인증서 삭제</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const InfoItem = ({ label, value }) => (
+  <View style={styles.infoItem}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    <Text style={styles.infoValue}>{value}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#ffffff',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  infoContainer: {
-    marginBottom: 20,
-  },
-  infoText: {
-    fontSize: 18,
-    marginBottom: 10,
   },
   image: {
     width: '100%',
     height: 300,
-    borderRadius: 10,
     marginBottom: 20,
   },
-  confirmButton: {
-    backgroundColor: '#fff', // 버튼 배경색
-    borderColor: '#007AFF', // 테두리 색상
-    borderWidth: 1, // 테두리 두께
-    borderRadius: 25, // 동그란 모양을 위해 반경 설정
-    width: 80, // 버튼의 너비
-    height: 40, // 버튼의 높이
-    justifyContent: 'center', // 버튼 안 텍스트 중앙 정렬
-    alignItems: 'center', // 버튼 안 텍스트 수평 중앙 정렬
-    alignSelf: 'center', // 부모 뷰 기준 중앙 정렬
-    // marginTop: 3, // 상단 여백
+  infoContainer: {
+    padding: 16,
   },
-  buttonText: {
-    color: '#007AFF', // 텍스트 색상
-    fontSize: 16, // 텍스트 크기
-    fontWeight: 'bold', // 텍스트 굵기
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  infoLabel: {
+    fontSize: 16,
+    color: '#666',
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  deleteButton: {
+    backgroundColor: '#ff3b30',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 20,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

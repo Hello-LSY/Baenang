@@ -31,6 +31,7 @@ import ProfileButton from '../../components/ProfileButton';
 import { Feather, AntDesign } from '@expo/vector-icons';
 import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
+import * as Font from 'expo-font';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -448,6 +449,7 @@ const styles = StyleSheet.create({
   headerGreeting: {
     fontSize: 18,
     fontWeight: 'normal',
+    // fontFamily: 'RiaSans-ExtraBold',
   },
   headerName: {
     fontSize: 24,

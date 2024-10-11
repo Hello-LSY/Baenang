@@ -1,68 +1,229 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../../redux/authState';
 import {
   View,
-  ScrollView,
   Text,
-  Button,
   StyleSheet,
   TouchableOpacity,
+  FlatList,
+  Alert,
+  Dimensions,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchTravelCertificates } from '../../redux/travelCertificatesSlice';
+import {
+  fetchTravelCertificates,
+  deleteCertificate,
+} from '../../redux/travelCertificatesSlice';
+import ProfileButton from '../../components/ProfileButton';
+import { Ionicons } from '@expo/vector-icons';
+import TravelCertificationItem from '../../components/travelCertification/TravelCertificationItem';
+import TravelCertificationModal from '../../components/travelCertification/TravelCertificationModal';
+import axios from 'axios';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import { BASE_URL } from '../../constants/config';
 
 const TravelCertificationMain = ({ navigation }) => {
   const dispatch = useDispatch();
+  const { auth } = useAuth();
+  const {
+    list: locations,
+    status,
+    error,
+  } = useSelector((state) => state.travelCertificates);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  // Redux state에서 상태를 가져옴
-  const { list: locations, status, error } = useSelector((state) => state.travelCertificates);
+  const [visibleMenuIndex, setVisibleMenuIndex] = useState(null);
 
-  const [region, setRegion] = React.useState({
-    latitude: 36.5, // 대한민국의 중앙 위치
+  const [region, setRegion] = useState({
+    latitude: 36.5,
     longitude: 127.8,
-    latitudeDelta: 3, // 대한민국일 때의 줌 레벨
+    latitudeDelta: 3,
     longitudeDelta: 3,
   });
 
-  // 컴포넌트가 로드되면 Redux 액션을 디스패치하여 데이터를 불러옴
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'list', title: '여행 인증서' },
+    { key: 'map', title: '지도' },
+  ]);
+
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchTravelCertificates());
     }
   }, [status, dispatch]);
 
-  // 방문한 국가 개수 구하기 (Set을 이용해 중복 제거)
   const uniqueCountries = new Set(
-    locations.map((loc) => {
-      if (loc.visitedcountry) {
-        return loc.visitedcountry.trim().toLowerCase().split("-")[0]; // 대소문자 구분 제거, 공백 제거
-      }
-      return ""; // visitedcountry가 null이거나 undefined일 경우 빈 문자열로 처리
-    })
+    locations.map(
+      (loc) => loc.visitedcountry?.trim().toLowerCase().split('-')[0] || ''
+    )
   );
 
-  // 지도를 전환하는 함수 (한국 -> 세계)
   const toggleWorldMap = () => {
-    if (region.latitude === 36.5 && region.longitude === 127.8) {
-      // 세계 지도로 전환
-      setRegion({
-        latitude: 110,
-        longitude: 50,
-        latitudeDelta: 100, // 전 세계를 볼 수 있게 확대
-        longitudeDelta: 100,
-      });
-    } else {
-      // 한국 지도로 전환
-      setRegion({
-        latitude: 36.5,
-        longitude: 127.8,
-        latitudeDelta: 3, // 한국 지역만 보기
-        longitudeDelta: 3,
-      });
-    }
+    setRegion((prev) =>
+      prev.latitude === 36.5
+        ? {
+            latitude: 0,
+            longitude: 0,
+            latitudeDelta: 180,
+            longitudeDelta: 180,
+          }
+        : {
+            latitude: 36.5,
+            longitude: 127.8,
+            latitudeDelta: 3,
+            longitudeDelta: 3,
+          }
+    );
   };
 
-  // 로딩 상태 처리
+  const handlePressItem = (item) => {
+    console.log('Selected item:', item); // 디버깅을 위한 로그
+    setSelectedItem(item);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedItem(null); // 모달을 닫을 때 selectedItem을 null로 설정
+  };
+
+  const handleDeleteItem = (id) => {
+    Alert.alert('삭제 확인', '정말로 이 인증서를 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        onPress: () => {
+          axios
+            .delete(`${BASE_URL}/api/travel-certificates/delete/${id}`)
+            .then(() => {
+              dispatch(deleteCertificate(id));
+              setModalVisible(false);
+              setSelectedItem(null);
+              Alert.alert('삭제 완료', '여행 인증서가 삭제되었습니다.');
+            })
+            .catch((error) => {
+              console.error('삭제 오류:', error);
+              Alert.alert('삭제 실패', '여행 인증서를 삭제할 수 없습니다.');
+            });
+        },
+      },
+    ]);
+  };
+
+  const handleEditItem = (item) => {
+    navigation.navigate('TravelCertificationEdit', { item });
+  };
+
+  const toggleMenu = (index) => {
+    setVisibleMenuIndex((prev) => (prev === index ? null : index));
+  };
+  const renderHeader = useCallback(
+    () => (
+      <View style={styles.header}>
+        <ProfileButton
+          onPress={() => navigation.navigate('Profile')}
+          size={100}
+        />
+        <View style={styles.userInfo}>
+          <View style={styles.nameContainer}>
+            <Text style={styles.name}>{auth.nickname}</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('TravelCertificationProcess')}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color="#A9A9A9" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.location}>San Jose, CA</Text>
+        </View>
+
+        <View style={styles.statsSection}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{locations.length}</Text>
+            <Text style={styles.statLabel}>방문 지역</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{uniqueCountries.size}</Text>
+            <Text style={styles.statLabel}>방문 국가</Text>
+          </View>
+        </View>
+      </View>
+    ),
+    [auth.nickname, locations.length, uniqueCountries.size, navigation]
+  );
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <View style={styles.itemContainer}>
+        <TravelCertificationItem
+          item={item}
+          onPress={() => handlePressItem(item)}
+        />
+      </View>
+    ),
+    []
+  );
+
+  const ListScene = useCallback(
+    () => (
+      <FlatList
+        data={locations}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.travelid.toString()}
+        ListEmptyComponent={
+          <View style={styles.noTravelContainer}>
+            <Text style={styles.noTravelText}>방문한 여행지가 없습니다.</Text>
+          </View>
+        }
+        showsVerticalScrollIndicator={false}
+      />
+    ),
+    [locations, renderItem]
+  );
+
+  const MapScene = useCallback(
+    () => (
+      <View style={styles.mapContainer}>
+        <MapView style={styles.map} region={region}>
+          {locations.map((location) => (
+            <Marker
+              key={location.travelid}
+              coordinate={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+              }}
+              title={location.visitedcountry}
+              description={`방문 날짜: ${location.traveldate}`}
+            />
+          ))}
+        </MapView>
+        <TouchableOpacity style={styles.toggleButton} onPress={toggleWorldMap}>
+          <Text style={styles.toggleButtonText}>
+            {region.latitude === 36.5 ? '세계 지도' : '한국 지도'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    ),
+    [locations, region]
+  );
+
+  const renderScene = SceneMap({
+    list: ListScene,
+    map: MapScene,
+  });
+
+  const renderTabBar = (props) => (
+    <TabBar
+      {...props}
+      indicatorStyle={{ backgroundColor: '#87CEFA' }}
+      style={{ backgroundColor: 'white' }}
+      labelStyle={{ color: 'black', fontWeight: 'bold' }}
+    />
+  );
+
   if (status === 'loading') {
     return (
       <View style={styles.container}>
@@ -71,7 +232,6 @@ const TravelCertificationMain = ({ navigation }) => {
     );
   }
 
-  // 오류 처리
   if (status === 'failed') {
     return (
       <View style={styles.container}>
@@ -81,160 +241,116 @@ const TravelCertificationMain = ({ navigation }) => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        {/* 방문 지역 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>방문 지역</Text>
-          <Text style={styles.infoText}>• 개수 : {locations.length}개</Text>
-        </View>
-
-        {/* 방문 국가 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>방문 국가</Text>
-          <Text style={styles.infoText}>• 국가 : {uniqueCountries.size}개</Text>
-        </View>
-
-        <View>
-          <View>
-            <Text style={styles.title}>여행 인증서</Text>
-          </View>
-          <View flexDirection="row" justifyContent="flex-end">
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => navigation.navigate("TravelCertificationProcess")}
-            >
-              <Text style={styles.addButtonText}>추가</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* 여행 인증서 지도 섹션 */}
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            region={region}
-            zoomEnabled={true}
-            scrollEnabled={true}
-            pitchEnabled={true}
-            rotateEnabled={true}
-          >
-            {locations.length > 0 ? (
-              locations.map((location) => (
-                <Marker
-                  key={location.travelid}
-                  coordinate={{
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                  }}
-                  title={location.visitedcountry}
-                  description={`방문 날짜: ${location.traveldate}`}
-                />
-              ))
-            ) : (
-              <Text>마커가 없습니다.</Text>
-            )}
-          </MapView>
-        </View>
-
-        {/* 해외 지도 보기 버튼 */}
-        <View style={styles.buttonContainer}>
-          <Button
-            title={region.latitude === 36.5 ? "해외 지도" : "한국 지도"}
-            onPress={toggleWorldMap}
-          />
-        </View>
-
-        {/* 최근 여행지 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>최근 여행지</Text>
-          {locations.length > 0 ? (
-            <View style={styles.recentTravel}>
-              <Text style={styles.travelText}>
-                {locations[0].visitedcountry.split("-")[0]}{" "}
-                {locations[0].visitedcountry.split("-")[1]} -{" "}
-                {locations[0].traveldate}
-              </Text>
-            </View>
-          ) : (
-            <Text>방문한 여행지가 없습니다.</Text>
-          )}
-        </View>
-
-        {/* 여행 인증서 리스트로 이동 버튼 */}
-        <Button
-          title="여행 인증서 리스트 보기"
-          onPress={() => navigation.navigate("TravelCertificationList")}
+    <View style={styles.container}>
+      {renderHeader()}
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: Dimensions.get('window').width }}
+        renderTabBar={renderTabBar}
+        style={styles.tabView}
+      />
+      {modalVisible && selectedItem && (
+        <TravelCertificationModal
+          isVisible={modalVisible}
+          onClose={handleCloseModal}
+          item={selectedItem}
+          onEdit={handleEditItem}
+          onDelete={handleDeleteItem}
         />
-      </View>
-    </ScrollView>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    paddingBottom: 20,
-  },
   container: {
     flex: 1,
-    backgroundColor: "#f0f8ff",
-    paddingHorizontal: 16,
+    backgroundColor: '#ffffff',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
+    padding: 16,
+    alignItems: 'center',
   },
-  title: {
+  userInfo: {
+    alignItems: 'center',
+    marginTop: 8,
+    width: '100%',
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    position: 'relative',
+  },
+  name: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   addButton: {
-    backgroundColor: "#00BCD4",
-    borderRadius: 50,
-    padding: 10,
+    position: 'absolute',
+    right: '32%',
+    top: '50%',
+    transform: [{ translateY: -12 }], // 버튼의 절반 크기만큼 위로 이동
   },
-  addButtonText: {
-    fontSize: 24,
-    color: "#fff",
+  location: {
+    fontSize: 14,
+    color: 'grey',
+    marginTop: 4,
   },
-  section: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
-    marginVertical: 8,
+  statsSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
+  statItem: {
+    alignItems: 'center',
   },
-  infoText: {
-    fontSize: 16,
+  statNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
+  statLabel: {
+    fontSize: 13,
+    color: 'grey',
+  },
+  tabView: {
+    flex: 1,
+  },
+
   mapContainer: {
-    height: 200,
-    borderRadius: 8,
-    overflow: "hidden",
-    marginVertical: 16,
+    flex: 1,
+    position: 'relative',
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  buttonContainer: {
-    marginVertical: 16,
+  toggleButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 10,
+    borderRadius: 5,
   },
-  recentTravel: {
-    flexDirection: "row",
-    alignItems: "center",
+  toggleButtonText: {
+    fontWeight: 'bold',
   },
-  travelText: {
+  itemContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  noTravelContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  noTravelText: {
     fontSize: 16,
-    fontWeight: "bold",
-  },
-  travelDate: {
-    color: "#666",
+    color: 'grey',
   },
 });
 

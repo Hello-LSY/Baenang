@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, StyleSheet, Alert, Image, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+  StyleSheet,
+  Alert,
+  Image,
+  ScrollView,
+} from 'react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import MapView, { Marker } from 'react-native-maps';
@@ -7,7 +16,9 @@ import * as Location from 'expo-location';
 
 const TravelCertificationEdit = ({ route, navigation }) => {
   const { item } = route.params;
-  const [visitedCountry, setVisitedCountry] = useState(item.visitedcountry || '');
+  const [visitedCountry, setVisitedCountry] = useState(
+    item.visitedcountry || ''
+  );
   const [travelDate, setTravelDate] = useState(item.traveldate || '');
   const [imageUri, setImageUri] = useState(item.imagepath || null);
   const [location, setLocation] = useState({
@@ -18,8 +29,9 @@ const TravelCertificationEdit = ({ route, navigation }) => {
 
   useEffect(() => {
     // 서버에서 데이터 가져오기
-    axios.get(`http://10.0.2.2:8080/api/travel-certificates/show/${item.travelid}`)
-      .then(response => {
+    axios
+      .get(`http://10.0.2.2:8080/api/travel-certificates/show/${item.travelid}`)
+      .then((response) => {
         const data = response.data;
         setVisitedCountry(data.visitedcountry);
         setTravelDate(data.traveldate);
@@ -29,7 +41,7 @@ const TravelCertificationEdit = ({ route, navigation }) => {
           longitude: data.longitude || -122.4324,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         Alert.alert('오류', '데이터를 불러올 수 없습니다.');
       })
       .finally(() => {
@@ -39,8 +51,10 @@ const TravelCertificationEdit = ({ route, navigation }) => {
 
   // 카메라 및 사진 권한 요청 처리 함수
   const requestPermissions = async () => {
-    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-    const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status: cameraStatus } =
+      await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaStatus } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
       Alert.alert('권한 필요', '카메라 및 사진 접근 권한이 필요합니다.');
       return false;
@@ -85,7 +99,13 @@ const TravelCertificationEdit = ({ route, navigation }) => {
 
   // 저장 함수
   const handleSave = () => {
-    if (!visitedCountry.trim() || !travelDate.trim() || !imageUri || !location.latitude || !location.longitude) {
+    if (
+      !visitedCountry.trim() ||
+      !travelDate.trim() ||
+      !imageUri ||
+      !location.latitude ||
+      !location.longitude
+    ) {
       Alert.alert('입력 오류', '모든 필드를 입력해 주세요.');
       return;
     }
@@ -98,12 +118,16 @@ const TravelCertificationEdit = ({ route, navigation }) => {
       longitude: location.longitude,
     };
 
-    axios.put(`http://10.0.2.2:8080/api/travel-certificates/${item.travelid}`, updatedData)
-      .then(response => {
+    axios
+      .put(
+        `http://10.0.2.2:8080/api/travel-certificates/${item.travelid}`,
+        updatedData
+      )
+      .then((response) => {
         Alert.alert('수정 완료', '여행 인증서 정보가 수정되었습니다.');
         navigation.goBack();
       })
-      .catch(error => {
+      .catch((error) => {
         Alert.alert('수정 실패', '여행 인증서를 수정할 수 없습니다.');
       });
   };
@@ -134,9 +158,7 @@ const TravelCertificationEdit = ({ route, navigation }) => {
       />
       <Text style={styles.label}>사진</Text>
       <Button title="사진 선택" onPress={selectImage} />
-      {imageUri && (
-        <Image source={{ uri: imageUri }} style={styles.image} />
-      )}
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
       <Text style={styles.label}>위치</Text>
       <MapView
@@ -154,7 +176,10 @@ const TravelCertificationEdit = ({ route, navigation }) => {
         showsUserLocation={true} // 사용자의 현재 위치 표시
       >
         <Marker
-          coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+          coordinate={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+          }}
           draggable
           onDragEnd={onMarkerDragEnd}
         />
