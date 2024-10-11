@@ -10,7 +10,7 @@ const MainApp = () => {
   const { auth, initializeAuth } = useAuth();
 
   useEffect(() => {
-    initializeAuth(); 
+    initializeAuth();
   }, []);
 
   if (auth.loading) {
