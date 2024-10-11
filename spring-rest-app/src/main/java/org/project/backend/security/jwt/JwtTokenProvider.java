@@ -1,22 +1,28 @@
 package org.project.backend.security.jwt;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);  // 로거 추가
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    private final String JWT_SECRET = "your-secret-key"; // 비밀 키
-    private final long JWT_EXPIRATION_MS = 604800000L; // 7일
+    // 외부 설정에서 JWT 시크릿 키와 만료 시간 가져오기
+    @Value("${jwt.secret}")
+    private String JWT_SECRET;
+
+    @Value("${jwt.expirationMs}")
+    private long JWT_EXPIRATION_MS;
 
     // JWT 토큰 생성
     public String generateToken(Authentication authentication) {
@@ -25,7 +31,7 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);
 
         return Jwts.builder()
-                .setSubject(userDetails.getUsername()) // 사용자 이름
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date()) // 토큰 발행 시간
                 .setExpiration(expiryDate) // 토큰 만료 시간
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET) // 알고리즘과 시크릿 키
@@ -48,10 +54,8 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException ex) {
-            // 토큰 만료된 경우 처리
             logger.error("Expired JWT token", ex);
         } catch (Exception ex) {
-            // 일반적인 토큰 검증 오류 처리
             logger.error("Invalid JWT token", ex);
         }
         return false;

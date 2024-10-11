@@ -108,7 +108,7 @@ dependencies {
 
 
 war {
-    archiveFileName = 'backend.war'
+    archiveFileName = 'baenang.war'
 }
 
 test {

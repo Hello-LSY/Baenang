@@ -152,38 +152,50 @@ const BusinessCardScreen = ({ navigation }) => {
 
           {/* 자신의 명함 영역 */}
           <View style={styles.cardContainer}>
-            {businessCard ? (
-              <View style={styles.businessCard}>
-                <View style={styles.cardHeader}>
-                  <Image source={{ uri: `${BASE_URL}/uploads/${businessCard.imageUrl}` }} style={styles.businessCardImage} resizeMode="cover" />
-                  <View style={styles.qrCodeWrapper}>
-                    <QRCode value={JSON.stringify(businessCard)} size={90} />
-                  </View>
-                </View>
-                <View style={styles.cardDetails}>
-                  <View style={styles.nameSnsContainer}>
-                    <Text style={styles.nameText}>{businessCard.name}</Text>
-                    <View style={styles.snsContainer}>
-                      {getSnsIcon(parseSnsInfo(businessCard.sns).platform)}
-                      <Text style={styles.snsText}>{parseSnsInfo(businessCard.sns).snsId}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.subText}>{businessCard.email}</Text>
-                  <Text style={styles.introductionText}>{businessCard.introduction}</Text>
-                </View>
-
-                <TouchableOpacity style={styles.iconEditButton} onPress={() => navigation.navigate('UpdateBusinessCard', { businessCardId: businessCard.cardId })}>
-                  <FontAwesome name="edit" size={20} color="#3498db" />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles.emptyState}>
-                <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateBusinessCard')}>
-                  <Text style={styles.createButtonText}>명함 생성하기</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+  {businessCard ? (
+    <View style={styles.businessCard}>
+      <View style={styles.cardHeader}>
+        {/* S3에서 반환된 이미지 URL을 직접 사용하여 이미지 출력 */}
+        <Image 
+  source={{ uri: `https://baenang.s3.amazonaws.com/${businessCard.imageUrl}` }} 
+  style={styles.businessCardImage} 
+          resizeMode="cover" 
+        />
+        <View style={styles.qrCodeWrapper}>
+          <QRCode value={JSON.stringify(businessCard)} size={90} />
+        </View>
+      </View>
+      <View style={styles.cardDetails}>
+        <View style={styles.nameSnsContainer}>
+          <Text style={styles.nameText}>{businessCard.name}</Text>
+          <View style={styles.snsContainer}>
+            {getSnsIcon(parseSnsInfo(businessCard.sns).platform)}
+            <Text style={styles.snsText}>{parseSnsInfo(businessCard.sns).snsId}</Text>
           </View>
+        </View>
+        <Text style={styles.subText}>{businessCard.email}</Text>
+        <Text style={styles.introductionText}>{businessCard.introduction}</Text>
+      </View>
+
+      <TouchableOpacity 
+        style={styles.iconEditButton} 
+        onPress={() => navigation.navigate('UpdateBusinessCard', { businessCardId: businessCard.cardId })}
+      >
+        <FontAwesome name="edit" size={20} color="#3498db" />
+      </TouchableOpacity>
+    </View>
+  ) : (
+    <View style={styles.emptyState}>
+      <TouchableOpacity 
+        style={styles.createButton} 
+        onPress={() => navigation.navigate('CreateBusinessCard')}
+      >
+        <Text style={styles.createButtonText}>명함 생성하기</Text>
+      </TouchableOpacity>
+    </View>
+  )}
+</View>
+
 
           {/* 명함 수첩 영역 */}
           <View style={styles.sectionHeader}>
@@ -266,6 +278,7 @@ const BusinessCardScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  // 스타일 정의
   container: {
     flex: 1,
     backgroundColor: '#f4f9ff',
