@@ -9,6 +9,7 @@ import friendReducer from "./friendSlice";
 import commentReducer from "./commentSlice";
 import documentReducer from "./documentSlice";
 import documentItemReducer from "./documentItemSlice";
+import profileReducer from './profileSlice';
 
 const storeConfig = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ const storeConfig = configureStore({
     friend: friendReducer,
     document: documentReducer,
     documentItem : documentItemReducer,
+    profile : profileReducer,
   },
 });
 
