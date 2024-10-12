@@ -1,48 +1,51 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import { BASE_URL } from '../../constants/config';
+
+const { width } = Dimensions.get('window');
 
 const TravelCertificationItem = ({ item, onPress }) => {
+  const imageUrl = `${BASE_URL}/uploads/${item.imagepath}`;
+
   return (
-    <TouchableOpacity style={styles.container} onPress={() => onPress(item)}>
+    <TouchableOpacity onPress={() => onPress(item)} style={styles.container}>
+      <Image source={{ uri: imageUrl }} style={styles.thumbnail} />
       <View style={styles.infoContainer}>
-        <Text style={styles.countryText}>{item.visitedcountry.split('-')[0]}</Text>
-        <Text style={styles.countryText}>{item.visitedcountry.split('-')[1]}</Text>
-        {/* <Text style={styles.imageText}>이미지 경로: {item.imagepath}</Text> */}
-        <Text style={styles.dateText}>방문 날짜: {item.traveldate}</Text>
+        <Text style={styles.title}>{item.visitedcountry}</Text>
+        <Text style={styles.subtitle}>{item.traveldate}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+  container: {},
+  thumbnail: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+    borderRadius: 10,
   },
   infoContainer: {
-    flex: 1,
+    marginVertical: 8,
+    padding: 10,
   },
-  countryText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  imageText: {
+  title: {
+    marginVertical: 2,
     fontSize: 16,
-    color: '#666',
+    fontWeight: 'bold',
   },
-  dateText: {
-    fontSize: 13,
-    color: '#999',
+  subtitle: {
+    marginVertical: 2,
+    fontSize: 14,
+    color: '#666',
   },
 });
 

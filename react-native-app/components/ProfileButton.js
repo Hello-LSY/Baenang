@@ -10,12 +10,16 @@ import Animated, {
 import { Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import DefaultProfileImage from '../assets/icons/profile-placeholder.png';
 
-const BUTTON_SIZE = 50;
-const IMAGE_SIZE = 40;
-
 const AnimatedView = Animated.createAnimatedComponent(View);
 
-const ProfileButton = ({ onPress, imageSource = DefaultProfileImage }) => {
+const ProfileButton = ({
+  onPress,
+  imageSource = DefaultProfileImage,
+  size = 50,
+}) => {
+  const BUTTON_SIZE = size;
+  const IMAGE_SIZE = size * 0.8; // 이미지 크기를 버튼 크기의 80%로 설정
+
   const rotation = useSharedValue(0);
 
   React.useEffect(() => {
@@ -33,9 +37,26 @@ const ProfileButton = ({ onPress, imageSource = DefaultProfileImage }) => {
   });
 
   return (
-    <TouchableOpacity style={styles.profileButton} onPress={onPress}>
-      <View style={styles.imageContainer}>
-        <AnimatedView style={[styles.gradientCircleContainer, animatedStyle]}>
+    <TouchableOpacity
+      style={[
+        styles.profileButton,
+        { width: BUTTON_SIZE, height: BUTTON_SIZE },
+      ]}
+      onPress={onPress}
+    >
+      <View
+        style={[
+          styles.imageContainer,
+          { width: BUTTON_SIZE, height: BUTTON_SIZE },
+        ]}
+      >
+        <AnimatedView
+          style={[
+            styles.gradientCircleContainer,
+            animatedStyle,
+            { width: BUTTON_SIZE, height: BUTTON_SIZE },
+          ]}
+        >
           <Svg width={BUTTON_SIZE} height={BUTTON_SIZE}>
             <Defs>
               <LinearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -53,7 +74,17 @@ const ProfileButton = ({ onPress, imageSource = DefaultProfileImage }) => {
             />
           </Svg>
         </AnimatedView>
-        <Image source={imageSource} style={styles.profileIcon} />
+        <Image
+          source={imageSource}
+          style={[
+            styles.profileIcon,
+            {
+              width: IMAGE_SIZE,
+              height: IMAGE_SIZE,
+              borderRadius: IMAGE_SIZE / 2,
+            },
+          ]}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -61,27 +92,18 @@ const ProfileButton = ({ onPress, imageSource = DefaultProfileImage }) => {
 
 const styles = StyleSheet.create({
   profileButton: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
     justifyContent: 'center',
     alignItems: 'center',
   },
   imageContainer: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   gradientCircleContainer: {
     position: 'absolute',
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
   },
   profileIcon: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: IMAGE_SIZE / 2,
     resizeMode: 'cover',
   },
 });
