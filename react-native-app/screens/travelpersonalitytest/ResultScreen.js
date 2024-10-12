@@ -208,13 +208,14 @@ const styles = StyleSheet.create({
     },
     homeButton: {
         backgroundColor: '#4b8efc', // 귀여운 파란색 배경
-        borderRadius: 25, // 동그랗게 만듦
+        borderRadius: 20, // 동그랗게 만듦
         paddingVertical: 10,
-        paddingHorizontal: 25,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        width: 150, // 버튼 크기
-        marginTop: 30, // 상단과 간격을 줌
+        width: 120, // 버튼 크기
+        marginTop: 20,
+         // 상단과 간격을 줌
         shadowColor: '#000', // 그림자 효과 추가
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -223,8 +224,10 @@ const styles = StyleSheet.create({
     },
     homeButtonText: {
         color: '#fff', // 텍스트 색상
-        fontSize: 16,
+        fontSize: 14.5,
         fontWeight: 'bold',
+        marginBottom: 2,
+        textAlign: 'center'
     },
 });
 

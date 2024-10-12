@@ -89,11 +89,11 @@ const BusinessCardScreen = ({ navigation }) => {
   const handleBarCodeScanned = ({ data }) => {
     setScanned(true);
     setIsScanning(false);
-    
+
     try {
       const businessCardData = JSON.parse(data);
       const { cardId } = businessCardData;
-  
+
       if (cardId) {
         Alert.alert('QR 코드 스캔 완료', `스캔한 명함 ID: ${cardId}`);
         handleAddFriendById(cardId);
@@ -104,7 +104,6 @@ const BusinessCardScreen = ({ navigation }) => {
       Alert.alert('Error', 'QR 코드 데이터가 유효하지 않습니다.');
     }
   };
-  
 
   // QR 스캐너 시작 버튼 핸들러
   const handleStartScan = () => {
@@ -145,9 +144,14 @@ const BusinessCardScreen = ({ navigation }) => {
       ) : (
         <View>
           {/* 나의 여행 명함 영역 */}
-          <View style={styles.titleContainer}>
-            <MaterialIcons name="badge" size={30} color="#34495e" />
-            <Text style={styles.title}>나의 여행 명함</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleContainer}>
+              <MaterialIcons name="badge" size={30} color="#34495e" />
+              <Text style={styles.title}>나의 여행 명함</Text>
+            </View>
+            <TouchableOpacity style={styles.addFriendButton} onPress={() => navigation.navigate('CreateBusinessCard')}>
+              <FontAwesome name="plus" size={18} color="#000" />
+            </TouchableOpacity>
           </View>
 
           {/* 자신의 명함 영역 */}
@@ -177,11 +181,7 @@ const BusinessCardScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles.emptyState}>
-                <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateBusinessCard')}>
-                  <Text style={styles.createButtonText}>명함 생성하기</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.noFriendsText}>나만의 명함을 만들어보세요!</Text>
             )}
           </View>
 
@@ -201,7 +201,7 @@ const BusinessCardScreen = ({ navigation }) => {
               {friendsList.length > 0 ? (
                 friendsList.map((friend, index) => (
                   <TouchableOpacity key={index} style={styles.friendCard} onPress={() => handleFriendPress(friend)}>
-                    <Image source={{ uri: `${BASE_URL}/uploads/${friend.imageUrl}`}} style={styles.friendImage} />
+                    <Image source={{ uri: `${BASE_URL}/uploads/${friend.imageUrl}` }} style={styles.friendImage} />
                     <View style={styles.friendInfo}>
                       <Text style={styles.friendCardText}>{friend.name}</Text>
                       <Text style={styles.friendSubText}>{friend.country}</Text>
@@ -218,51 +218,51 @@ const BusinessCardScreen = ({ navigation }) => {
           <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={closeAddFriendModal}>
             <View style={styles.addFriendModalContainer}>
               <View style={styles.addFriendModalContent}>
-                <TouchableOpacity style={styles.closeIcon} onPress={closeAddFriendModal}>
-                  <AntDesign name="close" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.addFriendModalCardId}>내 명함 ID: {businessCard?.cardId}</Text>
-                <TouchableOpacity style={styles.qrButton} onPress={() => { closeAddFriendModal(); handleStartScan(); }}>
-                  <FontAwesome name="qrcode" size={18} color="#3498db" />
-                  <Text style={styles.qrButtonText}>QR Code</Text>
-                </TouchableOpacity>
-                <TextInput style={styles.modalInput} placeholder="친구 명함 ID 입력" value={businessCardIdInput} onChangeText={setBusinessCardIdInput} />
-                <TouchableOpacity style={styles.modalButton} onPress={() => { closeAddFriendModal(); handleAddFriendById(businessCardIdInput); }}>
-                  <Text style={styles.modalButtonText}>ID로 친구 추가</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity style={styles.closeIcon} onPress={closeAddFriendModal}>
+                <AntDesign name="close" size={24} color="black" />
+              </TouchableOpacity>
+              <Text style={styles.addFriendModalCardId}>내 명함 ID: {businessCard?.cardId}</Text>
+              <TouchableOpacity style={styles.qrButton} onPress={() => { closeAddFriendModal(); handleStartScan(); }}>
+                <FontAwesome name="qrcode" size={18} color="#3498db" />
+                <Text style={styles.qrButtonText}>QR Code</Text>
+              </TouchableOpacity>
+              <TextInput style={styles.modalInput} placeholder="친구 명함 ID 입력" value={businessCardIdInput} onChangeText={setBusinessCardIdInput} />
+              <TouchableOpacity style={styles.modalButton} onPress={() => { closeAddFriendModal(); handleAddFriendById(businessCardIdInput); }}>
+                <Text style={styles.modalButtonText}>ID로 친구 추가</Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
+          </View>
+        </Modal>
 
-          {/* 친구 상세 정보 모달 */}
-          <Modal visible={friendModalVisible} animationType="slide" transparent={true} onRequestClose={() => setFriendModalVisible(false)}>
-            <View style={styles.friendModalContainer}>
-              <View style={styles.friendModalContent}>
-                <TouchableOpacity style={styles.closeIcon} onPress={() => setFriendModalVisible(false)}>
-                  <AntDesign name="close" size={24} color="black" />
-                </TouchableOpacity>
-                {selectedFriend && (
-                  <>
-                    <Image source={{ uri: `${BASE_URL}/uploads/${selectedFriend.imageUrl}` }} style={styles.modalFriendImage} />
-                    <View style={styles.modalNameSnsContainer}>
-                      <Text style={styles.modalFriendName}>{selectedFriend.name}</Text>
-                      <View style={styles.friendSnsContainer}>
-                        {getSnsIcon(parseSnsInfo(selectedFriend.sns).platform)}
-                        <Text style={styles.snsText}>{parseSnsInfo(selectedFriend.sns).snsId}</Text>
-                      </View>
+        {/* 친구 상세 정보 모달 */}
+        <Modal visible={friendModalVisible} animationType="slide" transparent={true} onRequestClose={() => setFriendModalVisible(false)}>
+          <View style={styles.friendModalContainer}>
+            <View style={styles.friendModalContent}>
+              <TouchableOpacity style={styles.closeIcon} onPress={() => setFriendModalVisible(false)}>
+                <AntDesign name="close" size={24} color="black" />
+              </TouchableOpacity>
+              {selectedFriend && (
+                <>
+                  <Image source={{ uri: `${BASE_URL}/uploads/${selectedFriend.imageUrl}` }} style={styles.modalFriendImage} />
+                  <View style={styles.modalNameSnsContainer}>
+                    <Text style={styles.modalFriendName}>{selectedFriend.name}</Text>
+                    <View style={styles.friendSnsContainer}>
+                      {getSnsIcon(parseSnsInfo(selectedFriend.sns).platform)}
+                      <Text style={styles.snsText}>{parseSnsInfo(selectedFriend.sns).snsId}</Text>
                     </View>
-                    <Text style={styles.modalFriendInfo}>{selectedFriend.email}</Text>
-                    <Text style={styles.modalFriendInfo}>{selectedFriend.introduction}</Text>
-                  </>
-                )}
-              </View>
+                  </View>
+                  <Text style={styles.modalFriendInfo}>{selectedFriend.email}</Text>
+                  <Text style={styles.modalFriendInfo}>{selectedFriend.introduction}</Text>
+                </>
+              )}
             </View>
-          </Modal>
+          </View>
+        </Modal>
 
-        </View>
-      )}
-    </ScrollView>
-  );
+      </View>
+    )}
+  </ScrollView>
+);
 };
 
 const styles = StyleSheet.create({
@@ -270,6 +270,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f9ff',
     paddingHorizontal: 20,
+    
   },
   loadingContainer: {
     flex: 1,
@@ -340,8 +341,8 @@ const styles = StyleSheet.create({
   },
   iconEditButton: {
     position: 'absolute',
-    bottom: 15,  
-    right: 10,  
+    bottom: 15,
+    right: 10,
     backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 50,
@@ -398,6 +399,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 30,
   },
   sectionTitleContainer: {
     flexDirection: 'row',
@@ -413,9 +415,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 50,
   },
-  friendsListSection: {
-    marginTop: 10,
-  },
+  
   friendCard: {
     backgroundColor: '#f0f0f0',
     padding: 15,
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   },
   noFriendsText: {
     fontSize: 16,
-    color: '#999',
+    color: '#999999',
     textAlign: 'center',
   },
   addFriendModalContainer: {
@@ -510,42 +510,74 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
-  },
-  modalFriendImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 15,
-  },
-  modalFriendName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 0,
-    lineHeight: 22,
-  },
-  modalFriendInfo: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    marginBottom: 5,
-    marginLeft: 5,
-  },
-  modalNameSnsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginBottom: 10,
-  },
-  friendSnsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  snsText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginLeft: 4,
-    lineHeight: 22,
-  },
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 10,
+  marginBottom: 20,
+},
+modalFriendImage: {
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  marginBottom: 15,
+},
+modalFriendName: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  marginBottom: 0,
+  lineHeight: 22,
+},
+modalFriendInfo: {
+  fontSize: 16,
+  color: '#7f8c8d',
+  marginBottom: 5,
+  marginLeft: 5,
+},
+modalNameSnsContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  marginBottom: 10,
+},
+friendSnsContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginLeft: 10,
+},
+snsText: {
+  fontSize: 14,
+  color: '#7f8c8d',
+  marginLeft: 4,
+  lineHeight: 22,
+},
+emptyState: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+createButton: {
+  backgroundColor: '#286ee9',
+  paddingVertical: 15,
+  paddingHorizontal: 30,
+  borderRadius: 15,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 5,
+  transform: [{ scale: 1 }],
+  transitionProperty: 'transform',
+  transitionDuration: '0.3s',
+},
+createButtonText: {
+  color: '#fff',
+  fontSize: 14,
+  fontWeight: 'bold',
+  textAlign: 'center',
+},
 });
 
 export default BusinessCardScreen;
+
