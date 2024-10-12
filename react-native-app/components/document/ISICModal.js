@@ -65,6 +65,8 @@ const ISICModal = ({ visible, onClose }) => {
         <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
           {/* 애니메이션 적용된 뷰 */}
           <Animated.View style={[styles.modalView, { transform: [{ rotateY }] }]}>
+          <View style={styles.topColor}></View>
+            
             {/* 닫기 버튼 */}
             <Pressable style={styles.closeButton} onPress={onClose}>
               <Ionicons name="close" size={24} color="black" />
@@ -101,7 +103,7 @@ const ISICModal = ({ visible, onClose }) => {
                         <Text style={styles.textDetailInfo}>{formatDate(isic.issueDate)} ~ {formatDate(isic.expiryDate)}</Text>
                       </View>
                     ) : (
-                      <View>
+                      <View style={styles.dataContainer}>
                         {/*이미지 표시 */}
                         {isic.imagePath && (
                           <View style={styles.imageContainer}>
@@ -162,11 +164,22 @@ const styles = StyleSheet.create({
     elevation: 5,
     backfaceVisibility: 'hidden', // 뷰 회전할 때 뒷면이 보이지 않도록 설정
   },
+  topColor:{
+    width: 300,
+    height: 30,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    position: 'absolute',
+    backgroundColor: '#FFB268',
+  },
   scrollView: {
     flex: 1,
     width: '100%',
-    marginTop: 10,
+    marginTop: 30,
     marginBottom: 20,
+  },
+  dataContainer: {
+    alignItems: 'center',
   },
   scrollViewContent: {
     alignItems: 'center',
@@ -197,7 +210,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     position: 'absolute',
-    top: 20,
+    top: 45,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -206,7 +219,7 @@ const styles = StyleSheet.create({
     fontWeight: 'semibold',
     color: '#495057',
     position: 'absolute',
-    top: 45,
+    top: 70,
   },
   textIssuer: {
     fontWeight: 'bold',
@@ -221,8 +234,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 140,
     height: 180,
-    marginTop: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -245,9 +257,10 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginTop: 15,
     textAlign: 'center',
-    backgroundColor: 'black',
+    backgroundColor: '#FFB268',
     color: 'white',
     padding: 5,
+    width: 230,
   },
   textInfo: {
     fontWeight: 'bold',
