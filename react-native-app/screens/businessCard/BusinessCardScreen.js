@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBusinessCard, clearBusinessCard } from '../../redux/businessCardSlice';
 import QRCode from 'react-native-qrcode-svg';
-import { BASE_URL } from '../../constants/config';
+import { BASE_URL, S3_URL } from '../../constants/config';
 import { addFriendByBusinessCardId, fetchFriendsList } from '../../redux/friendSlice';
 import { Camera } from 'expo-camera';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
@@ -144,16 +144,22 @@ const BusinessCardScreen = ({ navigation }) => {
         </View>
       ) : (
         <View>
-          {/* 나의 여행 명함 영역 */}
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <MaterialIcons name="badge" size={30} color="#34495e" />
-              <Text style={styles.title}>나의 여행 명함</Text>
-            </View>
-            <TouchableOpacity style={styles.addFriendButton} onPress={() => navigation.navigate('CreateBusinessCard')}>
-              <FontAwesome name="plus" size={18} color="#000" />
-            </TouchableOpacity>
+        {/* 나의 여행 명함 영역 */}
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleContainer}>
+            <MaterialIcons name="badge" size={30} color="#34495e" />
+            <Text style={styles.title}>나의 여행 명함</Text>
           </View>
+          {/* 명함이 없을 경우에만 명함 생성 버튼을 표시 */}
+          {!businessCard && (
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => navigation.navigate('CreateBusinessCard')}
+            >
+              <Text style={styles.createButtonText}>명함 생성하기</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
           {/* 자신의 명함 영역 */}
           <View style={styles.cardContainer}>
@@ -162,7 +168,7 @@ const BusinessCardScreen = ({ navigation }) => {
       <View style={styles.cardHeader}>
         {/* S3에서 반환된 이미지 URL을 직접 사용하여 이미지 출력 */}
         <Image
-  source={{ uri: `https://baenang.s3.amazonaws.com/${businessCard.imageUrl}` }}
+  source={{ uri: `${S3_URL}/${businessCard.imageUrl}` }}
   style={styles.businessCardImage}
           resizeMode="cover"
         />
@@ -336,8 +342,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   businessCardImage: {
-    width: 180,
-    height: 180,
+    width: 170,
+    height: 170,
     borderRadius: 10,
     marginRight:10,
   },
