@@ -5,6 +5,16 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "fonts": [
+      {
+        "asset": "assets/fonts/RiaSans-ExtraBold.ttf",
+        "family": "RiaSans-ExtraBold"
+      },
+      {
+        "asset": "assets/fonts/PretendardVariable.ttf",
+        "family": "PretendardVariable"
+      }
+    ],
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -38,8 +48,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font"
-    ]
+    "plugins": ["expo-font"]
   }
 }
