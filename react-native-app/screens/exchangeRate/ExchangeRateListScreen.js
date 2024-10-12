@@ -148,6 +148,14 @@ const ExchangeRateListScreen = ({ navigation }) => {
     </View>
   );
 
+  const renderHeader = () => (
+    <View>
+      <Text style={styles.sectionTitle}>주요 국가 환율</Text>
+      {renderMainCurrenciesGrid()}
+      <Text style={styles.sectionTitle}>전체 국가 환율</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -157,7 +165,7 @@ const ExchangeRateListScreen = ({ navigation }) => {
           data={otherRates}
           renderItem={renderExchangeRate}
           keyExtractor={(item) => item.currencyCode}
-          ListHeaderComponent={renderMainCurrenciesGrid}
+          ListHeaderComponent={renderHeader}
           stickyHeaderIndices={[]}
         />
       )}
@@ -168,14 +176,13 @@ const ExchangeRateListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#ffffff',
   },
   mainCurrenciesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
   },
   mainCurrencyWrapper: {
     width: '48%',
@@ -223,9 +230,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 15,
     marginHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f8ff',
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -259,6 +266,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#0066cc',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 20,
+    // borderWidth: 1,
+    // borderColor:'red',
   },
 });
 
