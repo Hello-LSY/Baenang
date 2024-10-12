@@ -148,12 +148,12 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   if (chartType === 'weekly') {
     historyData = groupByWeek(historyData);
-    historyData = limitData(historyData, 4); // 최근 4주
+    historyData = limitData(historyData, 6); // 최근 6주
   } else if (chartType === 'monthly') {
     historyData = groupByMonth(historyData);
-    historyData = limitData(historyData, 12); // 최근 12개월
+    historyData = limitData(historyData, 6); // 최근 6개월
   } else {
-    historyData = limitData(historyData, 30); // 최근 30일
+    historyData = limitData(historyData, 7); // 최근 7일
   }
 
   const latestRate = historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
