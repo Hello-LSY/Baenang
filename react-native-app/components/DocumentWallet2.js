@@ -96,7 +96,6 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
         visible={modalVisible}
         document={selectedDocument}
         onClose={() => setModalVisible(false)}
-        navigation={navigation} // navigation 전달
       />
     </View>
   );
@@ -118,6 +117,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
+
     fontWeight: 'bold',
     color: '#fff',
   },
