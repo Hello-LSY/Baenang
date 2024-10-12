@@ -1,3 +1,4 @@
+// screens/home/HomeScreen.js
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -32,7 +33,6 @@ import { Feather, AntDesign } from '@expo/vector-icons';
 import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
 import * as Font from 'expo-font';
-import { Linking } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -217,9 +217,7 @@ const HomeScreen = ({ navigation }) => {
         ) : latestExchangeRates.length > 0 ? (
           <ExchangeRateCarousel
             latestExchangeRates={latestExchangeRates}
-            onItemPress={(currencyCode) =>
-              handleExchangeRateClick(currencyCode)
-            }
+            onItemPress={handleExchangeRateClick}
           />
         ) : (
           <Text>환율 정보가 없습니다.</Text>

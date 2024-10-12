@@ -10,7 +10,7 @@ const questions = [
   },
   {
     question:
-      '항공사 소멸 예정 마일리지가 많다! 가장 원하는 서비스 3개를 순서대로 골라보자',
+      '항공사 소멸 예정 마일리지가 많다!\n 가장 원하는 서비스 3개를 순서대로 골라보자',
     options: [
       '탑승혜택',
       '기내식 등급 업그레이드',
@@ -22,12 +22,12 @@ const questions = [
     selectCount: 3,
   },
   {
-    question: '여행 날짜가 얼마 남지 않았는데, 여행기간에 폭설이 예상된다면...',
+    question: '여행 날짜가 얼마 남지 않았는데, \n여행기간에 폭설이 예상된다면...',
     options: ['예약했는데 당연히 떠나야지!', '취소하자!'],
     type: 'single',
   },
   {
-    question: '여행 당일, 어떤 방법으로 티켓을 발급할까?',
+    question: '여행 당일,\n어떤 방법으로 티켓을 발급할까?',
     options: [
       '오프라인 셀프 체크인',
       '온라인 체크인',
@@ -37,12 +37,12 @@ const questions = [
     type: 'single',
   },
   {
-    question: '항공기 좌석을 선택할 때, 나는 어떤 좌석을 선호할까?',
+    question: '항공기 좌석을 선택할 때,\n나는 어떤 좌석을 선호할까?',
     options: ['창가자리', '복도자리', '중간자리'],
     type: 'single',
   },
   {
-    question: '탑승시간이 다가올 때 나는, 언제 탑승하러 갈까?',
+    question: '탑승시간이 다가올 때 나는,\n언제 탑승하러 갈까?',
     options: [
       '가장 먼저 줄을 선다',
       '줄이 생기면 뒤따라 선다',
@@ -52,7 +52,7 @@ const questions = [
   },
   {
     question:
-      '드디어 도착! 배가 너무 고프다... 가장 가고 싶은 식당 스타일 3가지를 순서대로 골라보자!',
+      '드디어 도착! 배가 너무 고프다...\n가장 가고 싶은 식당 스타일 3가지를 순서대로 골라보자!',
     options: [
       '현지인 특화 음식점',
       '평소 즐겨 먹던 종류의 음식점',
@@ -65,7 +65,7 @@ const questions = [
   },
   {
     question:
-      '식당에 도착했는데, 메뉴판을 봐도 모르겠다. 가장 먼저 시도하는 주문방법 상위 3개는?',
+      '식당에 도착해서 음식을 시켜야한다. \n가장 먼저 시도하는 주문 방법\n상위 3개는?',
     options: [
       '메뉴판의 사진을 보고 주문한다',
       '직원에게 추천을 받는다',
@@ -78,7 +78,7 @@ const questions = [
   },
   {
     question:
-      '밥 먹고 커피나 한잔 할까? 가장 가고 싶은 카페 스타일 3가지를 순서대로 골라보자!',
+      '밥 먹고 커피나 한잔 할까?\n가장 가고 싶은 카페 스타일 3가지를 순서대로 골라보자!',
     options: [
       'sns 핫플레이스 현지 유명카페',
       '특색있는 테마카페 (ex, 동물카페)',
@@ -284,60 +284,75 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#ffffff', // 전체 배경을 밝은 톤으로 설정
   },
   questionNumber: {
-    fontSize: 20,
+    fontSize: 24, // 질문 번호 크기를 키움
     fontWeight: 'bold',
-    marginBottom: 30,
+    color: '#333', // 다크 그레이 색상으로 가독성 향상
+    marginBottom: 20,
   },
   question: {
-    fontSize: 18,
-    marginBottom: 50,
+    fontSize: 20, // 질문 텍스트 크기
+    marginBottom: 40,
     textAlign: 'center',
+    color: '#4A4A4A', // 약간 진한 그레이
+    paddingHorizontal: 20,
   },
   option: {
-    backgroundColor: '#ffffff',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 100,
+    backgroundColor: '#ffffff', // 옵션 배경을 흰색으로
+    paddingVertical: 15,
+    marginVertical: 10, // 위아래 여백 추가
+    borderRadius: 25, // 둥글게 처리
     width: '80%',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1, // 옵션에 테두리 추가
+    borderColor: '#D1D5DB', // 연한 그레이로 테두리 색상 설정
+    shadowColor: '#000', // 그림자 추가
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 1, // 그림자 효과를 위한 설정 (안드로이드)
   },
   selectedOption: {
-    backgroundColor: '#BBDEFB',
+    backgroundColor: '#e6f4ff',
+    borderColor: '#0c94fb' // 선택된 옵션을 더 눈에 띄게 파란색 계열로 변경
   },
   submitButton: {
-    backgroundColor: '#2196F3',
-    // padding: 10,
+    backgroundColor: '#42A5F5', // 버튼 색상을 진한 파란색으로
     marginTop: 30,
-    borderRadius: 100,
-    width: '50%',
-    height: '7%',
+    borderRadius: 25,
+    width: '60%', // 버튼 크기 설정
+    height: 50, // 높이를 고정하여 일관된 버튼 크기 유지
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   disabledButton: {
-    backgroundColor: '#a0a0a0',
+    backgroundColor: '#B0BEC5', // 비활성화된 버튼 색상
   },
-  submitButtonText:{
+  submitButtonText: {
     fontWeight: 'bold',
-    color: 'white',
+    color: '#fff',
     textAlign: 'center',
-    fontSize: 15,
+    fontSize: 16,
   },
   progressBar: {
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#e0e0e0',
+    height: 12, // 프로그레스바 높이를 살짝 키움
+    borderRadius: 6,
+    backgroundColor: '#E3F2FD', // 밝은 블루 계열로 설정
     width: '100%',
-
   },
   progressBarWrapper: {
-    width: '80%',
-    paddingHorizontal: 20,
+    width: '90%', // 넓이를 더 넓게 설정하여 화면에 맞춤
     marginBottom: 40,
   },
 });
+
 
 export default TravelerPersonalityTest;
