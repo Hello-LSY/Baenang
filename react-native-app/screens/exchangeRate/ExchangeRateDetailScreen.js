@@ -88,7 +88,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   useEffect(() => {
     if (exchangeRateHistory[currencyCode] && exchangeRateHistory[currencyCode].length > 0) {
-      const latestRate = exchangeRateHistory[currencyCode][0]?.exchangeRateValue ?? 0;
+      const latestRate = exchangeRateHistory[currencyCode][exchangeRateHistory[currencyCode].length - 1]?.exchangeRateValue ?? 0;
       calculateForeignToKRW(foreignAmount, latestRate);
     }
   }, [foreignAmount, exchangeRateHistory, currencyCode]);
@@ -192,7 +192,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
                 value={foreignAmount}
                 onChangeText={(value) => {
                   setForeignAmount(value);
-                  calculateForeignToKRW(value, latestRate);
+                  calculateForeignToKRW(value, latestRate); // 최신 시세 반영
                 }}
                 placeholder="0"
               />
@@ -209,7 +209,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
                 value={krwAmount}
                 onChangeText={(value) => {
                   setKrwAmount(value);
-                  calculateKRWToForeign(value, latestRate);
+                  calculateKRWToForeign(value, latestRate); // 최신 시세 반영
                 }}
                 placeholder="0"
               />
