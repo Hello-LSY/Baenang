@@ -1,6 +1,6 @@
 import React from 'react';
 import { BASE_URL } from '../../constants/config';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground , Button} from 'react-native';
 
 const TravelCertificationDetail = ({ route, navigation }) => {
   // route.params로 전달된 item을 받아옴

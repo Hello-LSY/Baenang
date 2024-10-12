@@ -1,32 +1,120 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, Alert, ImageBackground, TouchableOpacity, ActivityIndicator } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
-import * as FileSystem from "expo-file-system";
-import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
-import { useDispatch } from "react-redux";
-import { fetchTravelCertificates } from "../../redux/travelCertificatesSlice"; // Redux 액션
+import React, { useState } from 'react';
+import { View, Text, Button, Image, StyleSheet, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import axios from 'axios'; // axios 임포트
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { fetchTravelCertificates } from '../../redux/travelCertificatesSlice'; // Redux 액션
+import { BASE_URL } from '../../constants/config';
+
+const requestPermissions = async () => {
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  const mediaStatus = await MediaLibrary.requestPermissionsAsync();
+
+  if (status !== 'granted' || mediaStatus.status !== 'granted') {
+    alert('카메라 및 파일 시스템 권한이 필요합니다.');
+    return false;
+  }
+  return true;
+};
+
+// 이미지 업로드 함수
+const uploadImage = async (imageUri, travelid) => {
+  try {
+    const formData = new FormData();
+    const fileName = `${travelid}_${Date.now()}.jpg`;
+
+    formData.append('file', {
+      uri: imageUri.startsWith('file://') ? imageUri : `file://${imageUri}`,
+      name: fileName,
+      type: 'image/jpeg',
+    });
+
+    console.log('이미지 업로드 시작:', fileName);
+
+    const response = await fetch('http://10.0.2.2:8080/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('이미지 업로드 실패');
+    }
+
+    const data = await response.json();
+    console.log('이미지 업로드 성공, 반환된 파일명:', data.fileName);
+
+    return data.fileName;
+  } catch (error) {
+    console.error('이미지 업로드 중 오류 발생:', error);
+    throw error;
+  }
+};
 
 const TravelCertificationProcess = () => {
   const [imageUri, setImageUri] = useState(null);
   const [location, setLocation] = useState(null);
   const [visitedCountry, setVisitedCountry] = useState(null);
-  const [loading, setLoading] = useState(true); // 로딩 상태
-
-  const username = "exampleUser";
+  const username = 'exampleUser';
   const navigation = useNavigation();
   const dispatch = useDispatch(); // Redux dispatch 사용
 
-  useEffect(() => {
-    getLocationAndCountry();
-  }, []);
+  const userFolder = `${FileSystem.documentDirectory}${username}/`;
+
+  const createUserFolder = async () => {
+    const folderExists = await FileSystem.getInfoAsync(userFolder);
+    if (!folderExists.exists) {
+      await FileSystem.makeDirectoryAsync(userFolder, { intermediates: true });
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      const permissionsGranted = await requestPermissions();
+      if (!permissionsGranted) return;
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        alert('카메라 접근 권한이 필요합니다.');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        await createUserFolder();
+
+        const fileExtension = uri.split('.').pop();
+        const newFilePath = `${userFolder}photo_${Date.now()}.${fileExtension}`;
+
+        await FileSystem.moveAsync({
+          from: uri,
+          to: newFilePath,
+        });
+
+        setImageUri(newFilePath);
+        alert('사진이 Baenang 폴더의 사용자 폴더에 저장되었습니다.');
+      }
+    } catch (error) {
+      console.error('카메라 실행 오류:', error);
+      alert('카메라를 실행할 수 없습니다.');
+    }
+  };
 
   const getLocationAndCountry = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("위치 권한이 필요합니다.");
+      if (status !== 'granted') {
+        alert('위치 권한이 필요합니다.');
         return;
       }
 
@@ -47,129 +135,106 @@ const TravelCertificationProcess = () => {
         const country = geocode[0].country;
         const region = geocode[0].region;
         setVisitedCountry(`${country}-${region}`);
-        setLoading(false); // 로딩 상태 해제
       } else {
-        alert("국가 정보를 가져올 수 없습니다.");
+        alert('국가 정보를 가져올 수 없습니다.');
       }
     } catch (error) {
-      console.error("위치 정보 가져오기 오류:", error);
-      alert("위치 정보를 가져오는 중 오류가 발생했습니다.");
-    }
-  };
-
-  const takePhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        alert("카메라 접근 권한이 필요합니다.");
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri;
-        const fileExtension = uri.split(".").pop();
-        const newFilePath = `${FileSystem.documentDirectory}${username}/photo_${Date.now()}.${fileExtension}`;
-
-        await FileSystem.moveAsync({
-          from: uri,
-          to: newFilePath,
-        });
-
-        setImageUri(newFilePath);
-        alert("사진이 Baenang 폴더의 사용자 폴더에 저장되었습니다.");
-      }
-    } catch (error) {
-      console.error("카메라 실행 오류:", error);
-      alert("카메라를 실행할 수 없습니다. 실제 기기에서 시도하세요.");
+      console.error('위치 정보 가져오기 오류:', error);
+      alert('위치 정보를 가져오는 중 오류가 발생했습니다.');
     }
   };
 
   const handleSave = async () => {
     if (!imageUri || !location || !visitedCountry) {
-      alert("사진과 위치 정보가 필요합니다.");
+      alert('사진과 위치 정보가 필요합니다.');
       return;
     }
 
     try {
-      const currentTime = new Date().toISOString().replace("T", " ").split(".")[0];
+      // 이미지 업로드
+      const uploadedFileName = await uploadImage(imageUri, username);
+      console.log('업로드된 파일명:', uploadedFileName);
+
+      // 서버에 여행 인증서 저장 요청
+      const currentTime = new Date()
+        .toISOString()
+        .replace('T', ' ')
+        .split('.')[0];
       const data = {
         username,
-        imagepath: imageUri,
+        imagepath: uploadedFileName, // 업로드된 파일명 저장
         latitude: location.latitude,
         longitude: location.longitude,
         visitedcountry: visitedCountry,
         traveldate: currentTime,
       };
 
-      const response = await axios.post("http://10.0.2.2:8080/api/travel-certificates/save", data);
+      console.log('서버로 전송할 데이터:', data);
+
+      // 데이터 전송
+      const response = await axios.post(
+        `${BASE_URL}/api/travel-certificates/save`,
+        data
+      );
 
       if (response.status === 201) {
-        Alert.alert("인증 완료", "사진과 위치가 데이터베이스에 저장되었습니다.");
+        console.log('서버 응답 데이터:', JSON.stringify(response.data)); // 서버 응답 데이터 출력
+        Alert.alert(
+          '인증 완료',
+          '사진과 위치가 데이터베이스에 저장되었습니다.'
+        );
+
+        // Redux 상태 업데이트
         dispatch(fetchTravelCertificates());
-        navigation.navigate("TravelCertificationList");
+
+        // 저장 후 목록 화면으로 이동
+        navigation.navigate('TravelCertificationList');
       } else {
+        console.log('서버 응답 상태 코드:', response.status);
         const errorText = JSON.stringify(response.data);
         throw new Error(`데이터 전송 실패: ${errorText}`);
       }
     } catch (error) {
-      console.error("데이터 저장 오류:", error);
+      console.error('데이터 저장 오류:', error);
       if (error.response) {
-        Alert.alert("저장 실패", `서버 오류: ${JSON.stringify(error.response.data)}`);
+        console.log('서버 응답 데이터:', JSON.stringify(error.response.data)); // 서버에서 반환한 에러 메시지
+        Alert.alert(
+          '저장 실패',
+          `서버 오류: ${JSON.stringify(error.response.data)}`
+        );
       } else {
-        Alert.alert("저장 실패", `데이터베이스에 저장하는 데 실패했습니다. 오류: ${error.message}`);
+        Alert.alert(
+          '저장 실패',
+          `데이터베이스에 저장하는 데 실패했습니다. 오류: ${error.message}`
+        );
       }
     }
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/real.gif')} // 배경 GIF 경로 설정
-      style={styles.backgroundGif} // 배경 스타일 적용
-    >
-      <View style={styles.container}>
-        {/* 로딩 중일 때 기본 로딩 애니메이션 사용 */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
-          </View>
-        ) : (
-          <Text style={styles.topLocationText}>
-            현재 인증할 위치는 {'\n'} '{visitedCountry}' 입니다.
-          </Text>
-        )}
+    <View style={styles.container}>
+      <Text style={styles.title}>여행 인증</Text>
 
-        {/* 버튼들이 있는 하단 영역 */}
-        <View style={styles.buttonContainer}>
-          {!imageUri && (
-            <TouchableOpacity
-              style={styles.customButton}
-              onPress={takePhoto}
-            >
-              <Text style={styles.customButtonText}>방문 인증하기</Text>
-            </TouchableOpacity>
-          )}
+      <Button
+        title="방문인증하기"
+        onPress={async () => {
+          await takePhoto();
+          await getLocationAndCountry();
+        }}
+      />
 
-          {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
-          {/* '인증 완료' 버튼을 조건부로 숨김 */}
-          {imageUri && (
-          <TouchableOpacity
-            style={[styles.customButton, { display: imageUri ? 'flex' : 'none' }]} // 버튼 숨기기 처리 및 스타일 병합
-            onPress={handleSave}
-          >
-            <Text style={styles.customButtonText}>인증 완료</Text>
-          </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    </ImageBackground>
+      {location && (
+        <Text>
+          위치: {location.latitude}, {location.longitude}
+        </Text>
+      )}
+
+      {visitedCountry && <Text>방문 국가 및 지역: {visitedCountry}</Text>}
+
+      <Button title="인증 완료" onPress={handleSave} />
+    </View>
   );
 };
 
@@ -178,46 +243,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
-  backgroundGif: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: '20%', // 텍스트와 동일한 위치에 로딩 애니메이션을 배치
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 170, // 하단에 고정
-    alignItems: 'center',
-  },
-  topLocationText: {
-    fontSize: 18,
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-    marginBottom: 400,
-  },
-  customButton: {
-    backgroundColor: '#fff',
-    borderColor: '#007AFF',
-    borderWidth: 2,
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    marginVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  customButtonText: {
-    fontSize: 18,
-    color: '#007AFF',
-    fontWeight: 'bold',
+    marginBottom: 20,
   },
   image: {
     width: 200,
