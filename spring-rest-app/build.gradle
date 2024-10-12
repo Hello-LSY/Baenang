@@ -28,7 +28,7 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:5.6.15.Final'
 
     // MySQL 드라이버
-    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
     // Spring Web MVC
     implementation 'org.springframework:spring-webmvc:5.3.22'

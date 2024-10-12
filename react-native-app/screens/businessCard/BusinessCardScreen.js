@@ -343,9 +343,10 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   businessCardImage: {
-    width: 200,
-    height: 200,
+    width: 180,
+    height: 180,
     borderRadius: 10,
+    marginRight:10,
   },
   qrCodeWrapper: {
     alignSelf: 'flex-start',

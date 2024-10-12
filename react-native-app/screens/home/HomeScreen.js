@@ -32,6 +32,7 @@ import { Feather, AntDesign } from '@expo/vector-icons';
 import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
 import * as Font from 'expo-font';
+import { Linking } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -225,7 +226,7 @@ const HomeScreen = ({ navigation }) => {
         )}
       </View>
 
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <Text style={styles.sectionTitle}>실시간 환율</Text>
         {loading ? (
           <Text>Loading...</Text>
@@ -323,7 +324,7 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <Text>환율 정보가 없습니다.</Text>
         )}
-      </View>
+      </View> */}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>외부 서비스</Text>
