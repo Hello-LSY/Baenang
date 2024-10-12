@@ -79,7 +79,10 @@ const BusinessCardScreen = ({ navigation }) => {
         const { status } = await Camera.requestCameraPermissionsAsync();
         setHasPermission(status === "granted");
       } catch (error) {
-        Alert.alert("Error", "카메라 권한을 요청하는 동안 오류가 발생했습니다.");
+        Alert.alert(
+          "Error",
+          "카메라 권한을 요청하는 동안 오류가 발생했습니다."
+        );
         console.error("Camera permission error: ", error);
       }
     })();
@@ -112,7 +115,9 @@ const BusinessCardScreen = ({ navigation }) => {
 
   // QR코드 스캔 핸들러
   const handleBarCodeScanned = ({ data }) => {
-    console.log("data : ", data);
+    // Alert로 스캔 이벤트 확인
+    Alert.alert("QR 스캔", "QR 코드가 스캔되었습니다.");
+    console.log("Scanned data:", data);
     setScanned(true);
     setIsScanning(false);
 
@@ -121,20 +126,33 @@ const BusinessCardScreen = ({ navigation }) => {
       const { cardId } = businessCardData;
 
       if (cardId) {
-        Alert.alert("QR 코드 스캔 완료", `스캔한 명함 ID: ${cardId}`);
-        handleAddFriendById(cardId);
+        // 스캔된 cardId로 바로 친구 추가 시도
+        dispatch(
+          addFriendByBusinessCardId({
+            memberId: auth.memberId,
+            businessCardId: cardId,
+          })
+        )
+          .then(() => {
+            Alert.alert("성공", "새로운 친구가 추가되었습니다.");
+            dispatch(fetchFriendsList(auth.memberId)); // 친구 목록 새로고침
+          })
+          .catch((error) => {
+            Alert.alert("오류", "친구 추가에 실패했습니다: " + error.message);
+          });
       } else {
-        Alert.alert("Error", "QR 코드에서 유효한 명함 ID를 찾을 수 없습니다.");
+        Alert.alert("오류", "QR 코드에서 유효한 명함 ID를 찾을 수 없습니다.");
       }
     } catch (error) {
-      Alert.alert("Error", "QR 코드 데이터가 유효하지 않습니다.");
+      Alert.alert("오류", "QR 코드 데이터가 유효하지 않습니다.");
     }
   };
 
   // QR 스캐너 시작 버튼 핸들러
   const handleStartScan = () => {
     setIsScanning(true);
-    setScanned(false);
+    setScanned(true);
+    console.log("스캐너시작중");
   };
 
   // 스캔 취소 버튼 핸들러
@@ -158,34 +176,38 @@ const BusinessCardScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-       {loading ? (
+      {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
         </View>
       ) : isScanning ? (
-         <View style={styles.scannerContainer}>
-          {/* Camera 컴포넌트를 사용 */}
+        <View style={styles.scannerContainer}>
+          {/* CameraView 컴포넌트를 사용 */}
           <CameraView
-            style={StyleSheet.absoluteFillObject}
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject} // 전체 화면을 차지하도록 설정
+            onBarcodeScanned={scanned ? handleBarCodeScanned : undefined}
             barCodeScannerSettings={{
               barCodeTypes: ["qr"],
             }}
+            autofocus="on"
           />
-          <View style={styles.overlay}>
-            <View style={styles.unfocusedContainer} />
-            <View style={styles.middleContainer}>
-              <View style={styles.unfocusedContainer} />
-              <View style={styles.focusedContainer}>
-                <Text style={styles.scanText}>QR코드를 스캔해주세요</Text>
-              </View>
-              <View style={styles.unfocusedContainer} />
+          {/* 오버레이 영역 */}
+          <View style={styles.overlay} pointerEvents="none">
+            <View style={styles.scanArea}>
+              <Text style={styles.scanText}>QR코드를 스캔해주세요</Text>
             </View>
-            <View style={styles.unfocusedContainer} />
           </View>
+          {/* 다시 스캔 버튼 */}
           {scanned && (
             <Button title={"다시 스캔"} onPress={() => setScanned(false)} />
           )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.scanButton} onPress={handleStartScan}>
+              <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
+            </TouchableOpacity>
+          </View>
+          {/* 취소 버튼 */}
           <TouchableOpacity
             style={styles.cancelScanButton}
             onPress={handleCancelScan}
@@ -410,7 +432,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    position: 'relative',
+    position: "relative",
   },
   cancelScanButton: {
     position: "absolute",
@@ -676,6 +698,31 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
     marginLeft: 4,
     lineHeight: 22,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scanArea: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: "white",
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scanText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  scanButton: {
+    backgroundColor: "#3498db",
+    padding: 15,
+    borderRadius: 10,
   },
 });
 
