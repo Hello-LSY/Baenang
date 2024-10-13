@@ -166,55 +166,59 @@ const ExchangeRateDetailScreen = ({ route }) => {
         <ScrollView>
           <View style={styles.header}>
             <View style={styles.currencyInfo}>
-              <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
+              <FlagIcon currencyCode={cleanedCurrencyCode} size={30} />
               <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
             </View>
-            <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} 원</Text>
-            {latestChangePercentage !== null ? (
-              <Text style={[styles.changeRate, { color: latestChangePercentage >= 0 ? 'red' : 'blue' }]}>
-                {latestChangePercentage >= 0 ? '▲' : '▼'} {latestChangePercentage}%
-              </Text>
-            ) : (
-              <Text style={styles.changeRate}>N/A</Text>
-            )}
+            <View style={styles.rateContainer}>
+              <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} 원</Text>
+              {latestChangePercentage !== null ? (
+                <Text style={[styles.changeRate, { color: latestChangePercentage >= 0 ? 'red' : 'blue' }]}>
+                  {latestChangePercentage >= 0 ? '▲' : '▼'} {latestChangePercentage}%
+                </Text>
+              ) : (
+                <Text style={styles.changeRate}>N/A</Text>
+              )}
+            </View>
           </View>
 
           <View style={styles.calculatorContainer}>
             <Text style={styles.calculatorTitle}>환율계산기</Text>
-            <View style={styles.inputContainer}>
-              <View style={styles.currencySelector}>
-                <FlagIcon currencyCode={cleanedCurrencyCode} size={24} />
-                <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
+            <View style={styles.calculatorContent}>
+              <View style={styles.inputContainer}>
+                <View style={styles.currencySelector}>
+                  <FlagIcon currencyCode={cleanedCurrencyCode} size={26} />
+                  <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={foreignAmount}
+                  onChangeText={(value) => {
+                    setForeignAmount(value);
+                    calculateForeignToKRW(value, latestRate);
+                  }}
+                  placeholder="0"
+                />
               </View>
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={foreignAmount}
-                onChangeText={(value) => {
-                  setForeignAmount(value);
-                  calculateForeignToKRW(value, latestRate);
-                }}
-                placeholder="0"
-              />
-            </View>
-            <Text style={styles.equalSign}>=</Text>
-            <View style={styles.inputContainer}>
-              <View style={styles.currencySelector}>
-                <FlagIcon currencyCode="KRW" size={24} />
-                <Text style={styles.currencyCode}>KRW</Text>
+              <View style={styles.inputContainer}>
+                <View style={styles.currencySelector}>
+                  <FlagIcon currencyCode="KRW" size={26} />
+                  <Text style={styles.currencyCode}>KRW</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={krwAmount}
+                  onChangeText={(value) => {
+                    setKrwAmount(value);
+                    calculateKRWToForeign(value, latestRate);
+                  }}
+                  placeholder="0"
+                />
               </View>
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={krwAmount}
-                onChangeText={(value) => {
-                  setKrwAmount(value);
-                  calculateKRWToForeign(value, latestRate);
-                }}
-                placeholder="0"
-              />
             </View>
           </View>
+            
 
           <View style={styles.chartContainer}>
             <View style={styles.chartTypeSelector}>
@@ -241,8 +245,8 @@ const ExchangeRateDetailScreen = ({ route }) => {
                     labels: historyData.map((data) => formatDate(data.recordedAt)),
                     datasets: [{ data: historyData.map((data) => data.exchangeRateValue) }],
                   }}
-                  width={screenWidth - 32}
-                  height={220}
+                  width={screenWidth*0.8}
+                  height={250}
                   chartConfig={{
                     backgroundGradientFrom: '#ffffff',
                     backgroundGradientTo: '#ffffff',
@@ -280,13 +284,20 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f0f8ff',
+    paddingHorizontal: 20,
+    flex:1,
   },
   header: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderRadius: 20,
+    marginTop: 20,
+    marginBottom: 10,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   currencyInfo: {
     flexDirection: 'row',
@@ -295,7 +306,7 @@ const styles = StyleSheet.create({
   currencyCode: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 8,
+    marginLeft: 5,
   },
   exchangeRate: {
     fontSize: 24,
@@ -309,22 +320,34 @@ const styles = StyleSheet.create({
   },
   calculatorContainer: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderRadius: 20,
+    marginVertical: 10,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  inputContainer:{
+    flex: 1,
+    paddingHorizontal: 10,
   },
   calculatorTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    marginLeft: 10,
   },
-  inputContainer: {
-    marginBottom: 16,
+  calculatorContent: {
+    flexDirection: 'row',
+    marginTop: 5,
   },
   input: {
     height: 40,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 4,
+    backgroundColor: '#ffffff',
     paddingHorizontal: 8,
     fontSize: 16,
   },
@@ -335,6 +358,13 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     padding: 16,
+    borderRadius: 20,
+    marginVertical: 10,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   chartTypeSelector: {
     flexDirection: 'row',
@@ -379,6 +409,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 2,
   },
+  currencySelector: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  rateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }
 });
 
 export default ExchangeRateDetailScreen;

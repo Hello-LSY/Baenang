@@ -291,10 +291,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addButton: {
-    position: 'absolute',
-    right: '32%',
-    top: '50%',
-    transform: [{ translateY: -12 }], // 버튼의 절반 크기만큼 위로 이동
+    marginLeft: 3,
   },
   location: {
     fontSize: 14,
