@@ -1,11 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, TextInput, ScrollView, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BASE_URL } from '../../constants/config';
+import { S3_URL } from '../../constants/config'; // S3 URL을 constants에서 가져옵니다.
 import { useAuth } from '../../redux/authState';
 import { getApiClient } from '../../redux/apiClient';
 import { BottomSheet } from 'react-native-elements';
 import defaultProfileImage from '../../assets/icons/default-profile.png';
+
+// 배열로 전달된 createdAt을 Date 객체로 변환하는 함수
+const arrayToDate = (arr) => {
+  const [year, month, day, hour, minute, second, nano] = arr;
+  return new Date(year, month - 1, day, hour, minute, second, nano / 1000000); // 월은 0부터 시작하므로 -1 필요
+};
+
+// 시간 계산 함수 (몇 분 전, 몇 시간 전, n일 전)
+const timeAgo = (dateArray) => {
+  const date = arrayToDate(dateArray); // 배열을 Date 객체로 변환
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) {
+    return '방금 전';
+  } else if (seconds < 3600) {
+    return `${Math.floor(seconds / 60)}분 전`;
+  } else if (seconds < 86400) {
+    return `${Math.floor(seconds / 3600)}시간 전`;
+  } else {
+    return `${Math.floor(seconds / 86400)}일 전`;
+  }
+};
 
 const CommunityItem = ({ post, onDelete, onEdit }) => {
   const { auth } = useAuth();
@@ -18,7 +41,11 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
   const [newComment, setNewComment] = useState('');
 
   const apiClient = getApiClient(auth.token);
-  const imagePath = post.imageNames && post.imageNames.length > 0 ? post.imageNames[0].replace('/uploads/', '') : null;
+
+  // 서버에서 받은 imageNames에는 이미 /uploads/ 경로가 포함되어 있음.
+  const imagePath = post.imageNames && post.imageNames.length > 0
+    ? post.imageNames[0]
+    : null;
 
   useEffect(() => {
     const fetchLikeStatus = async () => {
@@ -120,11 +147,12 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
           style={styles.profileImage}
         />
         <Text style={styles.username}>{post.nickname}</Text>
+        <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text> 
       </View>
 
       {imagePath && !imageError ? (
         <Image
-          source={{ uri: `${BASE_URL}/uploads/${imagePath}` }}
+          source={{ uri: `${S3_URL}/${imagePath}` }} // 이미지 경로에 /uploads/를 중복으로 추가하지 않음
           style={styles.postImage}
           resizeMode="cover"
           onError={() => setImageError(true)}
@@ -340,6 +368,11 @@ const styles = StyleSheet.create({
   },
   deleteCommentButton: {
     padding: 5,
+  },
+  timeAgo: {
+    marginLeft: 'auto',
+    color: '#999',
+    fontSize: 12,
   },
 });
 
