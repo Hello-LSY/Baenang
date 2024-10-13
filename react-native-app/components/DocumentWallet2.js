@@ -8,22 +8,21 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 
 import DocumentCard2 from './DocumentCard2';
 import DocumentModal from './DocumentModal';
-import { useNavigation } from '@react-navigation/native'; // navigation 추가
+import { useNavigation } from '@react-navigation/native';
 
-if (
-  Platform.OS === 'android' &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const CARD_HEIGHT = 60; // 각 카드의 높이
-const CARD_MARGIN = 10; // 카드 사이의 간격
-const VISIBLE_CARDS = 3; // 접혀있을 때 보이는 카드 수
+const CARD_HEIGHT = 60;
+const CARD_MARGIN = 10;
+const VISIBLE_CARDS = 3;
 
 const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   const [expanded, setExpanded] = useState(false);
@@ -31,8 +30,9 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   const animatedHeight = useRef(new Animated.Value(0)).current;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [customAlertVisible, setCustomAlertVisible] = useState(false); // 커스텀 알림 모달 상태
 
-  const navigation = useNavigation(); // navigation 가져오기
+  const navigation = useNavigation();
 
   useLayoutEffect(() => {
     const toValue = expanded
@@ -57,8 +57,14 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   };
 
   const openModal = (document) => {
-    setSelectedDocument(document);
-    setModalVisible(true);
+    const unavailableDocuments = ['예방접종증명서', '출입국사실증명서', '여행보험증명서'];
+
+    if (unavailableDocuments.includes(document.title)) {
+      setCustomAlertVisible(true); // 서비스 준비중 모달 표시
+    } else {
+      setSelectedDocument(document);
+      setModalVisible(true);
+    }
   };
 
   return (
@@ -68,10 +74,7 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
         <Text style={styles.expandButton}>{expanded ? '접기' : '펼치기'}</Text>
       </Pressable>
       <Animated.View
-        style={[
-          styles.contentWrapper,
-          { height: animatedHeight, overflow: 'hidden' },
-        ]}
+        style={[styles.contentWrapper, { height: animatedHeight, overflow: 'hidden' }]}
       >
         <View style={styles.content} onLayout={onContentLayout}>
           {documents.map((doc, index) => (
@@ -97,6 +100,27 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
         document={selectedDocument}
         onClose={() => setModalVisible(false)}
       />
+
+      {/* 커스텀 알림 모달 */}
+      <Modal
+        transparent={true}
+        visible={customAlertVisible}
+        animationType="fade"
+        onRequestClose={() => setCustomAlertVisible(false)}
+      >
+        <View style={styles.alertContainer}>
+          <View style={styles.alertBox}>
+            <Text style={styles.alertTitle}>서비스 준비중</Text>
+            <Text style={styles.alertMessage}>해당 문서는 아직 준비중입니다.</Text>
+            <TouchableOpacity
+              style={styles.alertButton}
+              onPress={() => setCustomAlertVisible(false)}
+            >
+              <Text style={styles.alertButtonText}>확인</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -117,7 +141,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-
     fontWeight: 'bold',
     color: '#fff',
   },
@@ -137,6 +160,40 @@ const styles = StyleSheet.create({
   },
   showMoreText: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  alertContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  alertBox: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  alertMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  alertButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  alertButtonText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

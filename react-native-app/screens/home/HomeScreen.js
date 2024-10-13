@@ -49,7 +49,6 @@ const HomeScreen = ({ navigation }) => {
     { title: '주민등록증', isNew: false },
     { title: '운전면허증', isNew: true },
     { title: '여권', isNew: true },
-    { title: '여행보험증명서', isNew: false },
     { title: '예방접종증명서', isNew: false },
     { title: '출입국사실증명서', isNew: true },
     { title: '국제학생증', isNew: false },
