@@ -184,7 +184,7 @@ const BusinessCardScreen = ({ navigation }) => {
         <View style={styles.scannerContainer}>
           {/* CameraView 컴포넌트를 사용 */}
           <CameraView
-            style={StyleSheet.absoluteFillObject} // 전체 화면을 차지하도록 설정
+            style={[StyleSheet.absoluteFillObject, styles.cameraStyle]} // 전체 화면을 차지하도록 설정
             onBarcodeScanned={scanned ? handleBarCodeScanned : undefined}
             barCodeScannerSettings={{
               barCodeTypes: ["qr"],
@@ -198,21 +198,21 @@ const BusinessCardScreen = ({ navigation }) => {
             </View>
           </View>
           {/* 다시 스캔 버튼 */}
-          {scanned && (
+          {/* {scanned && (
             <Button title={"다시 스캔"} onPress={() => setScanned(false)} />
-          )}
+          )} */}
 
-          <View style={styles.buttonContainer}>
+          {/* <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.scanButton} onPress={handleStartScan}>
               <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
           {/* 취소 버튼 */}
           <TouchableOpacity
             style={styles.cancelScanButton}
             onPress={handleCancelScan}
           >
-            <Text style={styles.cancelScanButtonText}>취소</Text>
+            <Text style={styles.cancelScanButtonText}>닫기</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -413,20 +413,34 @@ const styles = StyleSheet.create({
   },
   scannerContainer: {
     flex: 1,
+    flexDirection: 'column',
+    height: 500,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    marginTop : 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   cancelScanButton: {
-    position: "absolute",
-    bottom: 50,
+    width: '60%',
     padding: 10,
+    position: 'absolute',
+    bottom: -70,
     backgroundColor: "#3498db",
-    borderRadius: 5,
+    borderRadius: 30,
+    alignItems: 'center'
   },
   cancelScanButtonText: {
     color: "#fff",
     fontSize: 18,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginVertical: 5,
   },
   titleContainer: {
     flexDirection: "row",
@@ -704,8 +718,14 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: '100%',
   },
+  cameraStyle: {
+    // borderWidth: 2, // 카메라 뷰에 테두리 적용
+    // borderColor: 'red', // 테두리 색상
+    borderRadius: 10, // 둥근 모서리
+    margin: 20, // 외부 여백 추가
+  },
   overlay: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
