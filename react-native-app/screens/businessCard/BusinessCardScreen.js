@@ -18,7 +18,7 @@ import {
   clearBusinessCard,
 } from "../../redux/businessCardSlice";
 import QRCode from "react-native-qrcode-svg";
-import { BASE_URL } from "../../constants/config";
+import { BASE_URL, S3_URL } from "../../constants/config";
 import {
   addFriendByBusinessCardId,
   fetchFriendsList,

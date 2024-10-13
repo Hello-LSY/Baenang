@@ -1,6 +1,7 @@
 package org.project.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.project.backend.dto.PostDTO;
 import org.project.backend.dto.PostResponseDTO;
 import org.project.backend.model.Post;
@@ -8,33 +9,49 @@ import org.project.backend.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final LikeService likeService; // LikeService 추가
+    private final LikeService likeService;
 
+    // 모든 게시글과 imageNames를 JPQL로 함께 로드하여 반환
     @Override
     @Transactional(readOnly = true)
     public List<PostResponseDTO> getAllPosts(Long memberId) {
-        // 최신 게시글이 상단에 오도록 내림차순 정렬된 게시글 목록을 가져옴
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
+        return postRepository.findAllWithImagesOrderByCreatedAtDesc().stream()
                 .map(post -> convertToPostResponseDTO(post, memberId))
                 .collect(Collectors.toList());
     }
 
+    // 위치 기반으로 게시글 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostResponseDTO> getPostsNearby(double latitude, double longitude, double distance, Long memberId) {
+        List<Post> posts = postRepository.findAllWithinDistance(latitude, longitude, distance);
+        return posts.stream()
+                .map(post -> convertToPostResponseDTO(post, memberId))
+                .collect(Collectors.toList());
+    }
+
+    // 개별 게시글과 imageNames를 JPQL로 함께 로드하여 반환
     @Override
     @Transactional(readOnly = true)
     public PostResponseDTO getPostById(Long id, Long memberId) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
-        return convertToPostResponseDTO(post, memberId); // 좋아요 상태 계산
+        Post post = postRepository.findByIdWithImages(id);
+        if (post == null) {
+            throw new RuntimeException("Post not found");
+        }
+        return convertToPostResponseDTO(post, memberId);
     }
 
+    // 게시글 생성 로직
     @Override
     @Transactional
     public PostDTO createPost(PostDTO postDTO) {
@@ -52,26 +69,20 @@ public class PostServiceImpl implements PostService {
         return convertToPostDTO(savedPost);
     }
 
+    // 게시글 수정 로직
     @Override
     @Transactional
     public PostDTO updatePost(Long id, PostDTO postDTO) {
-        // 게시글 조회
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // 제목과 내용만 업데이트
-        post.updatePost(
-                postDTO.getTitle(),
-                postDTO.getContent(),
-                post.getImageNames()  // 기존 이미지 리스트 그대로 유지
-        );
+        post.updatePost(postDTO.getTitle(), postDTO.getContent(), post.getImageNames());
 
-        // 업데이트된 게시글 저장
         Post savedPost = postRepository.save(post);
         return convertToPostDTO(savedPost);
     }
 
-
+    // 게시글 삭제 로직
     @Override
     public void deletePost(Long id) {
         postRepository.deleteById(id);
@@ -86,9 +97,7 @@ public class PostServiceImpl implements PostService {
                 .nickname(post.getNickname())
                 .latitude(post.getLatitude())
                 .longitude(post.getLongitude())
-                .imageNames(post.getImageNames().stream()
-                        .map(imageName -> "/uploads/" + imageName)
-                        .collect(Collectors.toList()))
+                .imageNames(post.getImageNames() != null ? post.getImageNames() : new ArrayList<>()) // null 체크 추가
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getComments().size())
                 .memberId(post.getMemberId())
@@ -107,9 +116,7 @@ public class PostServiceImpl implements PostService {
                 .nickname(post.getNickname())
                 .latitude(post.getLatitude())
                 .longitude(post.getLongitude())
-                .imageNames(post.getImageNames().stream()
-                        .map(imageName -> "/uploads/" + imageName)
-                        .collect(Collectors.toList()))
+                .imageNames(post.getImageNames() != null ? post.getImageNames() : new ArrayList<>()) // null 체크 추가
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getComments().size())
                 .hasLiked(hasLiked)

@@ -66,4 +66,21 @@ public class PostController {
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
     }
+
+    @ApiOperation(value = "가까운 게시글 조회", notes = "위치와 거리를 기준으로 가까운 게시글을 조회합니다.")
+    @GetMapping("/nearby")
+    public ResponseEntity<List<PostResponseDTO>> getPostsNearby(
+            @ApiParam(value = "위도", required = true) @RequestParam("latitude") double latitude,
+            @ApiParam(value = "경도", required = true) @RequestParam("longitude") double longitude,
+            @ApiParam(value = "조회 거리(km)", required = true) @RequestParam("distance") double distance,
+            @ApiParam(value = "회원 ID", required = true) @RequestParam("memberId") Long memberId) {
+
+        // 유효한 위도와 경도 값인지 확인
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        List<PostResponseDTO> posts = postService.getPostsNearby(latitude, longitude, distance, memberId);
+        return ResponseEntity.ok(posts);
+    }
 }

@@ -88,7 +88,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
   useEffect(() => {
     if (exchangeRateHistory[currencyCode] && exchangeRateHistory[currencyCode].length > 0) {
-      const latestRate = exchangeRateHistory[currencyCode][0]?.exchangeRateValue ?? 0;
+      const latestRate = exchangeRateHistory[currencyCode][exchangeRateHistory[currencyCode].length - 1]?.exchangeRateValue ?? 0;
       calculateForeignToKRW(foreignAmount, latestRate);
     }
   }, [foreignAmount, exchangeRateHistory, currencyCode]);
