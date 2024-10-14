@@ -8,10 +8,20 @@ export const fetchCommentsByPostId = createAsyncThunk('comments/fetchComments', 
 });
 
 // 댓글 작성
-export const createComment = createAsyncThunk('comments/createComment', async ({ postId, content }, thunkAPI) => {
-  const response = await getApiClient().post(`/api/comments/post/${postId}`, { content });
-  return { postId, comment: response.data };
-});
+export const createComment = createAsyncThunk(
+  'comments/createComment',
+  async ({ postId, content }, { getState }) => {
+    const state = getState();
+    // console.log("Current state in createComment:", state);
+    const memberId = state.auth.memberId;  // auth 상태에서 memberId 가져오기
+    // console.log("Creating comment with memberId:", memberId);
+    const response = await getApiClient().post(`/api/comments/post/${postId}`, {
+      memberId,  // memberId 추가
+      content,
+    });
+    return { postId, comment: response.data };
+  }
+);
 
 // 댓글 삭제
 export const deleteComment = createAsyncThunk('comments/deleteComment', async (commentId, thunkAPI) => {

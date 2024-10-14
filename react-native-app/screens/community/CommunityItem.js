@@ -65,6 +65,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
   const fetchComments = async () => {
     try {
       const response = await apiClient.get(`/api/comments/post/${post.id}`);
+  
       setComments(response.data);
       setCommentsCount(response.data.length);
     } catch (error) {
@@ -105,30 +106,37 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
     onEdit(post.id);
   };
 
-  const toggleBottomSheet = () => {
-    setBottomSheetVisible(!isBottomSheetVisible);
-    if (!isBottomSheetVisible) {
-      fetchComments();
-    }
-  };
+const toggleBottomSheet = async () => {
+  setBottomSheetVisible(!isBottomSheetVisible);
+  
+  // 다시 열 때 댓글 상태를 최신으로 갱신
+  if (!isBottomSheetVisible) {
+    await fetchComments();  // 댓글 상태 업데이트
+  }
+};
 
-  const handleAddComment = async () => {
-    if (newComment.trim()) {
-      try {
-        const newCommentData = {
-          memberId: auth.memberId,
-          nickname: auth.nickname,
-          content: newComment,
-        };
-        const response = await apiClient.post(`/api/comments/post/${post.id}`, newCommentData);
-        setComments([...comments, response.data]);
-        setCommentsCount(commentsCount + 1);
-        setNewComment('');
-      } catch (error) {
-        console.error('Error adding comment:', error);
-      }
+const handleAddComment = async () => {
+  if (newComment.trim()) {
+    try {
+      const newCommentData = {
+        memberId: auth.memberId,
+        nickname: auth.nickname,
+        content: newComment,
+      };
+      const response = await apiClient.post(`/api/comments/post/${post.id}`, newCommentData);
+
+      // 댓글 추가 후 상태 업데이트
+      setComments([...comments, response.data]);
+      setCommentsCount(commentsCount + 1);
+      setNewComment('');
+      
+      // 댓글 추가 후에도 삭제 버튼을 바로 볼 수 있도록 상태 갱신
+      await fetchComments();
+    } catch (error) {
+      console.error('Error adding comment:', error);
     }
-  };
+  }
+};
 
   const handleDeleteComment = async (commentId) => {
     try {
@@ -196,25 +204,25 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
 
       <BottomSheet isVisible={isBottomSheetVisible} containerStyle={styles.bottomSheetContainer}>
         <ScrollView style={styles.bottomSheetContent}>
-          {comments.map((comment) => (
-            <View key={comment.id} style={styles.comment}>
-              <View style={styles.commentHeader}>
-                <View style={styles.commentHeaderLeft}>
-                  <Image
-                    source={defaultProfileImage}
-                    style={styles.commentProfileImage}
-                  />
-                  <Text style={styles.commentUsername}>{comment.nickname}</Text>
-                </View>
-                {String(auth.memberId) === String(comment.memberId) && (
-                  <TouchableOpacity onPress={() => handleDeleteComment(comment.id)} style={styles.deleteCommentButton}>
-                    <Ionicons name="trash-outline" size={16} color="#999" />
-                  </TouchableOpacity>
-                )}
-              </View>
-              <Text style={styles.commentText}>{comment.content}</Text>
+        {comments.map((comment) => (
+        <View key={comment.id} style={styles.comment}>
+          <View style={styles.commentHeader}>
+            <View style={styles.commentHeaderLeft}>
+              <Image
+                source={defaultProfileImage}
+                style={styles.commentProfileImage}
+              />
+              <Text style={styles.commentUsername}>{comment.nickname}</Text>
             </View>
-          ))}
+            {auth.nickname === comment.nickname && (  // nickname 비교
+              <TouchableOpacity onPress={() => handleDeleteComment(comment.id)} style={styles.deleteCommentButton}>
+                <Ionicons name="trash-outline" size={16} color="#999" />
+              </TouchableOpacity>
+            )}
+          </View>
+          <Text style={styles.commentText}>{comment.content}</Text>
+        </View>
+      ))}
           <View style={styles.commentInputContainer}>
             <TextInput
               style={styles.input}

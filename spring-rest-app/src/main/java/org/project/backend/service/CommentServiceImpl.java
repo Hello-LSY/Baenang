@@ -9,6 +9,7 @@ import org.project.backend.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,21 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDTO addComment(Long postId, CommentDTO commentDTO) {
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Comment comment = new Comment(commentDTO.getContent(), commentDTO.getMemberId(), commentDTO.getNickname());
-        post.addComment(comment);
+        // Builder 패턴을 사용하여 Comment 객체 생성
+        Comment comment = Comment.builder()
+                .content(commentDTO.getContent())
+                .memberId(commentDTO.getMemberId())  // memberId 추가
+                .nickname(commentDTO.getNickname())
+                .post(post)  // post 설정
+                .createdAt(LocalDateTime.now())
+                .build();
 
         Comment savedComment = commentRepository.save(comment);
+
         return CommentDTO.builder()
                 .id(savedComment.getId())
                 .content(savedComment.getContent())
@@ -54,6 +63,9 @@ public class CommentServiceImpl implements CommentService {
                 .postId(postId)
                 .build();
     }
+
+
+
 
     @Override
     public void deleteComment(Long id) {
