@@ -212,6 +212,7 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>실시간 환율</Text>
+        <View style={styles.exchangeSection}>
         {loading ? (
           <Text>Loading...</Text>
         ) : latestExchangeRates.length > 0 ? (
@@ -222,6 +223,7 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <Text>환율 정보가 없습니다.</Text>
         )}
+        </View>
       </View>
 
       {/* <View style={styles.section}>
@@ -326,54 +328,58 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>외부 서비스</Text>
-        <View style={styles.row}>
-          <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
-          <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
-        </View>
-        <View style={styles.row}>
-          <ExternalServiceButton title="에어비앤비" imgSrc={airbnb} />
-          <ExternalServiceButton title="티머니고" imgSrc={tmg} />
-        </View>
-        <View style={styles.row}>
-          <ExternalServiceButton title="부킹닷컴" imgSrc={booking} />
-          <ExternalServiceButton title="아고다" imgSrc={agoda} />
+        <View style={styles.sectionContents}>
+          <View style={styles.row}>
+            <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
+            <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
+          </View>
+          <View style={styles.row}>
+            <ExternalServiceButton title="에어비앤비" imgSrc={airbnb} />
+            <ExternalServiceButton title="티머니고" imgSrc={tmg} />
+          </View>
+          <View style={styles.row}>
+            <ExternalServiceButton title="부킹닷컴" imgSrc={booking} />
+            <ExternalServiceButton title="아고다" imgSrc={agoda} />
+          </View>
         </View>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터</Text>
-        <Text style={styles.sectionSubtitle}>
-          {
-            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'
-          }
-        </Text>
+        <View style={styles.sectionContents}>
+          <Text style={styles.sectionSubtitle}>
+            {
+              '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'
+            }
+          </Text>
 
-        <View style={styles.row}>
-          <CustomButton
-            title="자주 묻는 질문"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
-          />
-          <CustomButton
-            title="공지사항"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
-          />
-        </View>
-        <View style={styles.row}>
-          <CustomButton
-            title="사용 가이드"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
-          />
-          <CustomButton
-            title="챗봇 상담"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-          />
+          <View style={styles.row}>
+            <CustomButton
+              title="자주 묻는 질문"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+              onPress={() => navigation.navigate('CustomerService')}
+            />
+            <CustomButton
+              title="공지사항"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+              onPress={() => navigation.navigate('CustomerService')}
+            />
+          </View>
+          <View style={styles.row}>
+            <CustomButton
+              title="사용 가이드"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+              onPress={() => navigation.navigate('CustomerService')}
+            />
+            <CustomButton
+              title="챗봇 상담"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+            />
+          </View>
         </View>
       </View>
 
@@ -538,10 +544,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginTop: 20,
+    marginLeft: 10,
   },
   sectionSubtitle: {
     marginTop: 5,
+    marginLeft: 10,
   },
   row: {
     flexDirection: 'row',
@@ -598,6 +606,13 @@ const styles = StyleSheet.create({
   cscenterText: {
     color: 'white',
   },
+  sectionContents: {
+    marginTop: 10,
+    width: '100%'
+  },
+  exchangeSection:{
+    height:95,
+  }
 });
 
 export default HomeScreen;
