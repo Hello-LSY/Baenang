@@ -169,7 +169,6 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
         <View style={styles.headerLeft}>
           <Image source={defaultProfileImage} style={styles.profileImage} />
           <Text style={styles.profileusername}>{post.nickname}</Text>
-            <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text>
         </View>
         {String(auth.memberId) === String(post.memberId) && (
           <View>
@@ -231,17 +230,23 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
       </View>
 
       <View style={styles.postContent}>
-        <Text style={styles.likeCount}>좋아요 {localLikeCount}개</Text>
-        <View style={styles.contentRow}>
-          <Text style={styles.username}>{post.nickname}</Text>
-          <Text style={styles.content}>{post.content}</Text>
-        </View>
-        <TouchableOpacity onPress={toggleCommentModal}>
-          <Text style={styles.viewComments}>
-            댓글 {commentsCount}개 모두 보기
-          </Text>
-        </TouchableOpacity>
-      </View>
+  <Text style={styles.likeCount}>좋아요 {localLikeCount}개</Text>
+  <View style={styles.contentRow}>
+    <Text style={styles.username}>{post.nickname}</Text>
+    <Text style={styles.content}>{post.content}</Text>
+  </View>
+
+    {/* commentsCount가 1개 이상일 때만 댓글 보기 텍스트를 렌더링 */}
+    {commentsCount > 0 && (
+      <TouchableOpacity onPress={toggleCommentModal}>
+        <Text style={styles.viewComments}>
+          <Text style={styles.viewCommentsText}>댓글 {commentsCount}개 모두 보기</Text>
+        </Text>
+      </TouchableOpacity>
+    )}
+
+  <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text>
+</View>
 
       <Modal
         isVisible={isCommentModalVisible}
@@ -486,9 +491,9 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   timeAgo: {
-    marginLeft: 'auto',
     color: '#999',
     fontSize: 12,
+    marginTop:5,
   },
 
   cancelButton: {
