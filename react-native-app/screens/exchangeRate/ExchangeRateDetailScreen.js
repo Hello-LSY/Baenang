@@ -218,7 +218,6 @@ const ExchangeRateDetailScreen = ({ route }) => {
               </View>
             </View>
           </View>
-            
 
           <View style={styles.chartContainer}>
             <View style={styles.chartTypeSelector}>

@@ -267,17 +267,20 @@ const BusinessCardScreen = ({ navigation }) => {
             <Button title={"다시 스캔"} onPress={() => setScanned(false)} />
           )} */}
 
-          {/* <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.scanButton} onPress={handleStartScan}>
-              <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
-            </TouchableOpacity>
-          </View> */}
+          <View style={styles.buttonContainer}>
+            {/* <TouchableOpacity
+              style={styles.scanButton}
+              onPress={handleStartScan}
+            > */}
+            <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
+            {/* </TouchableOpacity> */}
+          </View>
           {/* 취소 버튼 */}
           <TouchableOpacity
             style={styles.cancelScanButton}
             onPress={handleCancelScan}
           >
-            <Text style={styles.cancelScanButtonText}>닫기</Text>
+            <Text style={styles.cancelScanButtonText}>취소</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -400,22 +403,48 @@ const BusinessCardScreen = ({ navigation }) => {
           >
             <View style={styles.addFriendModalContainer}>
               <View style={styles.addFriendModalContent}>
-                <TouchableOpacity style={styles.closeIcon} onPress={closeAddFriendModal}>
+                <TouchableOpacity
+                  style={styles.closeIcon}
+                  onPress={closeAddFriendModal}
+                >
                   <AntDesign name="close" size={20} color="black" />
                 </TouchableOpacity>
                 <View style={styles.myIdSection}>
-                  <Text style={styles.addFriendModalCardIdTitle}>내 명함 ID</Text>
-                  <Text style={styles.addFriendModalCardId}>{businessCard?.cardId}</Text>
+                  <Text style={styles.addFriendModalCardIdTitle}>
+                    내 명함 ID
+                  </Text>
+                  <Text style={styles.addFriendModalCardId}>
+                    {businessCard?.cardId}
+                  </Text>
                 </View>
-                <Text style={styles.addFriendModalCardIdTitle}>추가할 사용자의 ID를 입력하세요.</Text>
-                <TextInput style={styles.modalInput} placeholder="친구 명함 ID 입력" placeholderTextColor="#999" value={businessCardIdInput} onChangeText={setBusinessCardIdInput} />
-                <TouchableOpacity style={styles.modalButton} onPress={() => { closeAddFriendModal(); handleAddFriendById(businessCardIdInput); }}>
+                <Text style={styles.addFriendModalCardIdTitle}>
+                  추가할 사용자의 ID를 입력하세요.
+                </Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="친구 명함 ID 입력"
+                  placeholderTextColor="#999"
+                  value={businessCardIdInput}
+                  onChangeText={setBusinessCardIdInput}
+                />
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => {
+                    closeAddFriendModal();
+                    handleAddFriendById(businessCardIdInput);
+                  }}
+                >
                   <Text style={styles.modalButtonText}>추가하기</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.qrButton} onPress={() => { closeAddFriendModal(); handleStartScan(); }}>
+                <TouchableOpacity
+                  style={styles.qrButton}
+                  onPress={() => {
+                    closeAddFriendModal();
+                    handleStartScan();
+                  }}
+                >
                   <FontAwesome name="qrcode" size={18} color="#3498db" />
                   <Text style={styles.qrButtonText}>QR Code로 추가하기</Text>
-
                 </TouchableOpacity>
               </View>
             </View>
@@ -680,32 +709,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   addFriendModalCardIdTitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 5,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   addFriendModalCardId: {
     fontSize: 16,
-    fontWeight: 'normal',
-    color: '#7f8c8d',
-    textAlign: 'center',
+    fontWeight: "normal",
+    color: "#7f8c8d",
+    textAlign: "center",
   },
   closeIcon: {
-    position: 'absolute',
+    position: "absolute",
     top: -40,
     right: 5,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 100,
     padding: 5,
   },
   modalInput: {
     height: 40,
-    width: '100%',
-    borderColor: '#ccc',
+    width: "100%",
+    borderColor: "#ccc",
     borderWidth: 1,
     marginTop: 10,
     marginBottom: 20,
@@ -713,19 +742,19 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     // width: '80%',
-    backgroundColor: '#3498db',
+    backgroundColor: "#3498db",
     padding: 10,
     borderRadius: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   modalButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },
   qrButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
     marginBottom: 10,
   },
@@ -782,10 +811,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   myIdSection: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: "#E3F2FD",
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 15,
     marginBottom: 30,
     width: '100%',

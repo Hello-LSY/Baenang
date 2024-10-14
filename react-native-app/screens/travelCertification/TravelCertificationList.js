@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'; // Redux 관련 hooks �
 import { fetchTravelCertificates, deleteCertificate } from '../../redux/travelCertificatesSlice';
 import TravelCertificationItem from '../../components/travelCertification/TravelCertificationItem';
 import axios from 'axios';
+import { BASE_URL } from '../../constants/config';
 
 
 const TravelCertificationList = ({ navigation }) => {
@@ -31,7 +32,7 @@ const TravelCertificationList = ({ navigation }) => {
         {
           text: '삭제',
           onPress: () => {
-            axios.delete(`http://10.0.2.2:8080/api/travel-certificates/delete/${id}`)
+            axios.delete(`${BASE_URL}/api/travel-certificates/delete/${id}`)
               .then(() => {
                 Alert.alert('삭제 완료', '여행 인증서가 삭제되었습니다.');
                 dispatch(deleteCertificate(id)); // Redux 상태에서 인증서 삭제
