@@ -43,6 +43,9 @@ public class MemberServiceImpl implements MemberService {
     public Member createMember(MemberDTO memberDTO) {
         validateMemberData(memberDTO);
 
+        if (memberRepository.existsByEmail(memberDTO.getEmail())) {
+            throw new InvalidMemberDataException("등록된 이메일이 존재합니다.");
+        }
         // 비밀번호 암호화
         memberDTO.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
         Member member = convertToEntity(memberDTO);
@@ -83,6 +86,19 @@ public class MemberServiceImpl implements MemberService {
             throw new InvalidMemberDataException("Member with the same username already exists");
         }
     }
+
+    public boolean existsByUsername(String username) {
+        return memberRepository.existsByUsername(username);
+    }
+
+    public boolean existsByNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname);
+    }
+
+    public boolean existsByEmail(String email) {
+        return memberRepository.existsByEmail(email);
+    }
+
 
     private MemberDTO convertToDTO(Member member) {
         return MemberDTO.builder()

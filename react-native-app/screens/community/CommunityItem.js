@@ -1,3 +1,4 @@
+// screens/community/CommunityItem.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, TextInput, ScrollView, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

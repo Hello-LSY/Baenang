@@ -1,3 +1,4 @@
+// screens/community/CreatePost.js
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';

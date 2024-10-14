@@ -18,14 +18,16 @@ import {
   clearBusinessCard,
 } from "../../redux/businessCardSlice";
 import QRCode from "react-native-qrcode-svg";
-import { BASE_URL, S3_URL } from "../../constants/config";
+import { BASE_URL , S3_URL } from "../../constants/config";
 import {
   addFriendByBusinessCardId,
+  removeFriendByBusinessCardId,
   fetchFriendsList,
 } from "../../redux/friendSlice";
 import { Camera, CameraView, useCameraPermissions } from "expo-camera"; // Using expo-camera
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
+import { Swipeable } from "react-native-gesture-handler";
 
 // SNS 아이콘 반환 함수
 const getSnsIcon = (platform) => {
@@ -174,6 +176,63 @@ const BusinessCardScreen = ({ navigation }) => {
     setModalVisible(false);
   };
 
+  const handleRemoveFriend = (businessCardId) => {
+    // auth 객체에서 memberId를 안전하게 가져오기
+    const memberId = auth?.memberId;
+
+    if (!memberId) {
+      Alert.alert("Error", "로그인 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    console.log(
+      "Deleting friend with memberId:",
+      memberId,
+      "and businessCardId:",
+      businessCardId
+    ); // 확인용 로그
+
+    Alert.alert(
+      "친구 삭제",
+      "이 친구를 정말로 삭제하시겠습니까?",
+      [
+        {
+          text: "취소",
+          style: "cancel",
+        },
+        {
+          text: "삭제",
+          onPress: () => {
+            dispatch(removeFriendByBusinessCardId({ memberId, businessCardId }))
+              .then(() => {
+                Alert.alert("성공", "친구가 삭제되었습니다.");
+                dispatch(fetchFriendsList(memberId)); // 친구 목록 새로고침
+              })
+              .catch(() => {
+                Alert.alert("오류", "친구 삭제에 실패했습니다.");
+              });
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const renderRightActions = (businessCardId) => {
+    console.log(
+      "Attempting to delete friend with businessCardId:",
+      businessCardId
+    ); // 확인용 로그
+    return (
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleRemoveFriend(businessCardId)}
+      >
+        <Text style={styles.deleteButtonText}>삭제</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       {loading ? (
@@ -194,18 +253,27 @@ const BusinessCardScreen = ({ navigation }) => {
           {/* 오버레이 영역 */}
           <View style={styles.overlay} pointerEvents="none">
             <View style={styles.scanArea}>
-              <Text style={styles.scanText}>QR코드를 스캔해주세요</Text>
+              <View style={styles.cornerTL} />
+              <View style={styles.cornerTR} />
+              <View style={styles.cornerBL} />
+              <View style={styles.cornerBR} />
             </View>
           </View>
+          <View style={styles.scanTextContainer}>
+            <Text style={styles.scanText}>QR코드를 스캔해주세요</Text>
+          </View>
           {/* 다시 스캔 버튼 */}
-          {scanned && (
+          {/* {scanned && (
             <Button title={"다시 스캔"} onPress={() => setScanned(false)} />
-          )}
+          )} */}
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.scanButton} onPress={handleStartScan}>
-              <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
-            </TouchableOpacity>
+            {/* <TouchableOpacity
+              style={styles.scanButton}
+              onPress={handleStartScan}
+            > */}
+            <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
+            {/* </TouchableOpacity> */}
           </View>
           {/* 취소 버튼 */}
           <TouchableOpacity
@@ -217,49 +285,41 @@ const BusinessCardScreen = ({ navigation }) => {
         </View>
       ) : (
         <View>
-        {/* 나의 여행 명함 영역 */}
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleContainer}>
+          {/* 나의 여행 명함 영역 */}
+          <View style={styles.titleContainer}>
             <MaterialIcons name="badge" size={30} color="#34495e" />
             <Text style={styles.title}>나의 여행 명함</Text>
           </View>
-          {/* 명함이 없을 경우에만 명함 생성 버튼을 표시 */}
-          {!businessCard && (
-            <TouchableOpacity
-              style={styles.createButton}
-              onPress={() => navigation.navigate('CreateBusinessCard')}
-            >
-              <Text style={styles.createButtonText}>명함 생성하기</Text>
-            </TouchableOpacity>
-          )}
-        </View>
 
           {/* 자신의 명함 영역 */}
           <View style={styles.cardContainer}>
-  {businessCard ? (
-    <View style={styles.businessCard}>
-      <View style={styles.cardHeader}>
-        {/* S3에서 반환된 이미지 URL을 직접 사용하여 이미지 출력 */}
-        <Image
-  source={{ uri: `${S3_URL}/${businessCard.imageUrl}` }}
-  style={styles.businessCardImage}
-          resizeMode="cover"
-        />
-        <View style={styles.qrCodeWrapper}>
-          <QRCode value={JSON.stringify(businessCard)} size={90} />
-        </View>
-      </View>
-      <View style={styles.cardDetails}>
-        <View style={styles.nameSnsContainer}>
-          <Text style={styles.nameText}>{businessCard.name}</Text>
-          <View style={styles.snsContainer}>
-            {getSnsIcon(parseSnsInfo(businessCard.sns).platform)}
-            <Text style={styles.snsText}>{parseSnsInfo(businessCard.sns).snsId}</Text>
-          </View>
-        </View>
-        <Text style={styles.subText}>{businessCard.email}</Text>
-        <Text style={styles.introductionText}>{businessCard.introduction}</Text>
-      </View>
+            {businessCard ? (
+              <View style={styles.businessCard}>
+                <View style={styles.cardHeader}>
+                  <Image
+                      source={{ uri: `${S3_URL}/${businessCard.imageUrl}` }}
+                      style={styles.businessCardImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.qrCodeWrapper}>
+                    <QRCode value={JSON.stringify(businessCard)} size={90} />
+                  </View>
+                </View>
+                <View style={styles.cardDetails}>
+                  <View style={styles.nameSnsContainer}>
+                    <Text style={styles.nameText}>{businessCard.name}</Text>
+                    <View style={styles.snsContainer}>
+                      {getSnsIcon(parseSnsInfo(businessCard.sns).platform)}
+                      <Text style={styles.snsText}>
+                        {parseSnsInfo(businessCard.sns).snsId}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.subText}>{businessCard.email}</Text>
+                  <Text style={styles.introductionText}>
+                    {businessCard.introduction}
+                  </Text>
+                </View>
 
                 <TouchableOpacity
                   style={styles.iconEditButton}
@@ -273,7 +333,14 @@ const BusinessCardScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             ) : (
-              <Text style={styles.noFriendsText}>나만의 명함을 만들어보세요!</Text>
+              <View style={styles.emptyState}>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={() => navigation.navigate("CreateBusinessCard")}
+                >
+                  <Text style={styles.createButtonText}>명함 생성하기</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
 
@@ -295,20 +362,29 @@ const BusinessCardScreen = ({ navigation }) => {
             <View style={styles.friendsListSection}>
               {friendsList.length > 0 ? (
                 friendsList.map((friend, index) => (
-                  <TouchableOpacity
+                  <Swipeable
                     key={index}
-                    style={styles.friendCard}
-                    onPress={() => handleFriendPress(friend)}
+                    renderRightActions={() => renderRightActions(friend.cardId)} // 슬라이드 시 나타나는 삭제 버튼 추가
                   >
-                    <Image
-                      source={{ uri: `${BASE_URL}/uploads/${friend.imageUrl}` }}
-                      style={styles.friendImage}
-                    />
-                    <View style={styles.friendInfo}>
-                      <Text style={styles.friendCardText}>{friend.name}</Text>
-                      <Text style={styles.friendSubText}>{friend.country}</Text>
-                    </View>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.friendCard}
+                      onPress={() => handleFriendPress(friend)}
+                    >
+                      <Image
+                        source={{
+                          uri: `${S3_URL}/${friend.imageUrl}`,
+                        }}
+                        style={styles.friendImage}
+                      />
+                      <View style={styles.friendInfo}>
+                        <Text style={styles.friendCardText}>{friend.name}</Text>
+                        <Text style={styles.friendSubText}>
+                          {friend.country}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </Swipeable>
                 ))
               ) : (
                 <Text style={styles.noFriendsText}>
@@ -331,24 +407,23 @@ const BusinessCardScreen = ({ navigation }) => {
                   style={styles.closeIcon}
                   onPress={closeAddFriendModal}
                 >
-                  <AntDesign name="close" size={24} color="black" />
+                  <AntDesign name="close" size={20} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.addFriendModalCardId}>
-                  내 명함 ID: {businessCard?.cardId}
+                <View style={styles.myIdSection}>
+                  <Text style={styles.addFriendModalCardIdTitle}>
+                    내 명함 ID
+                  </Text>
+                  <Text style={styles.addFriendModalCardId}>
+                    {businessCard?.cardId}
+                  </Text>
+                </View>
+                <Text style={styles.addFriendModalCardIdTitle}>
+                  추가할 사용자의 ID를 입력하세요.
                 </Text>
-                <TouchableOpacity
-                  style={styles.qrButton}
-                  onPress={() => {
-                    closeAddFriendModal();
-                    handleStartScan();
-                  }}
-                >
-                  <FontAwesome name="qrcode" size={18} color="#3498db" />
-                  <Text style={styles.qrButtonText}>QR Code</Text>
-                </TouchableOpacity>
                 <TextInput
                   style={styles.modalInput}
                   placeholder="친구 명함 ID 입력"
+                  placeholderTextColor="#999"
                   value={businessCardIdInput}
                   onChangeText={setBusinessCardIdInput}
                 />
@@ -359,7 +434,17 @@ const BusinessCardScreen = ({ navigation }) => {
                     handleAddFriendById(businessCardIdInput);
                   }}
                 >
-                  <Text style={styles.modalButtonText}>ID로 친구 추가</Text>
+                  <Text style={styles.modalButtonText}>추가하기</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.qrButton}
+                  onPress={() => {
+                    closeAddFriendModal();
+                    handleStartScan();
+                  }}
+                >
+                  <FontAwesome name="qrcode" size={18} color="#3498db" />
+                  <Text style={styles.qrButtonText}>QR Code로 추가하기</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -384,7 +469,7 @@ const BusinessCardScreen = ({ navigation }) => {
                   <>
                     <Image
                       source={{
-                        uri: `${BASE_URL}/uploads/${selectedFriend.imageUrl}`,
+                        uri: `${S3_URL}/${selectedFriend.imageUrl}`,
                       }}
                       style={styles.modalFriendImage}
                     />
@@ -429,6 +514,7 @@ const styles = StyleSheet.create({
   },
   scannerContainer: {
     flex: 1,
+    height: '100%',
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -482,10 +568,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   businessCardImage: {
-    width: 170,
-    height: 170,
+    width: 150,
+    height: 150,
     borderRadius: 10,
-    marginRight:10,
   },
   qrCodeWrapper: {
     alignSelf: "flex-start",
@@ -566,7 +651,9 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 50,
   },
-
+  friendsListSection: {
+    marginTop: 10,
+  },
   friendCard: {
     backgroundColor: "#f0f0f0",
     padding: 15,
@@ -608,31 +695,43 @@ const styles = StyleSheet.create({
     width: "80%",
     backgroundColor: "#fff",
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+  addFriendModalCardIdTitle: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 5,
+    fontWeight: "bold",
   },
   addFriendModalCardId: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "normal",
     color: "#7f8c8d",
-    marginBottom: 20,
     textAlign: "center",
   },
   closeIcon: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: -40,
+    right: 5,
+    backgroundColor: "white",
+    borderRadius: 100,
+    padding: 5,
   },
   modalInput: {
     height: 40,
+    width: "100%",
     borderColor: "#ccc",
     borderWidth: 1,
+    marginTop: 10,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   modalButton: {
+    // width: '80%',
     backgroundColor: "#3498db",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 20,
     alignItems: "center",
   },
   modalButtonText: {
@@ -643,7 +742,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 10,
   },
   qrButtonText: {
     marginLeft: 10,
@@ -697,6 +797,15 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     lineHeight: 22,
   },
+  myIdSection: {
+    backgroundColor: "#E3F2FD",
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 15,
+    marginBottom: 30,
+    width: "100%",
+  },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -721,6 +830,53 @@ const styles = StyleSheet.create({
     backgroundColor: "#3498db",
     padding: 15,
     borderRadius: 10,
+  },
+  scanTextContainer: {
+    position: "absolute",
+    bottom: 100,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  cornerTL: {
+    position: "absolute",
+    top: -2,
+    left: -2,
+    width: 20,
+    height: 20,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: "#00ff00",
+  },
+  cornerTR: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderColor: "#00ff00",
+  },
+  cornerBL: {
+    position: "absolute",
+    bottom: -2,
+    left: -2,
+    width: 20,
+    height: 20,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: "#00ff00",
+  },
+  cornerBR: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderColor: "#00ff00",
   },
 });
 

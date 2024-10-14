@@ -71,6 +71,31 @@ public class MemberController {
         }
     }
 
+    @ApiOperation(value = "아이디 중복 체크", notes = "입력된 아이디의 중복 여부를 확인합니다.")
+    @GetMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsernameDuplicate(
+            @ApiParam(value = "중복 체크할 아이디", required = true)
+            @RequestParam String username) {
+        boolean exists = memberServiceImpl.existsByUsername(username);
+        return ResponseEntity.ok(exists);
+    }
+
+    @ApiOperation(value = "닉네임 중복 체크", notes = "입력된 닉네임의 중복 여부를 확인합니다.")
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNicknameDuplicate(
+            @ApiParam(value = "중복 체크할 닉네임", required = true)
+            @RequestParam String nickname) {
+        boolean exists = memberServiceImpl.existsByNickname(nickname);
+        return ResponseEntity.ok(exists);
+    }
+
+    @ApiOperation(value = "이메일 중복 체크", notes = "이메일 중복 여부를 체크합니다.")
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+        boolean exists = memberServiceImpl.existsByEmail(email);
+        return ResponseEntity.ok(exists);
+    }
+
     @ApiOperation(value = "회원 삭제", notes = "회원 ID를 사용하여 특정 회원을 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMember(

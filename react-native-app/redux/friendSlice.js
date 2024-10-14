@@ -31,6 +31,23 @@ export const addFriendByBusinessCardId = createAsyncThunk(
   }
 );
 
+// 친구 삭제
+export const removeFriendByBusinessCardId = createAsyncThunk(
+  'friend/removeFriendByBusinessCardId',
+  async ({ memberId, businessCardId }, { getState, rejectWithValue }) => {
+    const token = getState().auth.token;
+    try {
+      const apiClient = getApiClient(token);
+      await apiClient.delete(`/api/friends/${memberId}/remove`, {
+        data: { businessCardId },
+      });
+      return businessCardId; // 성공 시 삭제한 명함 ID 반환
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : 'Network error');
+    }
+  }
+);
+
 const friendSlice = createSlice({
   name: 'friend',
   initialState: {
@@ -64,6 +81,16 @@ const friendSlice = createSlice({
       .addCase(addFriendByBusinessCardId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to add friend';
+      })
+      .addCase(removeFriendByBusinessCardId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.friendsList = state.friendsList.filter(
+          (friend) => friend.businessCardId !== action.payload
+        );
+      })
+      .addCase(removeFriendByBusinessCardId.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to remove friend';
       });
   },
 });

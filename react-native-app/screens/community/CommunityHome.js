@@ -1,3 +1,4 @@
+// screens/community/CommunityHome.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Text, Modal, Animated } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
