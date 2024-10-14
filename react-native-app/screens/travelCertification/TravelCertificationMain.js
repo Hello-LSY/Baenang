@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../../redux/authState';
+import React, { useEffect, useState, useCallback } from "react";
+import { useAuth } from "../../redux/authState";
 import {
   View,
   Text,
@@ -8,20 +8,20 @@ import {
   FlatList,
   Alert,
   Dimensions,
-} from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import { useSelector, useDispatch } from 'react-redux';
+} from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { useSelector, useDispatch } from "react-redux";
 import {
   fetchTravelCertificates,
   deleteCertificate,
-} from '../../redux/travelCertificatesSlice';
-import ProfileButton from '../../components/ProfileButton';
-import { Ionicons } from '@expo/vector-icons';
-import TravelCertificationItem from '../../components/travelCertification/TravelCertificationItem';
-import TravelCertificationModal from '../../components/travelCertification/TravelCertificationModal';
-import axios from 'axios';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import { BASE_URL } from '../../constants/config';
+} from "../../redux/travelCertificatesSlice";
+import ProfileButton from "../../components/ProfileButton";
+import { Ionicons } from "@expo/vector-icons";
+import TravelCertificationItem from "../../components/travelCertification/TravelCertificationItem";
+import TravelCertificationModal from "../../components/travelCertification/TravelCertificationModal";
+import axios from "axios";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { BASE_URL } from "../../constants/config";
 
 const TravelCertificationMain = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -45,19 +45,19 @@ const TravelCertificationMain = ({ navigation }) => {
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'list', title: '여행 인증서' },
-    { key: 'map', title: '지도' },
+    { key: "list", title: "여행 인증서" },
+    { key: "map", title: "지도" },
   ]);
 
   useEffect(() => {
-    if (status === 'idle') {
+    if (status === "idle") {
       dispatch(fetchTravelCertificates());
     }
   }, [status, dispatch]);
 
   const uniqueCountries = new Set(
     locations.map(
-      (loc) => loc.visitedcountry?.trim().toLowerCase().split('-')[0] || ''
+      (loc) => loc.visitedcountry?.trim().toLowerCase().split("-")[0] || ""
     )
   );
 
@@ -80,7 +80,7 @@ const TravelCertificationMain = ({ navigation }) => {
   };
 
   const handlePressItem = (item) => {
-    console.log('Selected item:', item); // 디버깅을 위한 로그
+    console.log("Selected item:", item); // 디버깅을 위한 로그
     setSelectedItem(item);
     setModalVisible(true);
   };
@@ -91,22 +91,26 @@ const TravelCertificationMain = ({ navigation }) => {
   };
 
   const handleDeleteItem = (id) => {
-    Alert.alert('삭제 확인', '정말로 이 인증서를 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
+    Alert.alert("삭제 확인", "정말로 이 인증서를 삭제하시겠습니까?", [
+      { text: "취소", style: "cancel" },
       {
-        text: '삭제',
+        text: "삭제",
         onPress: () => {
           axios
-            .delete(`${BASE_URL}/api/travel-certificates/delete/${id}`)
+            .delete(`${BASE_URL}/api/travel-certificates/delete/${id}`, {
+              headers: {
+                Authorization: `Bearer ${auth.token}`, // auth.token은 인증 토큰이라고 가정
+              },
+            })
             .then(() => {
               dispatch(deleteCertificate(id));
               setModalVisible(false);
               setSelectedItem(null);
-              Alert.alert('삭제 완료', '여행 인증서가 삭제되었습니다.');
+              Alert.alert("삭제 완료", "여행 인증서가 삭제되었습니다.");
             })
             .catch((error) => {
-              console.error('삭제 오류:', error);
-              Alert.alert('삭제 실패', '여행 인증서를 삭제할 수 없습니다.');
+              console.error("삭제 오류:", error);
+              Alert.alert("삭제 실패", "여행 인증서를 삭제할 수 없습니다.");
             });
         },
       },
@@ -114,7 +118,7 @@ const TravelCertificationMain = ({ navigation }) => {
   };
 
   const handleEditItem = (item) => {
-    navigation.navigate('TravelCertificationEdit', { item });
+    navigation.navigate("TravelCertificationEdit", { item });
   };
 
   const toggleMenu = (index) => {
@@ -124,14 +128,14 @@ const TravelCertificationMain = ({ navigation }) => {
     () => (
       <View style={styles.header}>
         <ProfileButton
-          onPress={() => navigation.navigate('Profile')}
+          onPress={() => navigation.navigate("Profile")}
           size={100}
         />
         <View style={styles.userInfo}>
           <View style={styles.nameContainer}>
             <Text style={styles.name}>{auth.nickname}</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate('TravelCertificationProcess')}
+              onPress={() => navigation.navigate("TravelCertificationProcess")}
               style={styles.addButton}
             >
               <Ionicons name="add-circle-outline" size={24} color="#A9A9A9" />
@@ -202,7 +206,7 @@ const TravelCertificationMain = ({ navigation }) => {
         </MapView>
         <TouchableOpacity style={styles.toggleButton} onPress={toggleWorldMap}>
           <Text style={styles.toggleButtonText}>
-            {region.latitude === 36.5 ? '세계 지도' : '한국 지도'}
+            {region.latitude === 36.5 ? "세계 지도" : "한국 지도"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -218,13 +222,13 @@ const TravelCertificationMain = ({ navigation }) => {
   const renderTabBar = (props) => (
     <TabBar
       {...props}
-      indicatorStyle={{ backgroundColor: '#87CEFA' }}
-      style={{ backgroundColor: 'white' }}
-      labelStyle={{ color: 'black', fontWeight: 'bold' }}
+      indicatorStyle={{ backgroundColor: "#87CEFA" }}
+      style={{ backgroundColor: "white" }}
+      labelStyle={{ color: "black", fontWeight: "bold" }}
     />
   );
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <View style={styles.container}>
         <Text>데이터를 불러오는 중입니다...</Text>
@@ -232,7 +236,7 @@ const TravelCertificationMain = ({ navigation }) => {
     );
   }
 
-  if (status === 'failed') {
+  if (status === "failed") {
     return (
       <View style={styles.container}>
         <Text>오류가 발생했습니다: {error}</Text>
@@ -247,7 +251,7 @@ const TravelCertificationMain = ({ navigation }) => {
         navigationState={{ index, routes }}
         renderScene={renderScene}
         onIndexChange={setIndex}
-        initialLayout={{ width: Dimensions.get('window').width }}
+        initialLayout={{ width: Dimensions.get("window").width }}
         renderTabBar={renderTabBar}
         style={styles.tabView}
       />
@@ -267,56 +271,53 @@ const TravelCertificationMain = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   header: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   userInfo: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
-    width: '100%',
+    width: "100%",
   },
   nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    position: 'relative',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    position: "relative",
   },
   name: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   addButton: {
-    position: 'absolute',
-    right: '32%',
-    top: '50%',
-    transform: [{ translateY: -12 }], // 버튼의 절반 크기만큼 위로 이동
+    marginLeft: 3,
   },
   location: {
     fontSize: 14,
-    color: 'grey',
+    color: "grey",
     marginTop: 4,
   },
   statsSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
     marginTop: 16,
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   statNumber: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   statLabel: {
     fontSize: 13,
-    color: 'grey',
+    color: "grey",
   },
   tabView: {
     flex: 1,
@@ -324,33 +325,33 @@ const styles = StyleSheet.create({
 
   mapContainer: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
   toggleButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
     padding: 10,
     borderRadius: 5,
   },
   toggleButtonText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   itemContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
   noTravelContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
   },
   noTravelText: {
     fontSize: 16,
-    color: 'grey',
+    color: "grey",
   },
 });
 

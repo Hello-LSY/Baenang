@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, Image, TextInput, Alert, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useDispatch } from 'react-redux';  // 추가
 import { fetchBusinessCard } from '../../redux/businessCardSlice';
 import { getApiClient } from '../../redux/apiClient';
 import { useAuth } from '../../redux/authState';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 
 const uploadImage = async (imageUri, memberId, token) => {
   try {
@@ -49,6 +48,9 @@ const CreateBusinessCardScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
   const [imageFileName, setImageFileName] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [countryModalVisible, setCountryModalVisible] = useState(false);
+
+  const countries = ['대한민국', '미국', '일본', '중국', '캐나다', '독일', '프랑스', '영국'];
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -108,29 +110,64 @@ const CreateBusinessCardScreen = ({ navigation }) => {
     }
   };
 
+  const handleCountrySelect = (selectedCountry) => {
+    setCountry(selectedCountry);
+    setCountryModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>명함 생성</Text>
 
-      {/* 국가 선택 Picker */}
-      <View style={styles.inputContainer}>
-        <MaterialIcons name="public" size={20} color="#3498db" style={styles.icon} />
-        <Picker
-          selectedValue={country}
-          style={styles.input}
-          onValueChange={(itemValue) => setCountry(itemValue)}
-        >
-          <Picker.Item label="국가를 선택하세요" value="" />
-          <Picker.Item label="대한민국" value="대한민국" />
-          <Picker.Item label="미국" value="미국" />
-          <Picker.Item label="일본" value="일본" />
-          <Picker.Item label="중국" value="중국" />
-        </Picker>
+      {/* 이미지 미리보기 또는 기본 회색 박스 */}
+      <View style={styles.imageContainer}>
+        {image ? (
+          <Image source={{ uri: image }} style={styles.businessCardImage} />
+        ) : (
+          <View style={styles.placeholderImage}></View>
+        )}
       </View>
 
+      {/* 이미지 선택 버튼 */}
+      <TouchableOpacity style={styles.button} onPress={pickImage}>
+        <Text style={styles.buttonText}>사진 선택</Text>
+      </TouchableOpacity>
+
+      {/* 국가 선택 버튼 */}
+      <View style={styles.inputContainer}>
+        <MaterialIcons name="public" size={20} color="#3498db" style={styles.icon} />
+        
+        <Text style={styles.inputLabel}>국가</Text>
+        <TouchableOpacity onPress={() => setCountryModalVisible(true)} style={styles.countryPickerButton}>
+          <Text style={[styles.countryText, !country && styles.placeholderText]}>
+            {country || '국가'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Modal for Country Selection */}
+      <Modal
+        transparent={true}
+        visible={countryModalVisible}
+        animationType="slide"
+        onRequestClose={() => setCountryModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, { maxHeight: 300 }]}>
+            <ScrollView contentContainerStyle={{ paddingVertical: 10 }}>
+              {countries.map((countryName) => (
+                <TouchableOpacity key={countryName} onPress={() => handleCountrySelect(countryName)}>
+                  <Text style={styles.modalItem}>{countryName}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       {/* SNS 플랫폼 선택을 Modal로 변경 */}
-      <View style={styles.snsContainer}>
+      <View style={styles.inputContainer}>
         <MaterialIcons name="person" size={20} color="#3498db" style={styles.icon} />
+        <Text style={styles.inputLabel}>SNS</Text>
         <TextInput
           style={styles.textInput}
           placeholder="SNS 아이디"
@@ -167,6 +204,7 @@ const CreateBusinessCardScreen = ({ navigation }) => {
       {/* 소개 입력 */}
       <View style={styles.inputContainer}>
         <MaterialIcons name="description" size={20} color="#3498db" style={styles.icon} />
+        <Text style={styles.inputLabel}>소개</Text>
         <TextInput
           style={styles.textInput}
           placeholder="소개"
@@ -175,15 +213,9 @@ const CreateBusinessCardScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* 이미지 선택 버튼 */}
-      <TouchableOpacity style={styles.button} onPress={pickImage}>
-        <Text style={styles.buttonText}>이미지 선택</Text>
-      </TouchableOpacity>
-
-
       {/* 명함 등록 버튼 */}
       <TouchableOpacity style={styles.button} onPress={handleSubmitCard} disabled={!imageFileName || !country}>
-        <Text style={styles.buttonText}>명함 등록</Text>
+        <Text style={styles.buttonText}>등록하기</Text>
       </TouchableOpacity>
     </View>
   );
@@ -193,7 +225,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#ffffff',
+    alignItems: 'center'
   },
   title: {
     fontSize: 24,
@@ -206,13 +239,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     marginBottom: 15,
-  },
-  snsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    marginBottom: 15,
+    width: '90%',
+    height: 50,
   },
   snsPickerButton: {
     marginLeft: 10,
@@ -232,14 +260,12 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     width: '80%',
+    maxHeight: 300,
   },
   modalItem: {
     fontSize: 18,
     marginVertical: 10,
     textAlign: 'center',
-  },
-  icon: {
-    marginRight: 10,
   },
   input: {
     flex: 1,
@@ -248,17 +274,41 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     height: 40,
+    fontSize: 15,
+  },
+  countryText: {
+    fontSize: 15,
   },
   button: {
     backgroundColor: '#3498db',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 100,
     alignItems: 'center',
-    marginTop: 10,
+    marginVertical: 10,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  businessCardImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+  },
+  placeholderImage: {
+    width: 150,
+    height: 150,
+    backgroundColor: '#d3d3d3',
+    borderRadius: 10,
+  },
+  inputLabel:{
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginHorizontal: 10,
+  },
+  placeholderText: {
+    color: '#ccc', // 회색 계열 색상
   },
 });
 
