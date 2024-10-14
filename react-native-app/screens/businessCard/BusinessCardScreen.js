@@ -272,7 +272,7 @@ const BusinessCardScreen = ({ navigation }) => {
               style={styles.scanButton}
               onPress={handleStartScan}
             > */}
-            <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text>
+            {/* <Text style={styles.scanButtonText}>QR 코드 스캔 시작</Text> */}
             {/* </TouchableOpacity> */}
           </View>
           {/* 취소 버튼 */}
