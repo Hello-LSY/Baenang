@@ -8,7 +8,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
-import DefaultProfileImage from '../assets/icons/profile-placeholder.png';
+import DefaultProfileImage from '../assets/icons/default-profile.png';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
