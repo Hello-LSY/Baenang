@@ -1,6 +1,14 @@
-// screens/community/CreatePost.js
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, Text } from 'react-native';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location'; // 위치 정보를 가져오기 위한 import
 import { useSelector } from 'react-redux';
@@ -31,8 +39,7 @@ const uploadImage = async (imageUri, token) => {
       throw new Error('이미지 업로드 실패');
     }
 
-    // 이미지 경로에서 중복된 /uploads 제거
-    return response.data.fileName.replace(/^\/uploads\//, '');
+    return response.data.fileName;
   } catch (error) {
     console.error('이미지 업로드 중 오류 발생:', error);
     throw error;
@@ -87,7 +94,7 @@ const CreatePost = ({ navigation }) => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -115,7 +122,7 @@ const CreatePost = ({ navigation }) => {
     try {
       // 게시글 작성 시에 이미지 업로드
       const uploadedFileName = await uploadImage(imageUri, token);
-      
+
       const postData = {
         content,
         imageNames: [uploadedFileName], // 업로드된 이미지 파일 이름
@@ -126,14 +133,20 @@ const CreatePost = ({ navigation }) => {
       };
 
       const apiClient = getApiClient(token);
-      const response = await apiClient.post(`${BASE_URL}/api/posts/create`, postData);
+      const response = await apiClient.post(
+        `${BASE_URL}/api/posts/create`,
+        postData
+      );
 
       if (response.status === 200 || response.status === 201) {
         Alert.alert('Success', '게시글이 성공적으로 작성되었습니다.');
         navigation.goBack();
       } else {
         const errorData = await response.data;
-        Alert.alert('Error', errorData.message || '게시글 작성에 실패했습니다.');
+        Alert.alert(
+          'Error',
+          errorData.message || '게시글 작성에 실패했습니다.'
+        );
       }
     } catch (error) {
       console.error('게시글 작성 중 오류:', error);
@@ -152,7 +165,9 @@ const CreatePost = ({ navigation }) => {
           multiline
         />
         {image && (
-          <Image source={{ uri: image }} style={styles.image} />
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: image }} style={styles.image} />
+          </View>
         )}
         <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
           <Ionicons name="image-outline" size={24} color="#66b2ff" />
@@ -192,19 +207,23 @@ const styles = StyleSheet.create({
     minHeight: 100,
     textAlignVertical: 'top',
   },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
   image: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 10,
+    height: '100%',
+    resizeMode: 'cover',
   },
   imagePickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    backgroundColor: '#ebf5ff', // 부드러운 파란색 배경
     padding: 10,
-    borderRadius: 10,
   },
   imagePickerText: {
     color: '#66b2ff', // 부드러운 파란색 텍스트
