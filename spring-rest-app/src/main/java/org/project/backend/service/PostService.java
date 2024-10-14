@@ -11,4 +11,5 @@ public interface PostService {
     PostDTO createPost(PostDTO postDTO);
     PostDTO updatePost(Long id, PostDTO postDTO);
     void deletePost(Long id);
+    List<PostResponseDTO> getPostsNearby(double latitude, double longitude, double distance, Long memberId);
 }

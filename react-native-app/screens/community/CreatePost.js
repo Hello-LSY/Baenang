@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location'; // 위치 정보를 가져오기 위한 import
 import { useSelector } from 'react-redux';
 import { getApiClient } from '../../redux/apiClient';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,7 +30,8 @@ const uploadImage = async (imageUri, token) => {
       throw new Error('이미지 업로드 실패');
     }
 
-    return response.data.fileName;
+    // 이미지 경로에서 중복된 /uploads 제거
+    return response.data.fileName.replace(/^\/uploads\//, '');
   } catch (error) {
     console.error('이미지 업로드 중 오류 발생:', error);
     throw error;
@@ -38,22 +40,45 @@ const uploadImage = async (imageUri, token) => {
 
 const CreatePost = ({ navigation }) => {
   const [content, setContent] = useState('');
-  const [image, setImage] = useState(null);
-  const [imageFileName, setImageFileName] = useState(null);
+  const [image, setImage] = useState(null); // 이미지 경로
+  const [imageUri, setImageUri] = useState(null); // 실제 업로드할 이미지 URI
+  const [location, setLocation] = useState(null); // 위치 정보
 
   // Redux에서 token, nickname, memberId 가져오기
   const { token, nickname, memberId } = useSelector((state) => state.auth);
 
-  // 권한 요청 함수
-  const requestPermission = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', '이미지 선택을 위해서는 권한이 필요합니다.');
+  // 권한 요청 함수 (이미지 선택 및 위치 정보 권한)
+  const requestPermissions = async () => {
+    const { status: imageStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
+
+    if (imageStatus !== 'granted' || locationStatus !== 'granted') {
+      Alert.alert('Permission Denied', '이미지 선택 및 위치 정보를 위해 권한이 필요합니다.');
+    }
+  };
+
+  // 위치 정보 갱신 함수
+  const watchLocation = async () => {
+    try {
+      await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 10000, // 10초마다 위치 정보 갱신
+          distanceInterval: 10, // 10미터마다 위치 정보 갱신
+        },
+        (location) => {
+          setLocation(location.coords); // 갱신된 위치 정보 저장
+        }
+      );
+    } catch (error) {
+      Alert.alert('Location Error', '위치 정보를 갱신하는 중 오류가 발생했습니다.');
+      console.error('Error watching location:', error);
     }
   };
 
   useEffect(() => {
-    requestPermission();
+    requestPermissions();
+    watchLocation(); // 위치 정보 갱신 함수 호출
   }, []);
 
   // 이미지 선택 함수
@@ -67,16 +92,8 @@ const CreatePost = ({ navigation }) => {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedImage = result.assets[0];
-      setImage(selectedImage.uri);
-
-      try {
-        const uploadedFileName = await uploadImage(selectedImage.uri, token);
-        setImageFileName(uploadedFileName);
-        console.log('이미지 업로드 성공:', uploadedFileName);
-      } catch (error) {
-        console.error('이미지 업로드 실패:', error);
-        Alert.alert('이미지 업로드 실패', '이미지 업로드 중 오류가 발생했습니다.');
-      }
+      setImageUri(selectedImage.uri); // 업로드할 이미지 URI 저장
+      setImage(selectedImage.uri); // 선택한 이미지 보여주기
     } else {
       console.log('이미지 선택 취소');
     }
@@ -84,19 +101,29 @@ const CreatePost = ({ navigation }) => {
 
   // 게시글 작성 함수
   const handleCreatePost = async () => {
-    if (!content || !imageFileName) {
+    if (!content || !imageUri) {
       Alert.alert('Validation', '내용과 이미지를 모두 입력해주세요.');
       return;
     }
 
-    const postData = {
-      content,
-      imageNames: [imageFileName],
-      nickname,
-      memberId,
-    };
+    if (!location) {
+      Alert.alert('Location Error', '위치 정보를 가져올 수 없습니다.');
+      return;
+    }
 
     try {
+      // 게시글 작성 시에 이미지 업로드
+      const uploadedFileName = await uploadImage(imageUri, token);
+      
+      const postData = {
+        content,
+        imageNames: [uploadedFileName], // 업로드된 이미지 파일 이름
+        nickname,
+        memberId,
+        latitude: location.latitude, // 위도 추가
+        longitude: location.longitude, // 경도 추가
+      };
+
       const apiClient = getApiClient(token);
       const response = await apiClient.post(`${BASE_URL}/api/posts/create`, postData);
 
@@ -130,7 +157,6 @@ const CreatePost = ({ navigation }) => {
           <Ionicons name="image-outline" size={24} color="#66b2ff" />
           <Text style={styles.imagePickerText}>이미지 선택</Text>
         </TouchableOpacity>
-        {imageFileName && <Text style={styles.uploadedText}>업로드된 이미지 파일명: {imageFileName}</Text>}
         <TouchableOpacity style={styles.createPostButton} onPress={handleCreatePost}>
           <Ionicons name="checkmark-circle-outline" size={24} color="white" />
           <Text style={styles.createPostText}>게시글 작성</Text>
@@ -183,11 +209,6 @@ const styles = StyleSheet.create({
     color: '#66b2ff', // 부드러운 파란색 텍스트
     fontSize: 16,
     marginLeft: 10,
-  },
-  uploadedText: {
-    fontSize: 14,
-    color: '#777',
-    marginBottom: 15,
   },
   createPostButton: {
     flexDirection: 'row',
