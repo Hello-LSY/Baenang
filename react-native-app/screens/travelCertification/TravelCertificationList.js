@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'; // Redux 관련 hooks �
 import { fetchTravelCertificates, deleteCertificate } from '../../redux/travelCertificatesSlice';
 import TravelCertificationItem from '../../components/travelCertification/TravelCertificationItem';
 import axios from 'axios';
-import { BASE_URL } from '../../constants/config';
+import { BASE_URL , S3_URL } from '../../constants/config';
 
 
 const TravelCertificationList = ({ navigation }) => {

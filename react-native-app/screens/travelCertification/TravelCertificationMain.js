@@ -21,7 +21,7 @@ import TravelCertificationItem from "../../components/travelCertification/Travel
 import TravelCertificationModal from "../../components/travelCertification/TravelCertificationModal";
 import axios from "axios";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-import { BASE_URL } from "../../constants/config";
+import { BASE_URL,S3_URL } from "../../constants/config";
 
 const TravelCertificationMain = ({ navigation }) => {
   const dispatch = useDispatch();

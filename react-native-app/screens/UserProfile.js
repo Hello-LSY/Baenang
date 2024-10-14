@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { checkPassword, updateProfile, fetchProfile } from '../redux/profileSlice';
+import { BASE_URL } from '../constants/config';
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -63,65 +64,65 @@ const UserProfile = () => {
       .catch(() => Alert.alert('오류가 발생했습니다.'));
   };
 
-  // 이미지 선택 함수
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+ // 이미지 선택 함수
+const pickImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.canceled && result.assets && result.assets.length > 0) {
+    const selectedImageUri = result.assets[0].uri;
+    setImageUri(selectedImageUri);
+
+    if (profile.profileId) {
+      uploadImage(selectedImageUri, profile.profileId)
+        .then((uploadedFileName) => {
+          setProfilePicturePath(uploadedFileName); // 업로드 후 반환된 파일명을 저장
+        })
+        .catch(() => {
+          Alert.alert('이미지 업로드 실패');
+        });
+    } else {
+      Alert.alert('프로필 ID가 없습니다. 다시 시도해 주세요.');
+    }
+  }
+};
+
+// 이미지 업로드 함수
+const uploadImage = async (imageUri, profileId) => {
+  try {
+    const formData = new FormData();
+    const fileName = `${profileId}_${Date.now()}.jpg`; // profileId를 파일명에 사용
+
+    formData.append("file", {
+      uri: imageUri, // 이미지 경로 처리
+      name: fileName,
+      type: "image/jpeg",
     });
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const selectedImageUri = result.assets[0].uri;
-      setImageUri(selectedImageUri);
+    console.log("이미지 업로드 시작:", fileName);
 
-      if (profile.profileId) {
-        uploadImage(selectedImageUri, profile.profileId)
-          .then((uploadedFileName) => {
-            setProfilePicturePath(uploadedFileName); // 업로드 후 반환된 파일명을 저장
-          })
-          .catch(() => {
-            Alert.alert('이미지 업로드 실패');
-          });
-      } else {
-        Alert.alert('프로필 ID가 없습니다. 다시 시도해 주세요.');
-      }
-    }
-  };
+    const response = await fetch(`${BASE_URL}/api/upload`, {
+      method: "POST",
+      body: formData,
+    });
 
-  // 이미지 업로드 함수
-  const uploadImage = async (imageUri, profileId) => {
-    try {
-      const formData = new FormData();
-      const fileName = `${profileId}_${Date.now()}.jpg`; // profileId를 파일명에 사용
-  
-      formData.append("file", {
-        uri: imageUri, // 이미지 경로 처리
-        name: fileName,
-        type: "image/jpeg",
-      });
-  
-      console.log("이미지 업로드 시작:", fileName);
-  
-      const response = await fetch("http://10.0.2.2:8080/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-  
-      if (!response.ok) {
-        throw new Error("이미지 업로드 실패");
-      }
-  
-      const data = await response.json();
-      console.log("이미지 업로드 성공, 반환된 파일명:", data.fileName);
-  
-      return data.fileName;
-    } catch (error) {
-      console.error("이미지 업로드 중 오류 발생:", error.message);
-      throw error;
+    if (!response.ok) {
+      throw new Error("이미지 업로드 실패");
     }
-  };
+
+    const data = await response.json();
+    console.log("이미지 업로드 성공, 반환된 파일명:", data.fileName);
+
+    return data.fileName; // 반환된 파일 이름
+  } catch (error) {
+    console.error("이미지 업로드 중 오류 발생:", error.message);
+    throw error;
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -291,3 +292,4 @@ const styles = StyleSheet.create({
 });
 
 export default UserProfile;
+
