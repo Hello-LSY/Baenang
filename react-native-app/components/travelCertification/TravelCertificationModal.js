@@ -26,6 +26,7 @@ const TravelCertificationModal = ({
   if (!item) return null;
 
   const imageUrl = `${S3_URL}/${item.imagepath}`;
+
   const handleDelete = () => {
     onDelete(item.travelid);
     // 여기서 모달을 직접 닫지 않습니다. 삭제 성공 시 TravelCertificationMain에서 모달을 닫을 것입니다.
