@@ -39,4 +39,17 @@ public class FriendController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    // 친구 삭제
+    @DeleteMapping("/{memberId}/remove")
+    public ResponseEntity<String> removeFriendByBusinessCardId(
+            @PathVariable Long memberId,
+            @RequestBody SavedBusinessCardDTO businessCardDTO) {
+        try {
+            friendService.removeFriendByBusinessCardId(memberId, businessCardDTO.getBusinessCardId());
+            return ResponseEntity.status(HttpStatus.OK).body("Friend removed successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

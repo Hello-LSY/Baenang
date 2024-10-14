@@ -6,13 +6,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Button
 } from 'react-native';
-import { BASE_URL } from '../../constants/config';
+import { BASE_URL , S3_URL } from '../../constants/config';
 
 const { width } = Dimensions.get('window');
 
 const TravelCertificationItem = ({ item, onPress }) => {
-  const imageUrl = `${BASE_URL}/uploads/${item.imagepath}`;
+  const imageUrl = `${S3_URL}/${item.imagepath}`;
 
   return (
     <TouchableOpacity onPress={() => onPress(item)} style={styles.container}>
