@@ -40,15 +40,15 @@ export const getApiClient = (token = '') => {
         // 서버에서 오류 응답을 받았을 때
         // console.error('Server Error:', error.response.data);
         if (error.response.status === 401) {
-          console.error('Unauthorized! Please check the token.'); 
+          // console.error('Unauthorized! Please check the token.'); 
           // 401 에러가 발생하면 토큰 만료나 인증 문제로 로그아웃 처리하거나 리프레시 로직 실행
         }
       } else if (error.request) {
         // 요청이 서버에 도달하지 않았을 때
-        console.error('No Response from Server:', error.request);
+        // console.error('No Response from Server:', error.request);
       } else {
         // 요청 설정 중 발생한 오류
-        console.error('Request Setup Error:', error.message);
+        // console.error('Request Setup Error:', error.message);
       }
       return Promise.reject(error);
     }

@@ -33,6 +33,7 @@ import { Feather, AntDesign } from '@expo/vector-icons';
 import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
 import * as Font from 'expo-font';
+import defaultProfileImage from '../../assets/icons/default-profile.png';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -385,7 +386,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Image
-              source={{ uri: 'https://via.placeholder.com/150' }}
+              source={defaultProfileImage}
               style={styles.profileImage}
             />
             <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
