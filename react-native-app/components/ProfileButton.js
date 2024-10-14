@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Image, StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -8,7 +8,10 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { Svg, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { fetchProfile } from '../redux/profileSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import DefaultProfileImage from '../assets/icons/default-profile.png';
+import { S3_URL } from '../constants/config'; // S3 URL 상수
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -21,6 +24,9 @@ const ProfileButton = ({
   const IMAGE_SIZE = size * 0.8; // 이미지 크기를 버튼 크기의 80%로 설정
 
   const rotation = useSharedValue(0);
+  const dispatch = useDispatch();
+  const { profile } = useSelector((state) => state.profile); // 프로필 상태에서 profile 정보 가져옴
+  const [profilePicture, setProfilePicture] = useState(DefaultProfileImage); // 기본 이미지를 초기 값으로 설정
 
   React.useEffect(() => {
     rotation.value = withRepeat(
@@ -28,7 +34,17 @@ const ProfileButton = ({
       -1,
       false
     );
+    dispatch(fetchProfile());
   }, []);
+
+  useEffect(() => {
+    // 프로필 이미지 경로가 있으면 해당 경로로 설정
+    if (profile?.profilePicturePath) {
+      setProfilePicture({ uri: `${S3_URL}/${profile.profilePicturePath}` }); // URL 경로로 이미지 불러옴
+    } else {
+      setProfilePicture(DefaultProfileImage); // 없으면 기본 이미지 설정
+    }
+  }, [profile]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -75,7 +91,7 @@ const ProfileButton = ({
           </Svg>
         </AnimatedView>
         <Image
-          source={imageSource}
+          source={profilePicture} // 동적으로 변경된 이미지 경로 사용
           style={[
             styles.profileIcon,
             {

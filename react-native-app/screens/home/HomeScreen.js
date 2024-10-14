@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { useAuth } from '../../redux/authState';
 import { useExchangeRate } from '../../redux/exchangeRateState';
+import { fetchProfile } from '../../redux/profileSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
@@ -34,17 +36,21 @@ import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
 import * as Font from 'expo-font';
 import defaultProfileImage from '../../assets/icons/default-profile.png';
+import { S3_URL } from '../../constants/config';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [isModalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
+  const { profile } = useSelector((state) => state.profile); // 프로필 상태에서 profile 정보 가져옴
   const { latestExchangeRates, fetchLatestRates, loading } = useExchangeRate();
   const scrollX = useRef(new Animated.Value(0)).current;
   const slideIntervalRef = useRef(null);
+  const [profilePicture, setProfilePicture] = useState(defaultProfileImage); // 기본 이미지를 초기 값으로 설정
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -70,11 +76,22 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     fetchLatestRates(); // 최신 환율 데이터를 가져옴
     startAutoSlide();
+    dispatch(fetchProfile());
 
     return () => {
       clearInterval(slideIntervalRef.current);
     };
   }, []);
+
+
+  useEffect(() => {
+    // 프로필 이미지 경로가 있으면 해당 경로로 설정
+    if (profile?.profilePicturePath) {
+      setProfilePicture({ uri: `${S3_URL}/${profile.profilePicturePath}` }); // URL 경로로 이미지 불러옴
+    } else {
+      setProfilePicture(defaultProfileImage); // 없으면 기본 이미지 설정
+    }
+  }, [profile]);
 
   const startAutoSlide = () => {
     slideIntervalRef.current = setInterval(() => {
@@ -386,7 +403,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Image
-              source={defaultProfileImage}
+              source={profilePicture}
               style={styles.profileImage}
             />
             <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
