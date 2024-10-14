@@ -65,6 +65,8 @@ const ResidentRegistrationModal = ({ visible, onClose }) => {
         <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
           {/* 애니메이션 적용된 뷰 */}
           <Animated.View style={[styles.modalView, { transform: [{ rotateY }] }]}>
+            <View style={styles.topColor}></View>
+            
             {/* 닫기 버튼 */}
             <Pressable style={styles.closeButton} onPress={onClose}>
               <Ionicons name="close" size={24} color="black" />
@@ -90,7 +92,7 @@ const ResidentRegistrationModal = ({ visible, onClose }) => {
                 ) : residentRegistration ? (
                   <View style={styles.infoContainer}>
                     {isDetailView ? (
-                      <View>
+                      <View style={styles.dataContainer}>
                         <Text style={styles.textLabel}>성명</Text>
                         <Text style={styles.textDetailInfo}>{residentRegistration.name}</Text>
                         <Text style={styles.textLabel}>주민등록번호</Text>
@@ -134,136 +136,144 @@ const ResidentRegistrationModal = ({ visible, onClose }) => {
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalView: {
-    width: 300,
-    height: 470,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    paddingTop: 70,
-    paddingBottom: 40,
-    paddingHorizontal: 30,
-    justifyContent: 'flex-start', // 상단부터 배치
-    alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    backfaceVisibility: 'hidden', // 뷰 회전할 때 뒷면이 보이지 않도록 설정
-  },
-  scrollView: {
-    flex: 1,
-    width: '100%',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  dataContainer: {
-    alignItems: 'center',
-  },
-  scrollViewContent: {
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  innerContentView: {
-    width: '100%',
-    padding: 10,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: -45,
-    right: 10,
-    backgroundColor: 'white',
-    borderRadius: 30,
-    padding: 5,
-  },
-  detailButton: {
-    position: 'absolute',
-    bottom: -50,
-    backgroundColor: 'white',
-    borderRadius: 30,
-    padding: 10,
-  },
-  detailText: {
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  modalTitle: {
-    position: 'absolute',
-    top: 20,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  modalTitleEng: {
-    fontSize: 15,
-    fontWeight: 'semibold',
-    color: '#495057',
-    position: 'absolute',
-    top: 45,
-  },
-  textIssuer: {
-    fontWeight: 'bold',
-    position: 'absolute',
-    bottom: 25,
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  infoContainer: {
-    alignItems: 'center',
-  },
-  imageContainer: {
-    width: 140,
-    height: 180,
-    marginTop: 10,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  image: {
-    width: 140,
-    height: 180,
-  },
-  textName: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    marginVertical: 5,
-    letterSpacing: 5,
-    textAlign: 'center',
-  },
-  textLabel: {
-    fontWeight: 'bold',
-    fontSize: 15,
-    marginVertical: 5,
-    marginTop: 15,
-    textAlign: 'center',
-    backgroundColor: 'black',
-    color: 'white',
-    padding: 5,
-  },
-  textInfo: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginVertical: 5,
-    textAlign: 'center',
-  },
-  textDetailInfo: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginVertical: 5,
-    textAlign: 'center',
-  },
-});
+    backdrop: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContainer: {
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalView: {
+      width: 300,
+      height: 470,
+      backgroundColor: 'white',
+      borderRadius: 20,
+      paddingTop: 70,
+      paddingBottom: 40,
+      paddingHorizontal: 30,
+      justifyContent: 'flex-start', // 상단부터 배치
+      alignItems: 'center',
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+      backfaceVisibility: 'hidden', // 뷰 회전할 때 뒷면이 보이지 않도록 설정
+    },
+    topColor:{
+      width: 300,
+      height: 30,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      position: 'absolute',
+      backgroundColor: '#D8C49F',
+    },
+    scrollView: {
+      flex: 1,
+      width: '100%',
+      marginTop: 30,
+      marginBottom: 20,
+    },
+    dataContainer: {
+      alignItems: 'center',
+    },
+    scrollViewContent: {
+      alignItems: 'center',
+      paddingBottom: 20,
+    },
+    innerContentView: {
+      width: '100%',
+      padding: 10,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: -45,
+      right: 10,
+      backgroundColor: 'white',
+      borderRadius: 30,
+      padding: 5,
+    },
+    detailButton: {
+      position: 'absolute',
+      bottom: -50,
+      backgroundColor: 'white',
+      borderRadius: 30,
+      padding: 10,
+    },
+    detailText: {
+      fontWeight: 'bold',
+      fontSize: 15,
+    },
+    modalTitle: {
+      position: 'absolute',
+      top: 45,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    modalTitleEng: {
+      fontSize: 15,
+      fontWeight: 'semibold',
+      color: '#495057',
+      position: 'absolute',
+      top: 70,
+    },
+    textIssuer: {
+      fontWeight: 'bold',
+      position: 'absolute',
+      bottom: 25,
+      fontSize: 15,
+      textAlign: 'center',
+    },
+    infoContainer: {
+      alignItems: 'center',
+    },
+    imageContainer: {
+      width: 140,
+      height: 180,
+      marginBottom: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    image: {
+      width: 140,
+      height: 180,
+    },
+    textName: {
+      fontWeight: 'bold',
+      fontSize: 20,
+      marginVertical: 5,
+      letterSpacing: 5,
+      textAlign: 'center',
+    },
+    textLabel: {
+      fontWeight: 'bold',
+      fontSize: 15,
+      marginVertical: 5,
+      marginTop: 15,
+      textAlign: 'center',
+      backgroundColor: '#D8C49F',
+      color: 'white',
+      padding: 5,
+      width: 230,
+    },
+    textInfo: {
+      fontWeight: 'bold',
+      fontSize: 18,
+      marginVertical: 5,
+      textAlign: 'center',
+    },
+    textDetailInfo: {
+      fontWeight: 'bold',
+      fontSize: 16,
+      marginVertical: 5,
+      textAlign: 'center',
+    },
+  });
 
 export default ResidentRegistrationModal;
