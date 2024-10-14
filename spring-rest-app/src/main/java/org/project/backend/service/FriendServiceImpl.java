@@ -51,4 +51,12 @@ public class FriendServiceImpl implements FriendService {
                         .orElseThrow(() -> new RuntimeException("Business card not found")))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void removeFriendByBusinessCardId(Long memberId, String businessCardId) {
+        SavedBusinessCard savedBusinessCard = savedBusinessCardRepository.findByMember_IdAndBusinessCardId(memberId, businessCardId)
+                .orElseThrow(() -> new RuntimeException("Friend not found"));
+
+        savedBusinessCardRepository.delete(savedBusinessCard);
+    }
 }
