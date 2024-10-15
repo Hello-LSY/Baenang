@@ -42,7 +42,7 @@ const MainTabs = () => {
           tabBarLabelStyle: { fontSize: 16, fontWeight: 'bold' },
           tabBarStyle: {
             backgroundColor: 'white',
-            paddingTop: Platform.OS === 'ios' ? 50 : statusBarHeight,
+            paddingTop: Platform.OS === 'ios' ? 0 : statusBarHeight,
             elevation: 0, // Android에서 그림자 제거
             shadowOpacity: 0, // iOS에서 그림자 제거
           },

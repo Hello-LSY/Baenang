@@ -24,7 +24,7 @@ export const getApiClient = (token = '') => {
       return config;
     },
     (error) => {
-      console.error('Request Error:', error); // 요청 오류 로그
+      // console.error('Request Error:', error); // 요청 오류 로그
       return Promise.reject(error);
     }
   );
