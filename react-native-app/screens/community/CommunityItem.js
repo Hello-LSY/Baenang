@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { S3_URL } from '../../constants/config'; // S3 URL을 constants에서 가져옵니다.
 import { useAuth } from '../../redux/authState';
 import { posts } from '../../redux/postSlice';
+import { fetchProfile } from '../../redux/profileSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { getApiClient } from '../../redux/apiClient';
 import Modal from 'react-native-modal';
@@ -46,6 +47,7 @@ const timeAgo = (dateArray) => {
 const CommunityItem = ({ post, onDelete, onEdit }) => {
   const { auth } = useAuth();
   const [imageError, setImageError] = useState(false);
+  const dispatch = useDispatch();
   const [liked, setLiked] = useState(false);
   const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
@@ -54,11 +56,9 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
   const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
   const [newComment, setNewComment] = useState('');
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(
-    post.profilePicturePath
-      ? { uri: `${S3_URL}/${post.profilePicturePath}` }
-      : defaultProfileImage
-  ); // 프로필 이미지를 초기 값으로 설정
+
+  const { profile } = useSelector((state) => state.profile); // 프로필 상태에서 profile 정보 가져옴
+  const [profileImage, setProfileImage] = useState(defaultProfileImage); // 기본 이미지를 초기 값으로 설정
 
   const apiClient = getApiClient(auth.token);
 
@@ -75,12 +75,35 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
         setLiked(response.data);
       } catch (error) {
         console.error('Error fetching like status:', error);
+        if (error.response) {
+          console.log('Response data:', error.response.data);
+          console.log('Response status:', error.response.status);
+          console.log('Response headers:', error.response.headers);
+          if (error.response.status === 500) {
+            // alert("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.");
+          }
+        } else if (error.request) {
+          console.log('Request data:', error.request);
+          // alert("서버에서 응답이 없습니다. 네트워크 상태를 확인하세요.");
+        } else {
+          console.log('Error', error.message);
+          // alert("요청 중 오류가 발생했습니다.");
+        }
       }
     };
     fetchLikeStatus();
-
+    dispatch(fetchProfile());
     fetchComments();
-  }, [post.id, auth.memberId]);
+  }, [post.id, auth.memberId, dispatch]);
+
+  useEffect(() => {
+    // 프로필 이미지 경로가 있으면 해당 경로로 설정
+    if (profile?.profilePicturePath) {
+      setProfileImage({ uri: `${S3_URL}/${profile.profilePicturePath}` }); // URL 경로로 이미지 불러옴
+    } else {
+      setProfileImage(defaultProfileImage); // 없으면 기본 이미지 설정
+    }
+  }, [profile]);
 
   const fetchComments = async () => {
     try {
@@ -288,32 +311,39 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
         style={styles.bottomModal}
       >
         <View style={styles.modalContent}>
-          <View style={styles.commentInputContainer}>
-            <Image
-              source={defaultProfileImage}
-              style={styles.commentInputProfileImage}
-            />
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder="댓글 작성..."
-                value={newComment}
-                onChangeText={setNewComment}
-              />
-              <TouchableOpacity
-                onPress={handleAddComment}
-                style={styles.addCommentButton}
-              >
-                <Ionicons name="arrow-up" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
           <ScrollView style={styles.commentScrollView}>
+            <View style={styles.commentInputWrapper}>
+              <View style={styles.commentInputContainer}>
+                <Image
+                  source={profileImage}
+                  style={styles.commentInputProfileImage}
+                />
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="댓글 작성..."
+                    value={newComment}
+                    onChangeText={setNewComment}
+                  />
+                  <TouchableOpacity
+                    onPress={handleAddComment}
+                    style={styles.addCommentButton}
+                  >
+                    <Ionicons name="arrow-up" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.inputShadow} />
+            </View>
             {comments.map((comment) => (
               <View key={comment.id} style={styles.comment}>
                 <View style={styles.commentHeader}>
                   <Image
-                    source={defaultProfileImage}
+                    source={
+                      comment.profilePicturePath
+                        ? { uri: `${S3_URL}/${comment.profilePicturePath}` }
+                        : defaultProfileImage
+                    }
                     style={styles.commentProfileImage}
                   />
                   <View style={styles.commentContent}>
