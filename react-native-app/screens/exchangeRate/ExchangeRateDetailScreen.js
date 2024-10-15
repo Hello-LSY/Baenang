@@ -20,7 +20,9 @@ const screenWidth = Dimensions.get('window').width;
 const formatDate = (dateArray) => {
   if (!dateArray || dateArray.length < 2) return '';
   const [year, month, day] = dateArray;
-  return `${String(month).padStart(2, '0')}.${day ? String(day).padStart(2, '0') : ''}`;
+  return `${String(month).padStart(2, '0')}.${
+    day ? String(day).padStart(2, '0') : ''
+  }`;
 };
 
 // 주별, 월별 그룹화 함수들
@@ -29,7 +31,8 @@ const groupByWeek = (data) => {
   for (let i = 0; i < data.length; i += 7) {
     const weekData = data.slice(i, i + 7);
     const average =
-      weekData.reduce((sum, item) => sum + item.exchangeRateValue, 0) / weekData.length;
+      weekData.reduce((sum, item) => sum + item.exchangeRateValue, 0) /
+      weekData.length;
     weeks.push({
       recordedAt: weekData[0].recordedAt,
       exchangeRateValue: average,
@@ -50,7 +53,8 @@ const groupByMonth = (data) => {
 
   return Object.keys(months).map((month) => {
     const average =
-      months[month].reduce((sum, value) => sum + value, 0) / months[month].length;
+      months[month].reduce((sum, value) => sum + value, 0) /
+      months[month].length;
     return {
       recordedAt: [data[0].recordedAt[0], month, 1],
       exchangeRateValue: average,
@@ -72,7 +76,7 @@ const limitData = (data, limit) => {
 
 const ExchangeRateDetailScreen = ({ route }) => {
   const { currencyCode } = route.params;
-  const cleanedCurrencyCode = currencyCode.replace("(100)", "").trim();
+  const cleanedCurrencyCode = currencyCode.replace('(100)', '').trim();
   const { exchangeRateHistory, fetchRateHistory, loading } = useExchangeRate();
   const [chartType, setChartType] = useState('daily');
   const [krwAmount, setKrwAmount] = useState('');
@@ -87,8 +91,14 @@ const ExchangeRateDetailScreen = ({ route }) => {
   }, [currencyCode]);
 
   useEffect(() => {
-    if (exchangeRateHistory[currencyCode] && exchangeRateHistory[currencyCode].length > 0) {
-      const latestRate = exchangeRateHistory[currencyCode][exchangeRateHistory[currencyCode].length - 1]?.exchangeRateValue ?? 0;
+    if (
+      exchangeRateHistory[currencyCode] &&
+      exchangeRateHistory[currencyCode].length > 0
+    ) {
+      const latestRate =
+        exchangeRateHistory[currencyCode][
+          exchangeRateHistory[currencyCode].length - 1
+        ]?.exchangeRateValue ?? 0;
       calculateForeignToKRW(foreignAmount, latestRate);
     }
   }, [foreignAmount, exchangeRateHistory, currencyCode]);
@@ -116,7 +126,7 @@ const ExchangeRateDetailScreen = ({ route }) => {
     setSelectedDate(formatDate(historyData[index].recordedAt));
 
     const adjustedX = x > screenWidth - 150 ? screenWidth - 150 : x + 10;
-    
+
     setTooltipPosition({
       x: adjustedX + 2,
       y: y + 15,
@@ -156,9 +166,18 @@ const ExchangeRateDetailScreen = ({ route }) => {
     historyData = limitData(historyData, 7); // 최근 7일
   }
 
-  const latestRate = historyData.length > 0 ? historyData[historyData.length - 1].exchangeRateValue : 0;
-  const previousRate = historyData.length > 1 ? historyData[historyData.length - 2].exchangeRateValue : null;
-  const latestChangePercentage = calculateChangePercentage(latestRate, previousRate);
+  const latestRate =
+    historyData.length > 0
+      ? historyData[historyData.length - 1].exchangeRateValue
+      : 0;
+  const previousRate =
+    historyData.length > 1
+      ? historyData[historyData.length - 2].exchangeRateValue
+      : null;
+  const latestChangePercentage = calculateChangePercentage(
+    latestRate,
+    previousRate
+  );
 
   return (
     <TouchableWithoutFeedback onPress={hideTooltip}>
@@ -170,10 +189,18 @@ const ExchangeRateDetailScreen = ({ route }) => {
               <Text style={styles.currencyCode}>{cleanedCurrencyCode}</Text>
             </View>
             <View style={styles.rateContainer}>
-              <Text style={styles.exchangeRate}>{latestRate.toFixed(2)} 원</Text>
+              <Text style={styles.exchangeRate}>
+                {latestRate.toFixed(2)} 원
+              </Text>
               {latestChangePercentage !== null ? (
-                <Text style={[styles.changeRate, { color: latestChangePercentage >= 0 ? 'red' : 'blue' }]}>
-                  {latestChangePercentage >= 0 ? '▲' : '▼'} {latestChangePercentage}%
+                <Text
+                  style={[
+                    styles.changeRate,
+                    { color: latestChangePercentage >= 0 ? 'red' : 'blue' },
+                  ]}
+                >
+                  {latestChangePercentage >= 0 ? '▲' : '▼'}{' '}
+                  {latestChangePercentage}%
                 </Text>
               ) : (
                 <Text style={styles.changeRate}>N/A</Text>
@@ -224,14 +251,26 @@ const ExchangeRateDetailScreen = ({ route }) => {
               {['daily', 'weekly', 'monthly'].map((type) => (
                 <TouchableOpacity
                   key={type}
-                  style={[styles.chartTypeButton, chartType === type && styles.chartTypeButtonActive]}
+                  style={[
+                    styles.chartTypeButton,
+                    chartType === type && styles.chartTypeButtonActive,
+                  ]}
                   onPress={() => {
                     setChartType(type);
-                    hideTooltip();  // 버튼을 누를 때 툴팁을 숨기기
+                    hideTooltip(); // 버튼을 누를 때 툴팁을 숨기기
                   }}
                 >
-                  <Text style={[styles.chartTypeText, chartType === type && styles.chartTypeTextActive]}>
-                    {type === 'daily' ? '일별' : type === 'weekly' ? '주별' : '월별'}
+                  <Text
+                    style={[
+                      styles.chartTypeText,
+                      chartType === type && styles.chartTypeTextActive,
+                    ]}
+                  >
+                    {type === 'daily'
+                      ? '일별'
+                      : type === 'weekly'
+                      ? '주별'
+                      : '월별'}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -241,10 +280,16 @@ const ExchangeRateDetailScreen = ({ route }) => {
               <>
                 <LineChart
                   data={{
-                    labels: historyData.map((data) => formatDate(data.recordedAt)),
-                    datasets: [{ data: historyData.map((data) => data.exchangeRateValue) }],
+                    labels: historyData.map((data) =>
+                      formatDate(data.recordedAt)
+                    ),
+                    datasets: [
+                      {
+                        data: historyData.map((data) => data.exchangeRateValue),
+                      },
+                    ],
                   }}
-                  width={screenWidth*0.8}
+                  width={screenWidth * 0.8}
                   height={250}
                   chartConfig={{
                     backgroundGradientFrom: '#ffffff',
@@ -262,11 +307,20 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
                 {selectedRate && (
                   <Animated.View
-                    style={[styles.tooltip, { left: tooltipPosition.x, top: tooltipPosition.y, opacity: tooltipOpacity }]}
+                    style={[
+                      styles.tooltip,
+                      {
+                        left: tooltipPosition.x,
+                        top: tooltipPosition.y,
+                        opacity: tooltipOpacity,
+                      },
+                    ]}
                   >
                     <View style={styles.tooltipBubble}>
                       <Text style={styles.tooltipDate}>{selectedDate}</Text>
-                      <Text style={styles.tooltipText}>{selectedRate.toFixed(2)} 원</Text>
+                      <Text style={styles.tooltipText}>
+                        {selectedRate.toFixed(2)} 원
+                      </Text>
                     </View>
                   </Animated.View>
                 )}
@@ -283,9 +337,9 @@ const ExchangeRateDetailScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#f4f9ff',
     paddingHorizontal: 20,
-    flex:1,
+    flex: 1,
   },
   header: {
     padding: 16,
@@ -327,7 +381,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  inputContainer:{
+  inputContainer: {
     flex: 1,
     paddingHorizontal: 10,
   },
@@ -416,7 +470,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  }
+  },
 });
 
 export default ExchangeRateDetailScreen;

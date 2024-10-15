@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,10 +13,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { S3_URL } from "../../constants/config"; // S3 URL을 constants에서 가져옵니다.
 import { useAuth } from "../../redux/authState";
 import { posts } from "../../redux/postSlice";
+import { fetchProfile } from "../../redux/profileSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getApiClient } from "../../redux/apiClient";
 import Modal from "react-native-modal";
 import { BottomSheet } from "react-native-elements";
+import { Swipeable } from "react-native-gesture-handler";
 import defaultProfileImage from "../../assets/icons/default-profile.png";
 
 // 배열로 전달된 createdAt을 Date 객체로 변환하는 함수
@@ -45,6 +47,7 @@ const timeAgo = (dateArray) => {
 const CommunityItem = ({ post, onDelete, onEdit }) => {
   const { auth } = useAuth();
   const [imageError, setImageError] = useState(false);
+  const dispatch = useDispatch();
   const [liked, setLiked] = useState(false);
   const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
@@ -53,30 +56,54 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
   const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
   const [newComment, setNewComment] = useState("");
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(
-    post.profilePicturePath ? { uri: `${S3_URL}/${post.profilePicturePath}` } : defaultProfileImage
-  ); // 프로필 이미지를 초기 값으로 설정
+
+  const { profile } = useSelector((state) => state.profile); // 프로필 상태에서 profile 정보 가져옴
+  const [profileImage, setProfileImage] = useState(defaultProfileImage); // 기본 이미지를 초기 값으로 설정
 
   const apiClient = getApiClient(auth.token);
 
   // 서버에서 받은 imageNames에는 이미 /uploads/ 경로가 포함되어 있음.
-  const imagePath = post.imageNames && post.imageNames.length > 0
-    ? post.imageNames[0]
-    : null;
+  const imagePath =
+    post.imageNames && post.imageNames.length > 0 ? post.imageNames[0] : null;
 
   useEffect(() => {
     const fetchLikeStatus = async () => {
       try {
-        const response = await apiClient.get(`/api/likes/post/${post.id}/member/${auth.memberId}`);
+        const response = await apiClient.get(
+          `/api/likes/post/${post.id}/member/${auth.memberId}`
+        );
         setLiked(response.data);
       } catch (error) {
         console.error("Error fetching like status:", error);
+        if (error.response) {
+          console.log("Response data:", error.response.data);
+          console.log("Response status:", error.response.status);
+          console.log("Response headers:", error.response.headers);
+          if (error.response.status === 500) {
+            // alert("서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.");
+          }
+        } else if (error.request) {
+          console.log("Request data:", error.request);
+          // alert("서버에서 응답이 없습니다. 네트워크 상태를 확인하세요.");
+        } else {
+          console.log("Error", error.message);
+          // alert("요청 중 오류가 발생했습니다.");
+        }
       }
     };
     fetchLikeStatus();
-
+    dispatch(fetchProfile());
     fetchComments();
-  }, [post.id, auth.memberId]);
+  }, [post.id, auth.memberId, dispatch]);
+
+  useEffect(() => {
+    // 프로필 이미지 경로가 있으면 해당 경로로 설정
+    if (profile?.profilePicturePath) {
+      setProfileImage({ uri: `${S3_URL}/${profile.profilePicturePath}` }); // URL 경로로 이미지 불러옴
+    } else {
+      setProfileImage(defaultProfileImage); // 없으면 기본 이미지 설정
+    }
+  }, [profile]);
 
   const fetchComments = async () => {
     try {
@@ -144,7 +171,21 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
       }
     }
   };
-
+  const renderRightActions = (commentId, progress, dragX) => {
+    const scale = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [1, 0],
+      extrapolate: "clamp",
+    });
+    return (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={() => handleDeleteComment(commentId)}
+      >
+        <Ionicons name="trash-outline" size={24} color="white" />
+      </TouchableOpacity>
+    );
+  };
   const handleDeleteComment = async (commentId) => {
     try {
       await apiClient.delete(`/api/comments/${commentId}`);
@@ -242,23 +283,25 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
       </View>
 
       <View style={styles.postContent}>
-  <Text style={styles.likeCount}>좋아요 {localLikeCount}개</Text>
-  <View style={styles.contentRow}>
-    <Text style={styles.username}>{post.nickname}</Text>
-    <Text style={styles.content}>{post.content}</Text>
-  </View>
+        <Text style={styles.likeCount}>좋아요 {localLikeCount}개</Text>
+        <View style={styles.contentRow}>
+          <Text style={styles.username}>{post.nickname}</Text>
+          <Text style={styles.content}>{post.content}</Text>
+        </View>
 
-    {/* commentsCount가 1개 이상일 때만 댓글 보기 텍스트를 렌더링 */}
-    {commentsCount > 0 && (
-      <TouchableOpacity onPress={toggleCommentModal}>
-        <Text style={styles.viewComments}>
-          <Text style={styles.viewCommentsText}>댓글 {commentsCount}개 모두 보기</Text>
-        </Text>
-      </TouchableOpacity>
-    )}
+        {/* commentsCount가 1개 이상일 때만 댓글 보기 텍스트를 렌더링 */}
+        {commentsCount > 0 && (
+          <TouchableOpacity onPress={toggleCommentModal}>
+            <Text style={styles.viewComments}>
+              <Text style={styles.viewCommentsText}>
+                댓글 {commentsCount}개 모두 보기
+              </Text>
+            </Text>
+          </TouchableOpacity>
+        )}
 
-  <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text>
-</View>
+        <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text>
+      </View>
 
       <Modal
         isVisible={isCommentModalVisible}
@@ -273,19 +316,23 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
               <View key={comment.id} style={styles.comment}>
                 <View style={styles.commentHeader}>
                   <Image
-                    source={defaultProfileImage}
+                    source={
+                      comment.profilePicturePath
+                        ? { uri: `${S3_URL}/${comment.profilePicturePath}` } // profilePicturePath가 있으면 해당 경로 사용
+                        : defaultProfileImage // profilePicturePath가 없으면 기본 이미지 사용
+                    }
                     style={styles.commentProfileImage}
                   />
                   <View style={styles.commentContent}>
                     <Text style={styles.commentUsername}>
                       {comment.nickname}
-                        <Text style={styles.commentCreatedAt}>
-                         {timeAgo(comment.createdAt)}
-                        </Text>
+                      <Text style={styles.commentCreatedAt}>
+                        {timeAgo(comment.createdAt)}
                       </Text>
+                    </Text>
                     <Text style={styles.commentText}>{comment.content}</Text>
                   </View>
-                    {auth.nickname === comment.nickname && (  // nickname 비교
+                  {auth.nickname === comment.nickname && ( // nickname 비교
                     <TouchableOpacity
                       onPress={() => handleDeleteComment(comment.id)}
                       style={styles.deleteCommentButton}
@@ -299,7 +346,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
           </ScrollView>
           <View style={styles.commentInputContainer}>
             <Image
-              source={defaultProfileImage}
+              source={profileImage}
               style={styles.commentInputProfileImage}
             />
             <View style={styles.inputWrapper}>
@@ -318,7 +365,6 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
             </View>
           </View>
         </View>
-        
       </Modal>
     </View>
   );
@@ -465,10 +511,9 @@ const styles = StyleSheet.create({
   commentCreatedAt: {
     marginLeft: 10,
     fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
+    color: "#999",
+    fontWeight: "normal",
     marginLeft: 5,
-
   },
   commentUsername: {
     fontWeight: "bold",
@@ -517,7 +562,7 @@ const styles = StyleSheet.create({
   timeAgo: {
     color: "#999",
     fontSize: 12,
-    marginTop:5,
+    marginTop: 5,
   },
 
   cancelButton: {

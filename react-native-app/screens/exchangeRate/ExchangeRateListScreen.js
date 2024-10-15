@@ -175,8 +175,8 @@ const ExchangeRateListScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#f4f9ff',
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   mainCurrenciesContainer: {
     flexDirection: 'row',
@@ -196,6 +196,12 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     borderColor: '#ccc',
+    backgroundColor: '#fff',
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 3,
   },
   mainFlagContainer: {
     marginHorizontal: 12,
@@ -232,7 +238,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 15,
     marginHorizontal: 16,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#fff',
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
