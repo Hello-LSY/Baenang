@@ -11,6 +11,8 @@ import {
   RefreshControl,
   Dimensions,
   Animated,
+  Alert,
+  Linking
 } from 'react-native';
 import { useAuth } from '../../redux/authState';
 import { useExchangeRate } from '../../redux/exchangeRateState';
@@ -171,6 +173,45 @@ const HomeScreen = ({ navigation }) => {
   const handleExchangeRateClick = (currencyCode) => {
     navigation.navigate('ExchangeRateDetail', { currencyCode });
   };
+
+  const externalServices = [
+    {
+      title: 'KB 차차차',
+      imgSrc: kbc,
+      link: 'https://www.kbchachacha.com', // KB 차차차 링크
+    },
+    {
+      title: 'KB손해보험',
+      imgSrc: kbs,
+      link: 'https://www.kbinsure.co.kr', // KB손해보험 링크
+    },
+    {
+      title: '에어비앤비',
+      imgSrc: airbnb,
+      link: 'https://www.airbnb.com', // 에어비앤비 링크
+    },
+    {
+      title: '티머니고',
+      imgSrc: tmg,
+      link: 'https://www.tmoney.co.kr', // 티머니고 링크
+    },
+    {
+      title: '부킹닷컴',
+      imgSrc: booking,
+      link: 'https://www.booking.com', // 부킹닷컴 링크
+    },
+    {
+      title: '아고다',
+      imgSrc: agoda,
+      link: 'https://www.agoda.com', // 아고다 링크
+    },
+  ];
+  // 링크로 이동하는 함수
+  const handleExternalLink = (url) => {
+    Linking.openURL(url).catch((err) =>
+      Alert.alert('링크를 열 수 없습니다.', err.message)
+    );
+  };  
 
   return (
     <ScrollView
@@ -347,19 +388,44 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>외부 서비스</Text>
-        <View style={styles.sectionContents}>
-          <View style={styles.row}>
-            <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
-            <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
-          </View>
-          <View style={styles.row}>
-            <ExternalServiceButton title="에어비앤비" imgSrc={airbnb} />
-            <ExternalServiceButton title="티머니고" imgSrc={tmg} />
-          </View>
-          <View style={styles.row}>
-            <ExternalServiceButton title="부킹닷컴" imgSrc={booking} />
-            <ExternalServiceButton title="아고다" imgSrc={agoda} />
-          </View>
+        
+        <View style={styles.row}>
+          <ExternalServiceButton 
+            title="KB 차차차" 
+            imgSrc={kbc} 
+            onPress={() => handleExternalLink('https://www.kbchachacha.com')} // 링크 추가
+          />
+          <ExternalServiceButton 
+            title="KB손해보험" 
+            imgSrc={kbs} 
+            onPress={() => handleExternalLink('https://www.kbinsure.co.kr')} // 링크 추가
+          />
+        </View>
+        
+        <View style={styles.row}>
+          <ExternalServiceButton 
+            title="에어비앤비" 
+            imgSrc={airbnb} 
+            onPress={() => handleExternalLink('https://www.airbnb.com')} // 링크 추가
+          />
+          <ExternalServiceButton 
+            title="티머니고" 
+            imgSrc={tmg} 
+            onPress={() => handleExternalLink('https://www.tmoney.co.kr')} // 링크 추가
+          />
+        </View>
+        
+        <View style={styles.row}>
+          <ExternalServiceButton 
+            title="부킹닷컴" 
+            imgSrc={booking} 
+            onPress={() => handleExternalLink('https://www.booking.com')} // 링크 추가
+          />
+          <ExternalServiceButton 
+            title="아고다" 
+            imgSrc={agoda} 
+            onPress={() => handleExternalLink('https://www.agoda.com')} // 링크 추가
+          />
         </View>
       </View>
 
