@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchBusinessCard, updateBusinessCard } from '../../redux/businessCardSlice'; // update 액션 추가
 import { getApiClient } from '../../redux/apiClient';
 import { useAuth } from '../../redux/authState';
-import { BASE_URL } from '../../constants/config';
+import { S3_URL } from '../../constants/config';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // 이미지 업로드 함수
@@ -102,24 +102,41 @@ const UpdateBusinessCardScreen = ({ navigation, route }) => {
       console.log('이미지 선택 취소');
     }
   };
-
+  
   const handleUpdateCard = async () => {
+    let finalImageFileName = imageFileName;
+  
+    // 이미지가 선택된 경우 업로드
+    if (image) {
+      try {
+        finalImageFileName = await uploadImage(image, memberId, token); 
+        console.log("업로드된 이미지 파일명:", finalImageFileName);
+      } catch (error) {
+        Alert.alert('실패', '이미지 업로드에 실패했습니다.');
+        return;
+      }
+    }
+  
     const snsInfo = `${snsPlatform}_${snsId}`; 
-
+  
     const businessCardData = {
       name: businessCard.name,  
       email: businessCard.email,  
       country,
       sns: snsInfo,
       introduction,
-      imageUrl: imageFileName || businessCard.imageUrl, // 이미지가 없으면 기존 이미지 사용
+      imageUrl: finalImageFileName || businessCard.imageUrl, // 이미지가 없으면 기존 이미지 사용
     };
-    console.log(businessCardData)
+  
+    console.log("업데이트 데이터:", businessCardData);
+  
     try {
-      await dispatch(updateBusinessCard({ cardId: businessCardId, businessCardData }));
+      const response = await dispatch(updateBusinessCard({ cardId: businessCardId, businessCardData }));
+      console.log("업데이트 응답:", response); // 서버 응답 확인
       Alert.alert('성공', '명함이 성공적으로 업데이트되었습니다.');
       navigation.goBack();
     } catch (error) {
+      console.error('명함 업데이트 중 오류:', error);
       Alert.alert('실패', '명함 업데이트 실패');
     }
   };
@@ -135,11 +152,10 @@ const UpdateBusinessCardScreen = ({ navigation, route }) => {
       {/* 기존에 업로드된 이미지가 있는 경우 보여줍니다 */}
       {imageFileName && !image && (
         <Image
-          source={{ uri: `${BASE_URL}/uploads/${businessCard.imageUrl}` }} // 서버 URL에 맞게 수정
+          source={{ uri: `${S3_URL}/${imageFileName}` }} // S3 URL에 맞게 수정
           style={styles.businessCardImage}
         />
       )}
-
       {/* 사용자가 선택한 이미지가 있으면 선택한 이미지를 보여줍니다 */}
       {image && (
         <Image
