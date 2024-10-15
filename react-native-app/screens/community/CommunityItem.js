@@ -288,35 +288,6 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
         style={styles.bottomModal}
       >
         <View style={styles.modalContent}>
-          <ScrollView>
-            {comments.map((comment) => (
-              <View key={comment.id} style={styles.comment}>
-                <View style={styles.commentHeader}>
-                  <Image
-                    source={defaultProfileImage}
-                    style={styles.commentProfileImage}
-                  />
-                  <View style={styles.commentContent}>
-                    <Text style={styles.commentUsername}>
-                      {comment.nickname}
-                      <Text style={styles.commentCreatedAt}>
-                        {timeAgo(comment.createdAt)}
-                      </Text>
-                    </Text>
-                    <Text style={styles.commentText}>{comment.content}</Text>
-                  </View>
-                  {auth.nickname === comment.nickname && ( // nickname 비교
-                    <TouchableOpacity
-                      onPress={() => handleDeleteComment(comment.id)}
-                      style={styles.deleteCommentButton}
-                    >
-                      <Ionicons name="close" size={20} color="#999" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            ))}
-          </ScrollView>
           <View style={styles.commentInputContainer}>
             <Image
               source={defaultProfileImage}
@@ -337,6 +308,37 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
               </TouchableOpacity>
             </View>
           </View>
+          <ScrollView style={styles.commentScrollView}>
+            {comments.map((comment) => (
+              <View key={comment.id} style={styles.comment}>
+                <View style={styles.commentHeader}>
+                  <Image
+                    source={defaultProfileImage}
+                    style={styles.commentProfileImage}
+                  />
+                  <View style={styles.commentContent}>
+                    <View style={styles.commentUserInfo}>
+                      <Text style={styles.commentUsername}>
+                        {comment.nickname}
+                      </Text>
+                      <Text style={styles.commentCreatedAt}>
+                        {timeAgo(comment.createdAt)}
+                      </Text>
+                    </View>
+                    <Text style={styles.commentText}>{comment.content}</Text>
+                  </View>
+                  {auth.nickname === comment.nickname && (
+                    <TouchableOpacity
+                      onPress={() => handleDeleteComment(comment.id)}
+                      style={styles.deleteCommentButton}
+                    >
+                      <Ionicons name="close" size={20} color="#999" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -461,7 +463,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderColor: 'rgba(0, 0, 0, 0.1)',
-    maxHeight: '80%',
+    height: '60%',
   },
   comment: {
     paddingVertical: 10,
@@ -478,15 +480,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
+  commentUserInfo: {
+    flexDirection: 'row',
+    alignItems: 'baseline', // 'center' 대신 'baseline'을 사용합니다.
+  },
   commentContent: {
     flex: 1,
   },
   commentCreatedAt: {
-    marginLeft: 10,
     fontSize: 12,
+    marginLeft: 5, // 아이디와 timestamp 사이에 약간의 간격을 줍니다.
     color: '#999',
-    fontWeight: 'normal',
-    marginLeft: 5,
   },
   commentUsername: {
     fontWeight: 'bold',
@@ -499,10 +503,7 @@ const styles = StyleSheet.create({
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 10,
+    paddingBottom: 20,
   },
   commentInputProfileImage: {
     width: 40,
@@ -517,15 +518,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 20,
-    paddingHorizontal: 15,
+    paddingLeft: 15,
+    paddingRight: 5,
   },
   input: {
     flex: 1,
     paddingVertical: 8,
   },
   addCommentButton: {
+    alignItems: 'center',
     borderRadius: 20,
-    padding: 3,
+    padding: 5,
     backgroundColor: '#0095f6',
   },
 
