@@ -77,7 +77,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
           console.error("Error fetching like status:", error);
         }
       };
-    
+
       fetchLikeStatus();
       fetchComments(); // fetchComments는 post.id와 연관됨
     }, [post.id, auth.memberId, apiClient]); // dispatch는 제외
@@ -211,7 +211,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
           <Text style={styles.profileusername}>{post.nickname}</Text>
         </View>
         {String(auth.memberId) === String(post.memberId) && (
-          <View>
+          <View style={styles.dropdownContainer}>
             <TouchableOpacity onPress={toggleDropdown}>
               <Ionicons name="ellipsis-horizontal" size={20} color="#666" />
             </TouchableOpacity>
@@ -375,6 +375,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 10,
+    zIndex: 10, // Add this line
+  },
+  dropdownContainer: {
+    zIndex: 20, // Add this line
   },
   headerLeft: {
     flexDirection: "row",
@@ -393,8 +397,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     top: 25,
-    backgroundColor: "rgba(40, 53, 60, 0.8)",
-    zIndex: 1000,
+    backgroundColor: 'rgba(40, 53, 60, 0.8)',
+    zIndex: 30,
     width: 80,
     borderRadius: 8,
   },
