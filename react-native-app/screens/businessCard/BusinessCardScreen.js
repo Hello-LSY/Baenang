@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,32 +11,32 @@ import {
   Alert,
   Modal,
   Button,
-} from "react-native";
-import { useSelector, useDispatch } from "react-redux";
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchBusinessCard,
   clearBusinessCard,
-} from "../../redux/businessCardSlice";
-import QRCode from "react-native-qrcode-svg";
-import { BASE_URL , S3_URL } from "../../constants/config";
+} from '../../redux/businessCardSlice';
+import QRCode from 'react-native-qrcode-svg';
+import { BASE_URL, S3_URL } from '../../constants/config';
 import {
   addFriendByBusinessCardId,
   removeFriendByBusinessCardId,
   fetchFriendsList,
-} from "../../redux/friendSlice";
-import { Camera, CameraView, useCameraPermissions } from "expo-camera"; // Using expo-camera
-import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { Swipeable } from "react-native-gesture-handler";
+} from '../../redux/friendSlice';
+import { Camera, CameraView, useCameraPermissions } from 'expo-camera'; // Using expo-camera
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
+import { Swipeable } from 'react-native-gesture-handler';
 
 // SNS 아이콘 반환 함수
 const getSnsIcon = (platform) => {
   switch (platform.toLowerCase()) {
-    case "facebook":
+    case 'facebook':
       return <FontAwesome name="facebook" size={18} color="#3b5998" />;
-    case "instagram":
+    case 'instagram':
       return <FontAwesome name="instagram" size={18} color="#E1306C" />;
-    case "twitter":
+    case 'twitter':
       return <FontAwesome name="twitter" size={18} color="#1DA1F2" />;
     default:
       return null;
@@ -45,8 +45,8 @@ const getSnsIcon = (platform) => {
 
 // SNS 플랫폼과 아이디 분리 함수
 const parseSnsInfo = (sns) => {
-  if (!sns) return { platform: "", snsId: "" };
-  const [platform, snsId] = sns.split("_");
+  if (!sns) return { platform: '', snsId: '' };
+  const [platform, snsId] = sns.split('_');
   return { platform, snsId };
 };
 
@@ -55,7 +55,7 @@ const BusinessCardScreen = ({ navigation }) => {
   const auth = useSelector((state) => state.auth);
   const { businessCard, loading } = useSelector((state) => state.businessCard);
   const { friendsList } = useSelector((state) => state.friend);
-  const [businessCardIdInput, setBusinessCardIdInput] = useState("");
+  const [businessCardIdInput, setBusinessCardIdInput] = useState('');
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -79,13 +79,13 @@ const BusinessCardScreen = ({ navigation }) => {
     (async () => {
       try {
         const { status } = await Camera.requestCameraPermissionsAsync();
-        setHasPermission(status === "granted");
+        setHasPermission(status === 'granted');
       } catch (error) {
         Alert.alert(
-          "Error",
-          "카메라 권한을 요청하는 동안 오류가 발생했습니다."
+          'Error',
+          '카메라 권한을 요청하는 동안 오류가 발생했습니다.'
         );
-        console.error("Camera permission error: ", error);
+        console.error('Camera permission error: ', error);
       }
     })();
   }, []);
@@ -100,26 +100,26 @@ const BusinessCardScreen = ({ navigation }) => {
   // Card ID로 친구 추가하기
   const handleAddFriendById = (businessCardId) => {
     if (!businessCardId) {
-      Alert.alert("Error", "명함 ID를 입력해주세요.");
+      Alert.alert('Error', '명함 ID를 입력해주세요.');
       return;
     }
     dispatch(
       addFriendByBusinessCardId({ memberId: auth.memberId, businessCardId })
     )
       .then(() => {
-        Alert.alert("Success", "친구가 성공적으로 추가되었습니다.");
+        Alert.alert('Success', '친구가 성공적으로 추가되었습니다.');
         dispatch(fetchFriendsList(auth.memberId));
       })
       .catch(() => {
-        Alert.alert("Error", "친구 추가에 실패했습니다.");
+        Alert.alert('Error', '친구 추가에 실패했습니다.');
       });
   };
 
   // QR코드 스캔 핸들러
   const handleBarCodeScanned = ({ data }) => {
     // Alert로 스캔 이벤트 확인
-    Alert.alert("QR 스캔", "QR 코드가 스캔되었습니다.");
-    console.log("Scanned data:", data);
+    Alert.alert('QR 스캔', 'QR 코드가 스캔되었습니다.');
+    console.log('Scanned data:', data);
     setScanned(true);
     setIsScanning(false);
 
@@ -136,17 +136,17 @@ const BusinessCardScreen = ({ navigation }) => {
           })
         )
           .then(() => {
-            Alert.alert("성공", "새로운 친구가 추가되었습니다.");
+            Alert.alert('성공', '새로운 친구가 추가되었습니다.');
             dispatch(fetchFriendsList(auth.memberId)); // 친구 목록 새로고침
           })
           .catch((error) => {
-            Alert.alert("오류", "친구 추가에 실패했습니다: " + error.message);
+            Alert.alert('오류', '친구 추가에 실패했습니다: ' + error.message);
           });
       } else {
-        Alert.alert("오류", "QR 코드에서 유효한 명함 ID를 찾을 수 없습니다.");
+        Alert.alert('오류', 'QR 코드에서 유효한 명함 ID를 찾을 수 없습니다.');
       }
     } catch (error) {
-      Alert.alert("오류", "QR 코드 데이터가 유효하지 않습니다.");
+      Alert.alert('오류', 'QR 코드 데이터가 유효하지 않습니다.');
     }
   };
 
@@ -154,7 +154,7 @@ const BusinessCardScreen = ({ navigation }) => {
   const handleStartScan = () => {
     setIsScanning(true);
     setScanned(true);
-    console.log("스캐너시작중");
+    console.log('스캐너시작중');
   };
 
   // 스캔 취소 버튼 핸들러
@@ -181,35 +181,35 @@ const BusinessCardScreen = ({ navigation }) => {
     const memberId = auth?.memberId;
 
     if (!memberId) {
-      Alert.alert("Error", "로그인 정보를 찾을 수 없습니다.");
+      Alert.alert('Error', '로그인 정보를 찾을 수 없습니다.');
       return;
     }
 
     console.log(
-      "Deleting friend with memberId:",
+      'Deleting friend with memberId:',
       memberId,
-      "and businessCardId:",
+      'and businessCardId:',
       businessCardId
     ); // 확인용 로그
 
     Alert.alert(
-      "친구 삭제",
-      "이 친구를 정말로 삭제하시겠습니까?",
+      '친구 삭제',
+      '이 친구를 정말로 삭제하시겠습니까?',
       [
         {
-          text: "취소",
-          style: "cancel",
+          text: '취소',
+          style: 'cancel',
         },
         {
-          text: "삭제",
+          text: '삭제',
           onPress: () => {
             dispatch(removeFriendByBusinessCardId({ memberId, businessCardId }))
               .then(() => {
-                Alert.alert("성공", "친구가 삭제되었습니다.");
+                Alert.alert('성공', '친구가 삭제되었습니다.');
                 dispatch(fetchFriendsList(memberId)); // 친구 목록 새로고침
               })
               .catch(() => {
-                Alert.alert("오류", "친구 삭제에 실패했습니다.");
+                Alert.alert('오류', '친구 삭제에 실패했습니다.');
               });
           },
         },
@@ -220,7 +220,7 @@ const BusinessCardScreen = ({ navigation }) => {
 
   const renderRightActions = (businessCardId) => {
     console.log(
-      "Attempting to delete friend with businessCardId:",
+      'Attempting to delete friend with businessCardId:',
       businessCardId
     ); // 확인용 로그
     return (
@@ -246,7 +246,7 @@ const BusinessCardScreen = ({ navigation }) => {
             style={[StyleSheet.absoluteFillObject, styles.cameraStyle]} // 전체 화면을 차지하도록 설정
             onBarcodeScanned={scanned ? handleBarCodeScanned : undefined}
             barCodeScannerSettings={{
-              barCodeTypes: ["qr"],
+              barCodeTypes: ['qr'],
             }}
             autofocus="on"
           />
@@ -297,8 +297,8 @@ const BusinessCardScreen = ({ navigation }) => {
               <View style={styles.businessCard}>
                 <View style={styles.cardHeader}>
                   <Image
-                      source={{ uri: `${S3_URL}/${businessCard.imageUrl}` }}
-                      style={styles.businessCardImage}
+                    source={{ uri: `${S3_URL}/${businessCard.imageUrl}` }}
+                    style={styles.businessCardImage}
                     resizeMode="cover"
                   />
                   <View style={styles.qrCodeWrapper}>
@@ -324,7 +324,7 @@ const BusinessCardScreen = ({ navigation }) => {
                 <TouchableOpacity
                   style={styles.iconEditButton}
                   onPress={() =>
-                    navigation.navigate("UpdateBusinessCard", {
+                    navigation.navigate('UpdateBusinessCard', {
                       businessCardId: businessCard.cardId,
                     })
                   }
@@ -336,7 +336,7 @@ const BusinessCardScreen = ({ navigation }) => {
               <View style={styles.emptyState}>
                 <TouchableOpacity
                   style={styles.createButton}
-                  onPress={() => navigation.navigate("CreateBusinessCard")}
+                  onPress={() => navigation.navigate('CreateBusinessCard')}
                 >
                   <Text style={styles.createButtonText}>명함 생성하기</Text>
                 </TouchableOpacity>
@@ -504,24 +504,24 @@ const BusinessCardScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f9ff",
+    backgroundColor: '#f4f9ff',
     paddingHorizontal: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scannerContainer: {
     flex: 1,
     flexDirection: 'column',
     height: 500,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    backgroundColor: '#fff',
     borderRadius: 20,
-    marginTop : 30,
+    marginTop: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -532,52 +532,52 @@ const styles = StyleSheet.create({
     padding: 10,
     position: 'absolute',
     bottom: -70,
-    backgroundColor: "#3498db",
+    backgroundColor: '#3498db',
     borderRadius: 30,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   cancelScanButtonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
     textAlign: 'center',
     fontWeight: 'bold',
     marginVertical: 5,
   },
   titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginLeft: 10,
-    color: "#2c3e50",
+    color: '#2c3e50',
   },
   cardContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 20,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 10,
     marginBottom: 20,
   },
   businessCard: {
-    backgroundColor: "#f8f8f8",
+    backgroundColor: '#f8f8f8',
     padding: 20,
     borderRadius: 10,
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    width: "100%",
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    width: '100%',
   },
   cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 15,
   },
   businessCardImage: {
@@ -586,79 +586,79 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   qrCodeWrapper: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginRight: 0,
   },
   iconEditButton: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 15,
     right: 10,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 50,
   },
   cardDetails: {
-    alignItems: "flex-start",
+    alignItems: 'flex-start',
     marginTop: 10,
     marginLeft: 5,
   },
   nameText: {
     fontSize: 22,
-    fontWeight: "bold",
-    color: "#34495e",
+    fontWeight: 'bold',
+    color: '#34495e',
     marginBottom: 5,
   },
   subText: {
     fontSize: 16,
-    color: "#7f8c8d",
+    color: '#7f8c8d',
     marginBottom: 5,
   },
   snsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 0,
   },
   snsText: {
     fontSize: 14,
-    color: "#7f8c8d",
+    color: '#7f8c8d',
     marginLeft: 15,
   },
   nameSnsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   introductionText: {
     fontSize: 14,
-    color: "#7f8c8d",
+    color: '#7f8c8d',
     marginTop: 10,
   },
   friendsSection: {
     marginTop: 20,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 10,
     marginBottom: 20,
   },
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   sectionTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   sectionTitle: {
     marginLeft: 10,
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#34495e",
+    fontWeight: 'bold',
+    color: '#34495e',
   },
   addFriendButton: {
     padding: 5,
@@ -668,12 +668,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   friendCard: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   friendImage: {
     width: 50,
@@ -682,59 +682,59 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   friendInfo: {
-    flexDirection: "column",
+    flexDirection: 'column',
   },
   friendCardText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#34495e",
+    fontWeight: 'bold',
+    color: '#34495e',
   },
   friendSubText: {
     fontSize: 14,
-    color: "#7f8c8d",
+    color: '#7f8c8d',
   },
   noFriendsText: {
     fontSize: 16,
-    color: "#999",
-    textAlign: "center",
+    color: '#999',
+    textAlign: 'center',
   },
   addFriendModalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   addFriendModalContent: {
-    width: "80%",
-    backgroundColor: "#fff",
+    width: '80%',
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   addFriendModalCardIdTitle: {
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 5,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   addFriendModalCardId: {
     fontSize: 16,
-    fontWeight: "normal",
-    color: "#7f8c8d",
-    textAlign: "center",
+    fontWeight: 'normal',
+    color: '#7f8c8d',
+    textAlign: 'center',
   },
   closeIcon: {
-    position: "absolute",
+    position: 'absolute',
     top: -40,
     right: 5,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 100,
     padding: 5,
   },
   modalInput: {
     height: 40,
-    width: "100%",
-    borderColor: "#ccc",
+    width: '100%',
+    borderColor: '#ccc',
     borderWidth: 1,
     marginTop: 10,
     marginBottom: 20,
@@ -742,36 +742,36 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     // width: '80%',
-    backgroundColor: "#3498db",
+    backgroundColor: '#3498db',
     padding: 10,
     borderRadius: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   modalButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: '#fff',
+    fontWeight: 'bold',
   },
   qrButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 20,
     marginBottom: 10,
   },
   qrButtonText: {
     marginLeft: 10,
     fontSize: 16,
-    color: "#3498db",
+    color: '#3498db',
   },
   friendModalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   friendModalContent: {
-    width: "80%",
-    backgroundColor: "#fff",
+    width: '80%',
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
   },
@@ -783,38 +783,38 @@ const styles = StyleSheet.create({
   },
   modalFriendName: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 0,
     lineHeight: 22,
   },
   modalFriendInfo: {
     fontSize: 16,
-    color: "#7f8c8d",
+    color: '#7f8c8d',
     marginBottom: 5,
     marginLeft: 5,
   },
   modalNameSnsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
     marginBottom: 10,
   },
   friendSnsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginLeft: 10,
   },
   snsText: {
     fontSize: 14,
-    color: "#7f8c8d",
+    color: '#7f8c8d',
     marginLeft: 4,
     lineHeight: 22,
   },
   myIdSection: {
-    backgroundColor: "#E3F2FD",
+    backgroundColor: '#E3F2FD',
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 15,
     marginBottom: 30,
     width: '100%',
@@ -827,75 +827,75 @@ const styles = StyleSheet.create({
   },
   overlay: {
     // flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scanArea: {
     width: 250,
     height: 250,
     borderWidth: 2,
-    borderColor: "white",
-    backgroundColor: "transparent",
-    justifyContent: "center",
-    alignItems: "center",
+    borderColor: 'white',
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scanText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   scanButton: {
-    backgroundColor: "#3498db",
+    backgroundColor: '#3498db',
     padding: 15,
     borderRadius: 10,
   },
   scanTextContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 100,
     left: 0,
     right: 0,
-    alignItems: "center",
+    alignItems: 'center',
   },
   cornerTL: {
-    position: "absolute",
+    position: 'absolute',
     top: -2,
     left: -2,
     width: 20,
     height: 20,
     borderTopWidth: 4,
     borderLeftWidth: 4,
-    borderColor: "#00ff00",
+    borderColor: '#00ff00',
   },
   cornerTR: {
-    position: "absolute",
+    position: 'absolute',
     top: -2,
     right: -2,
     width: 20,
     height: 20,
     borderTopWidth: 4,
     borderRightWidth: 4,
-    borderColor: "#00ff00",
+    borderColor: '#00ff00',
   },
   cornerBL: {
-    position: "absolute",
+    position: 'absolute',
     bottom: -2,
     left: -2,
     width: 20,
     height: 20,
     borderBottomWidth: 4,
     borderLeftWidth: 4,
-    borderColor: "#00ff00",
+    borderColor: '#00ff00',
   },
   cornerBR: {
-    position: "absolute",
+    position: 'absolute',
     bottom: -2,
     right: -2,
     width: 20,
     height: 20,
     borderBottomWidth: 4,
     borderRightWidth: 4,
-    borderColor: "#00ff00",
+    borderColor: '#00ff00',
   },
 });
 

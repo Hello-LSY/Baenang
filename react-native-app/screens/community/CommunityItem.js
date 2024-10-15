@@ -14,6 +14,7 @@ import { S3_URL } from '../../constants/config'; // S3 URL을 constants에서 �
 import { useAuth } from '../../redux/authState';
 import { getApiClient } from '../../redux/apiClient';
 import Modal from 'react-native-modal';
+import { Swipeable } from 'react-native-gesture-handler';
 import { BottomSheet } from 'react-native-elements';
 import defaultProfileImage from '../../assets/icons/default-profile.png';
 
@@ -140,7 +141,21 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
       }
     }
   };
-
+  const renderRightActions = (commentId, progress, dragX) => {
+    const scale = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+    return (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={() => handleDeleteComment(commentId)}
+      >
+        <Ionicons name="trash-outline" size={24} color="white" />
+      </TouchableOpacity>
+    );
+  };
   const handleDeleteComment = async (commentId) => {
     try {
       await apiClient.delete(`/api/comments/${commentId}`);

@@ -83,7 +83,6 @@ const HomeScreen = ({ navigation }) => {
     };
   }, []);
 
-
   useEffect(() => {
     // 프로필 이미지 경로가 있으면 해당 경로로 설정
     if (profile?.profilePicturePath) {
@@ -230,16 +229,17 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>실시간 환율</Text>
         <View style={styles.exchangeSection}>
-        {loading ? (
-          <Text>Loading...</Text>
-        ) : latestExchangeRates.length > 0 ? (
-          <ExchangeRateCarousel
-            latestExchangeRates={latestExchangeRates}
-            onItemPress={handleExchangeRateClick}
-          />
-        ) : (
-          <Text>환율 정보가 없습니다.</Text>
-        )}
+          {loading ? (
+            <Text>Loading...</Text>
+          ) : latestExchangeRates.length > 0 ? (
+            <ExchangeRateCarousel
+              latestExchangeRates={latestExchangeRates}
+              onItemPress={handleExchangeRateClick}
+              width={SCREEN_WIDTH}
+            />
+          ) : (
+            <Text>환율 정보가 없습니다.</Text>
+          )}
         </View>
       </View>
 
@@ -408,10 +408,7 @@ const HomeScreen = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Image
-              source={profilePicture}
-              style={styles.profileImage}
-            />
+            <Image source={profilePicture} style={styles.profileImage} />
             <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
 
             <TouchableOpacity
@@ -454,7 +451,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#f4f9ff',
     paddingHorizontal: 16,
   },
   header: {
@@ -625,11 +622,12 @@ const styles = StyleSheet.create({
   },
   sectionContents: {
     marginTop: 10,
-    width: '100%'
+    width: '100%',
   },
-  exchangeSection:{
-    height:95,
-  }
+  exchangeSection: {
+    height: 95,
+    paddingHorizontal: 8,
+  },
 });
 
 export default HomeScreen;
