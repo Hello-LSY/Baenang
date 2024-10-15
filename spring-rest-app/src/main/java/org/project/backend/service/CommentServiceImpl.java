@@ -27,29 +27,36 @@ public class CommentServiceImpl implements CommentService {
     private final MemberRepository memberRepository;
 
     @Override
+    @Transactional(readOnly = true)  // 트랜잭션 내에서 메서드 실행
     public List<CommentDTO> getCommentsByPostId(Long postId) {
         List<Comment> comments = commentRepository.findByPostId(postId);
 
         return comments.stream()
                 .map(comment -> {
-                    // postId로 Post 조회 후 memberId를 이용해 Member 조회
-                    Post post = comment.getPost();
-                    Long memberId = post.getMemberId();  // Post의 memberId 사용
-                    Member member = memberRepository.findById(memberId)
-                            .orElseThrow(() -> new RuntimeException("Member not found"));
+                    // comment의 memberId로 Profile 경로 가져오기
+                    String profilePicturePath = null;
 
-                    // Member로 Profile 조회
-                    Profile profile = profileRepository.findByMember(member).orElse(null);
-                    String profilePicturePath = (profile != null) ? profile.getProfilePicturePath() : null;
-
+                    if (comment.getMemberId() != null) {
+                        // memberId로 Member 객체 조회
+                        Member member = memberRepository.findById(comment.getMemberId())
+                                .orElse(null);
+                        if (member != null) {
+                            Profile profile = profileRepository.findByMember(member)
+                                    .orElse(null);
+                            if (profile != null) {
+                                profilePicturePath = profile.getProfilePicturePath();
+                            }
+                        }
+                    }
                     return CommentDTO.builder()
                             .id(comment.getId())
                             .content(comment.getContent())
                             .nickname(comment.getNickname())
+                            .memberId(comment.getMemberId())  // memberId 반환
                             .createdAt(comment.getCreatedAt())
                             .updatedAt(comment.getUpdatedAt())
-                            .postId(post.getId())
-                            .profilePicturePath(profilePicturePath)  // 프로필 사진 경로 추가
+                            .postId(comment.getPost().getId())
+                            .profilePicturePath(profilePicturePath)  // profilePicturePath 설정
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -73,12 +80,19 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        Long memberId = post.getMemberId();  // Post에서 memberId 가져옴
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
-
-        Profile profile = profileRepository.findByMember(member).orElse(null);
-        String profilePicturePath = (profile != null) ? profile.getProfilePicturePath() : null;
+        // comment의 memberId로 Profile 경로 가져오기
+        String profilePicturePath = null;
+        if (savedComment.getMemberId() != null) {
+            Member member = memberRepository.findById(savedComment.getMemberId())
+                    .orElse(null);
+            if (member != null) {
+                Profile profile = profileRepository.findByMember(member)
+                        .orElse(null);
+                if (profile != null) {
+                    profilePicturePath = profile.getProfilePicturePath();
+                }
+            }
+        }
 
         return CommentDTO.builder()
                 .id(savedComment.getId())
@@ -88,12 +102,9 @@ public class CommentServiceImpl implements CommentService {
                 .createdAt(savedComment.getCreatedAt())
                 .updatedAt(savedComment.getUpdatedAt())
                 .postId(postId)
-                .profilePicturePath(profile.getProfilePicturePath())  // Profile의 profilePicturePath 설정
+                .profilePicturePath(profilePicturePath)  // profilePicturePath 설정
                 .build();
     }
-
-
-
 
     @Override
     public void deleteComment(Long id) {

@@ -129,7 +129,7 @@ const TravelCertificationMain = ({ navigation }) => {
       <View style={styles.header}>
         <ProfileButton
           onPress={() => navigation.navigate('Profile')}
-          size={100}
+          size={80}
         />
         <View style={styles.userInfo}>
           <View style={styles.nameContainer}>
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'center',
     width: '100%',
     position: 'relative',
