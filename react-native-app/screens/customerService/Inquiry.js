@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 
 const initialInquiries = [
-  { id: '1', title: '배송 관련 문의', date: '2024-09-15', status: '답변 대기' },
-  { id: '2', title: '결제 오류', date: '2024-09-10', status: '답변 완료' },
-  { id: '3', title: '환불 요청', date: '2024-09-05', status: '처리 중' },
+  { id: '1', title: '문서 인증 관련 문의', date: '2024-09-15', status: '답변 대기' },
+  { id: '2', title: '인증서 불러오기 오류', date: '2024-09-10', status: '답변 완료' },
+  { id: '3', title: '기능 피드백드립니다.', date: '2024-09-05', status: '처리 중' },
 ];
 
 const InquiryItem = ({ item }) => (

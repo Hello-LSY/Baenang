@@ -34,7 +34,7 @@ const AppInfo = () => {
 
       <View style={styles.infoSection}>
         <Text style={styles.label}>개발사</Text>
-        <Text style={styles.value}>예시 주식회사</Text>
+        <Text style={styles.value}>ASIX 주식회사</Text>
       </View>
 
       <View style={styles.infoSection}>
