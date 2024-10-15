@@ -37,6 +37,8 @@ import FlagIcon from '../../components/FlagIcon';
 import * as Font from 'expo-font';
 import defaultProfileImage from '../../assets/icons/default-profile.png';
 import { S3_URL } from '../../constants/config';
+import { Ionicons } from "@expo/vector-icons";
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -405,7 +407,7 @@ const HomeScreen = ({ navigation }) => {
         transparent={true}
         visible={isModalVisible}
         onRequestClose={toggleModal}
-      >
+      >            
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Image
@@ -424,7 +426,7 @@ const HomeScreen = ({ navigation }) => {
                 color="#333"
                 style={styles.modalButtonIcon}
               />
-              <Text style={styles.editProfileButtonText}>개인정보 수정</Text>
+              <Text style={styles.editProfileButtonText}>프로필 관리</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.logoutButton}
@@ -442,7 +444,7 @@ const HomeScreen = ({ navigation }) => {
               style={styles.modalCloseButton}
               onPress={toggleModal}
             >
-              <Text style={styles.modalCloseButtonText}>닫기</Text>
+              <Ionicons name="close" size={24} color="black" />
             </TouchableOpacity>
           </View>
         </View>
@@ -499,7 +501,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 20,
   },
   editProfileButton: {
     flexDirection: 'row',
@@ -535,11 +537,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   modalCloseButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#ddd',
-    alignItems: 'center',
-    width: '100%',
+    position: 'absolute',
+    top: -45,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 30,
+    padding: 5,
+    
   },
   modalCloseButtonText: {
     color: '#333',
