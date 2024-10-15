@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { SafeAreaView, Platform, StatusBar } from 'react-native';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import BusinessCardScreen from '../screens/businessCard/BusinessCardScreen';
@@ -32,17 +33,26 @@ const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
 const MainTabs = () => {
+  const statusBarHeight = Platform.OS === 'ios' ? 20 : StatusBar.currentHeight;
+
   return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarLabelStyle: { fontSize: 16, fontWeight: 'bold' },
-        tabBarStyle: { backgroundColor: 'white' },
-        tabBarIndicatorStyle: { backgroundColor: '#ea4c89' },
-      }}
-    >
-      <Tab.Screen name="홈" component={HomeScreen} />
-      <Tab.Screen name="커뮤니티" component={CommunityHome} />
-    </Tab.Navigator>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <Tab.Navigator
+        screenOptions={{
+          tabBarLabelStyle: { fontSize: 16, fontWeight: 'bold' },
+          tabBarStyle: {
+            backgroundColor: 'white',
+            paddingTop: Platform.OS === 'ios' ? 50 : statusBarHeight,
+            elevation: 0, // Android에서 그림자 제거
+            shadowOpacity: 0, // iOS에서 그림자 제거
+          },
+          tabBarIndicatorStyle: { backgroundColor: '#ea4c89' },
+        }}
+      >
+        <Tab.Screen name="홈" component={HomeScreen} />
+        <Tab.Screen name="커뮤니티" component={CommunityHome} />
+      </Tab.Navigator>
+    </SafeAreaView>
   );
 };
 

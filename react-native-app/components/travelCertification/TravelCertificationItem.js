@@ -6,9 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Button
+  Button,
 } from 'react-native';
-import { BASE_URL , S3_URL } from '../../constants/config';
+import { BASE_URL, S3_URL } from '../../constants/config';
 
 const { width } = Dimensions.get('window');
 

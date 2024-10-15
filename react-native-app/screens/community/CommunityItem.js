@@ -55,14 +55,15 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
   const apiClient = getApiClient(auth.token);
 
   // 서버에서 받은 imageNames에는 이미 /uploads/ 경로가 포함되어 있음.
-  const imagePath = post.imageNames && post.imageNames.length > 0
-    ? post.imageNames[0]
-    : null;
+  const imagePath =
+    post.imageNames && post.imageNames.length > 0 ? post.imageNames[0] : null;
 
   useEffect(() => {
     const fetchLikeStatus = async () => {
       try {
-        const response = await apiClient.get(`/api/likes/post/${post.id}/member/${auth.memberId}`);
+        const response = await apiClient.get(
+          `/api/likes/post/${post.id}/member/${auth.memberId}`
+        );
         setLiked(response.data);
       } catch (error) {
         console.error('Error fetching like status:', error);
@@ -230,23 +231,25 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
       </View>
 
       <View style={styles.postContent}>
-  <Text style={styles.likeCount}>좋아요 {localLikeCount}개</Text>
-  <View style={styles.contentRow}>
-    <Text style={styles.username}>{post.nickname}</Text>
-    <Text style={styles.content}>{post.content}</Text>
-  </View>
+        <Text style={styles.likeCount}>좋아요 {localLikeCount}개</Text>
+        <View style={styles.contentRow}>
+          <Text style={styles.username}>{post.nickname}</Text>
+          <Text style={styles.content}>{post.content}</Text>
+        </View>
 
-    {/* commentsCount가 1개 이상일 때만 댓글 보기 텍스트를 렌더링 */}
-    {commentsCount > 0 && (
-      <TouchableOpacity onPress={toggleCommentModal}>
-        <Text style={styles.viewComments}>
-          <Text style={styles.viewCommentsText}>댓글 {commentsCount}개 모두 보기</Text>
-        </Text>
-      </TouchableOpacity>
-    )}
+        {/* commentsCount가 1개 이상일 때만 댓글 보기 텍스트를 렌더링 */}
+        {commentsCount > 0 && (
+          <TouchableOpacity onPress={toggleCommentModal}>
+            <Text style={styles.viewComments}>
+              <Text style={styles.viewCommentsText}>
+                댓글 {commentsCount}개 모두 보기
+              </Text>
+            </Text>
+          </TouchableOpacity>
+        )}
 
-  <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text>
-</View>
+        <Text style={styles.timeAgo}>{timeAgo(post.createdAt)}</Text>
+      </View>
 
       <Modal
         isVisible={isCommentModalVisible}
@@ -270,7 +273,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
                     </Text>
                     <Text style={styles.commentText}>{comment.content}</Text>
                   </View>
-                    {auth.nickname === comment.nickname && (  // nickname 비교
+                  {auth.nickname === comment.nickname && ( // nickname 비교
                     <TouchableOpacity
                       onPress={() => handleDeleteComment(comment.id)}
                       style={styles.deleteCommentButton}
@@ -493,7 +496,7 @@ const styles = StyleSheet.create({
   timeAgo: {
     color: '#999',
     fontSize: 12,
-    marginTop:5,
+    marginTop: 5,
   },
 
   cancelButton: {
