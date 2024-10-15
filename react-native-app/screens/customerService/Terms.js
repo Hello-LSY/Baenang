@@ -9,7 +9,7 @@ const Terms = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>1. 서비스 이용 약관</Text>
         <Text style={styles.content}>
-          본 약관은 [회사명]이 제공하는 모든 서비스의 이용 조건 및 절차, 회사와
+          본 약관은 'BAENANG'이 제공하는 모든 서비스의 이용 조건 및 절차, 회사와
           회원 간의 권리, 의무 및 책임사항 등을 규정하고 있습니다.
         </Text>
       </View>
