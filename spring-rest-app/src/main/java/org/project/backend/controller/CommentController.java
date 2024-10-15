@@ -22,8 +22,10 @@ public class CommentController {
 
     @PostMapping("/post/{postId}")
     public ResponseEntity<CommentDTO> addComment(@PathVariable Long postId, @RequestBody CommentDTO commentDTO) {
+        System.out.println("Received CommentDTO: " + commentDTO); // 로그 추가
         return ResponseEntity.ok(commentService.addComment(postId, commentDTO));
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id) {

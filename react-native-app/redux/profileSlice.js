@@ -77,6 +77,10 @@ const profileSlice = createSlice({
       state.isPasswordChecked = false;
       state.error = null;
     },
+    // 비밀번호 확인 상태 초기화
+    resetPasswordCheck: (state) => {
+      state.isPasswordChecked = false; // 비밀번호 확인 상태 초기화
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -111,5 +115,5 @@ const profileSlice = createSlice({
   },
 });
 
-export const { clearProfileState } = profileSlice.actions;
+export const { clearProfileState, resetPasswordCheck } = profileSlice.actions;
 export default profileSlice.reducer;

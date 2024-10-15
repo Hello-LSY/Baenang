@@ -11,9 +11,13 @@ import {
   RefreshControl,
   Dimensions,
   Animated,
+  Alert,
+  Linking
 } from 'react-native';
 import { useAuth } from '../../redux/authState';
 import { useExchangeRate } from '../../redux/exchangeRateState';
+import { fetchProfile } from '../../redux/profileSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import DocumentWallet2 from '../../components/DocumentWallet2';
 import ServiceButton from '../../components/ServiceButton';
 import BussinessCard from '../../assets/icons/ID.png';
@@ -34,17 +38,23 @@ import ExchangeRateCarousel from '../../components/ExchangeRateCarousel';
 import FlagIcon from '../../components/FlagIcon';
 import * as Font from 'expo-font';
 import defaultProfileImage from '../../assets/icons/default-profile.png';
+import { S3_URL } from '../../constants/config';
+import { Ionicons } from "@expo/vector-icons";
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [isModalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { auth, logout } = useAuth();
+  const { profile } = useSelector((state) => state.profile); // 프로필 상태에서 profile 정보 가져옴
   const { latestExchangeRates, fetchLatestRates, loading } = useExchangeRate();
   const scrollX = useRef(new Animated.Value(0)).current;
   const slideIntervalRef = useRef(null);
+  const [profilePicture, setProfilePicture] = useState(defaultProfileImage); // 기본 이미지를 초기 값으로 설정
 
   const documents = [
     { title: '주민등록증', isNew: false },
@@ -70,11 +80,22 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     fetchLatestRates(); // 최신 환율 데이터를 가져옴
     startAutoSlide();
+    dispatch(fetchProfile());
 
     return () => {
       clearInterval(slideIntervalRef.current);
     };
   }, []);
+
+
+  useEffect(() => {
+    // 프로필 이미지 경로가 있으면 해당 경로로 설정
+    if (profile?.profilePicturePath) {
+      setProfilePicture({ uri: `${S3_URL}/${profile.profilePicturePath}` }); // URL 경로로 이미지 불러옴
+    } else {
+      setProfilePicture(defaultProfileImage); // 없으면 기본 이미지 설정
+    }
+  }, [profile]);
 
   const startAutoSlide = () => {
     slideIntervalRef.current = setInterval(() => {
@@ -153,6 +174,45 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('ExchangeRateDetail', { currencyCode });
   };
 
+  const externalServices = [
+    {
+      title: 'KB 차차차',
+      imgSrc: kbc,
+      link: 'https://www.kbchachacha.com', // KB 차차차 링크
+    },
+    {
+      title: 'KB손해보험',
+      imgSrc: kbs,
+      link: 'https://www.kbinsure.co.kr', // KB손해보험 링크
+    },
+    {
+      title: '에어비앤비',
+      imgSrc: airbnb,
+      link: 'https://www.airbnb.com', // 에어비앤비 링크
+    },
+    {
+      title: '티머니고',
+      imgSrc: tmg,
+      link: 'https://www.tmoney.co.kr', // 티머니고 링크
+    },
+    {
+      title: '부킹닷컴',
+      imgSrc: booking,
+      link: 'https://www.booking.com', // 부킹닷컴 링크
+    },
+    {
+      title: '아고다',
+      imgSrc: agoda,
+      link: 'https://www.agoda.com', // 아고다 링크
+    },
+  ];
+  // 링크로 이동하는 함수
+  const handleExternalLink = (url) => {
+    Linking.openURL(url).catch((err) =>
+      Alert.alert('링크를 열 수 없습니다.', err.message)
+    );
+  };  
+
   return (
     <ScrollView
       style={styles.container}
@@ -212,6 +272,7 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>실시간 환율</Text>
+        <View style={styles.exchangeSection}>
         {loading ? (
           <Text>Loading...</Text>
         ) : latestExchangeRates.length > 0 ? (
@@ -222,6 +283,7 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <Text>환율 정보가 없습니다.</Text>
         )}
+        </View>
       </View>
 
       {/* <View style={styles.section}>
@@ -326,54 +388,83 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>외부 서비스</Text>
+        
         <View style={styles.row}>
-          <ExternalServiceButton title="KB 차차차" imgSrc={kbc} />
-          <ExternalServiceButton title="KB손해보험" imgSrc={kbs} />
+          <ExternalServiceButton 
+            title="KB 차차차" 
+            imgSrc={kbc} 
+            onPress={() => handleExternalLink('https://www.kbchachacha.com')} // 링크 추가
+          />
+          <ExternalServiceButton 
+            title="KB손해보험" 
+            imgSrc={kbs} 
+            onPress={() => handleExternalLink('https://www.kbinsure.co.kr')} // 링크 추가
+          />
         </View>
+        
         <View style={styles.row}>
-          <ExternalServiceButton title="에어비앤비" imgSrc={airbnb} />
-          <ExternalServiceButton title="티머니고" imgSrc={tmg} />
+          <ExternalServiceButton 
+            title="에어비앤비" 
+            imgSrc={airbnb} 
+            onPress={() => handleExternalLink('https://www.airbnb.com')} // 링크 추가
+          />
+          <ExternalServiceButton 
+            title="티머니고" 
+            imgSrc={tmg} 
+            onPress={() => handleExternalLink('https://www.tmoney.co.kr')} // 링크 추가
+          />
         </View>
+        
         <View style={styles.row}>
-          <ExternalServiceButton title="부킹닷컴" imgSrc={booking} />
-          <ExternalServiceButton title="아고다" imgSrc={agoda} />
+          <ExternalServiceButton 
+            title="부킹닷컴" 
+            imgSrc={booking} 
+            onPress={() => handleExternalLink('https://www.booking.com')} // 링크 추가
+          />
+          <ExternalServiceButton 
+            title="아고다" 
+            imgSrc={agoda} 
+            onPress={() => handleExternalLink('https://www.agoda.com')} // 링크 추가
+          />
         </View>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>고객센터</Text>
-        <Text style={styles.sectionSubtitle}>
-          {
-            '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'
-          }
-        </Text>
+        <View style={styles.sectionContents}>
+          <Text style={styles.sectionSubtitle}>
+            {
+              '운영시간 평일 10:00 - 18:00 (토 일, 공휴일 휴무)\n점심시간 평일 13:00 - 14:00\n'
+            }
+          </Text>
 
-        <View style={styles.row}>
-          <CustomButton
-            title="자주 묻는 질문"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
-          />
-          <CustomButton
-            title="공지사항"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
-          />
-        </View>
-        <View style={styles.row}>
-          <CustomButton
-            title="사용 가이드"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-            onPress={() => navigation.navigate('CustomerService')}
-          />
-          <CustomButton
-            title="챗봇 상담"
-            style={styles.cscenter}
-            textStyle={styles.cscenterText}
-          />
+          <View style={styles.row}>
+            <CustomButton
+              title="자주 묻는 질문"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+              onPress={() => navigation.navigate('CustomerService')}
+            />
+            <CustomButton
+              title="공지사항"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+              onPress={() => navigation.navigate('CustomerService')}
+            />
+          </View>
+          <View style={styles.row}>
+            <CustomButton
+              title="사용 가이드"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+              onPress={() => navigation.navigate('CustomerService')}
+            />
+            <CustomButton
+              title="챗봇 상담"
+              style={styles.cscenter}
+              textStyle={styles.cscenterText}
+            />
+          </View>
         </View>
       </View>
 
@@ -382,11 +473,11 @@ const HomeScreen = ({ navigation }) => {
         transparent={true}
         visible={isModalVisible}
         onRequestClose={toggleModal}
-      >
+      >            
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Image
-              source={defaultProfileImage}
+              source={profilePicture}
               style={styles.profileImage}
             />
             <Text style={styles.modalTitle}>{auth.nickname || '사용자'}</Text>
@@ -401,7 +492,7 @@ const HomeScreen = ({ navigation }) => {
                 color="#333"
                 style={styles.modalButtonIcon}
               />
-              <Text style={styles.editProfileButtonText}>개인정보 수정</Text>
+              <Text style={styles.editProfileButtonText}>프로필 관리</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.logoutButton}
@@ -419,7 +510,7 @@ const HomeScreen = ({ navigation }) => {
               style={styles.modalCloseButton}
               onPress={toggleModal}
             >
-              <Text style={styles.modalCloseButtonText}>닫기</Text>
+              <Ionicons name="close" size={24} color="black" />
             </TouchableOpacity>
           </View>
         </View>
@@ -476,7 +567,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 20,
   },
   editProfileButton: {
     flexDirection: 'row',
@@ -512,11 +603,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   modalCloseButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#ddd',
-    alignItems: 'center',
-    width: '100%',
+    position: 'absolute',
+    top: -45,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 30,
+    padding: 5,
+    
   },
   modalCloseButtonText: {
     color: '#333',
@@ -538,10 +631,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginTop: 20,
+    marginLeft: 10,
   },
   sectionSubtitle: {
     marginTop: 5,
+    marginLeft: 10,
   },
   row: {
     flexDirection: 'row',
@@ -598,6 +693,13 @@ const styles = StyleSheet.create({
   cscenterText: {
     color: 'white',
   },
+  sectionContents: {
+    marginTop: 10,
+    width: '100%'
+  },
+  exchangeSection:{
+    height:95,
+  }
 });
 
 export default HomeScreen;

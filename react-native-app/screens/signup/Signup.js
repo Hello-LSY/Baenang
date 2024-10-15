@@ -185,7 +185,7 @@ const Signup = ({ navigation }) => {
           </View>
 
           <View style={styles.registrationContainer}>
-            <Text style={styles.registrationLabel}>주민등록번호</Text>
+            <Text style={styles.label}>주민등록번호</Text>
             <View style={styles.registrationFields}>
               <TextInput
                 style={styles.registrationInput}
@@ -208,7 +208,7 @@ const Signup = ({ navigation }) => {
 
           {/* 성별 선택 */}
           <View style={styles.genderContainer}>
-            <Text style={styles.genderLabel}>성별</Text>
+            <Text style={styles.label}>성별</Text>
             <View style={styles.radioButtonContainer}>
               <TouchableOpacity
                 style={styles.radioButton}
@@ -252,9 +252,11 @@ const Signup = ({ navigation }) => {
           </View>
 
           {/* 출생년도, 월, 일 */}
+          
+          <Text style={styles.label}>생년월일</Text>
           <View style={styles.birthDateContainer}>
             <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>출생년도</Text>
+              <Text style={styles.pickerLabel}>년도</Text>
               <DropDownPicker
                 open={openYear}
                 value={birthYear}
@@ -362,9 +364,10 @@ const styles = StyleSheet.create({
   registrationContainer: {
     marginBottom: 16,
   },
-  registrationLabel: {
+  label: {
     fontSize: 16,
-    marginBottom: 8,
+    marginVertical: 20,
+    fontWeight: 'bold'
   },
   registrationFields: {
     flexDirection: 'row',
@@ -384,10 +387,6 @@ const styles = StyleSheet.create({
   },
   genderContainer: {
     marginBottom: 16,
-  },
-  genderLabel: {
-    fontSize: 16,
-    marginBottom: 8,
   },
   radioButtonContainer: {
     flexDirection: 'row',
