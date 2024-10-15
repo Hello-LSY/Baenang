@@ -21,7 +21,7 @@ const ProfileButton = ({
   size = 50,
 }) => {
   const BUTTON_SIZE = size;
-  const IMAGE_SIZE = size * 0.8; // 이미지 크기를 버튼 크기의 80%로 설정
+  const IMAGE_SIZE = size * 0.85; // 이미지 크기를 버튼 크기의 80%로 설정
 
   const rotation = useSharedValue(0);
   const dispatch = useDispatch();
