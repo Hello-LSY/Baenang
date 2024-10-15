@@ -1,51 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  Animated,
-  PanResponder,
-} from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
 import FlagIcon from '../components/FlagIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEM_WIDTH = SCREEN_WIDTH * 0.8;
 
-const ExchangeRateCarousel = ({ latestExchangeRates, onItemPress }) => {
+const ExchangeRateCarousel = ({ latestExchangeRates, onItemPress, width }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const position = useRef(new Animated.Value(0)).current;
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gesture) => {
-        position.setValue(gesture.dx);
-      },
-      onPanResponderRelease: (_, gesture) => {
-        if (Math.abs(gesture.dx) > ITEM_WIDTH * 0.4) {
-          const direction = gesture.dx > 0 ? -1 : 1;
-          Animated.timing(position, {
-            toValue: direction * ITEM_WIDTH,
-            duration: 250,
-            useNativeDriver: true,
-          }).start(() => {
-            const newIndex = Math.max(
-              0,
-              Math.min(currentIndex + direction, latestExchangeRates.length - 1)
-            );
-            setCurrentIndex(newIndex);
-            position.setValue(0);
-          });
-        } else {
-          Animated.spring(position, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
+  const ITEM_WIDTH = width;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -71,13 +33,10 @@ const ExchangeRateCarousel = ({ latestExchangeRates, onItemPress }) => {
       (index + 1) * ITEM_WIDTH,
     ];
 
-    const translateX = Animated.add(
-      scrollX.interpolate({
-        inputRange,
-        outputRange: [ITEM_WIDTH, 0, -ITEM_WIDTH],
-      }),
-      position
-    );
+    const translateX = scrollX.interpolate({
+      inputRange,
+      outputRange: [ITEM_WIDTH, 0, -ITEM_WIDTH],
+    });
 
     const scale = scrollX.interpolate({
       inputRange,
@@ -137,7 +96,7 @@ const ExchangeRateCarousel = ({ latestExchangeRates, onItemPress }) => {
   };
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
+    <View style={styles.container}>
       {latestExchangeRates.map((item, index) =>
         renderExchangeRate(item, index)
       )}
@@ -150,10 +109,10 @@ const styles = StyleSheet.create({
     height: 120,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   exchangeItem: {
     position: 'absolute',
-    width: ITEM_WIDTH,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

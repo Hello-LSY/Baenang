@@ -16,7 +16,10 @@ import DocumentCard2 from './DocumentCard2';
 import DocumentModal from './DocumentModal';
 import { useNavigation } from '@react-navigation/native';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -57,7 +60,11 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
   };
 
   const openModal = (document) => {
-    const unavailableDocuments = ['예방접종증명서', '출입국사실증명서', '여행보험증명서'];
+    const unavailableDocuments = [
+      '예방접종증명서',
+      '출입국사실증명서',
+      '여행보험증명서',
+    ];
 
     if (unavailableDocuments.includes(document.title)) {
       setCustomAlertVisible(true); // 서비스 준비중 모달 표시
@@ -74,7 +81,10 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
         <Text style={styles.expandButton}>{expanded ? '접기' : '펼치기'}</Text>
       </Pressable>
       <Animated.View
-        style={[styles.contentWrapper, { height: animatedHeight, overflow: 'hidden' }]}
+        style={[
+          styles.contentWrapper,
+          { height: animatedHeight, overflow: 'hidden' },
+        ]}
       >
         <View style={styles.content} onLayout={onContentLayout}>
           {documents.map((doc, index) => (
@@ -111,7 +121,9 @@ const DocumentWallet2 = ({ title, documents, backgroundColors = [] }) => {
         <View style={styles.alertContainer}>
           <View style={styles.alertBox}>
             <Text style={styles.alertTitle}>서비스 준비중</Text>
-            <Text style={styles.alertMessage}>해당 문서는 아직 준비중입니다.</Text>
+            <Text style={styles.alertMessage}>
+              해당 문서는 아직 준비중입니다.
+            </Text>
             <TouchableOpacity
               style={styles.alertButton}
               onPress={() => setCustomAlertVisible(false)}
