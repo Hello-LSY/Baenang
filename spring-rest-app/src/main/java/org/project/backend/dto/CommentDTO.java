@@ -19,4 +19,5 @@ public class CommentDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long postId;
+    private String profilePicturePath; // 프로필 사진 경로 추가
 }
