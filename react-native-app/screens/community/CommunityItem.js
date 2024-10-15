@@ -305,6 +305,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
             </View>
           </View>
         </View>
+        
       </Modal>
     </View>
   );
