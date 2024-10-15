@@ -25,4 +25,5 @@ public class PostDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long memberId;
+    private String profilePicturePath;  // 프로필 사진 경로 필드 추가
 }
