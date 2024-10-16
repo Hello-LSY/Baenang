@@ -88,7 +88,7 @@ const CommunityItem = ({ post, onDelete, onEdit }) => {
       setComments(response.data);
       setCommentsCount(response.data.length);
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      //console.error('Error fetching comments:', error);
     }
   };
 

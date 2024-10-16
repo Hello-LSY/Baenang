@@ -3,6 +3,7 @@ import { Modal, View, Text, Pressable, StyleSheet, Image, ActivityIndicator, Ani
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchISIC } from '../../redux/documentItemSlice';
 import { Ionicons } from "@expo/vector-icons";
+import { S3_URL } from '../../constants/config';
 
 const ISICModal = ({ visible, onClose }) => {
   // Animated Value 생성
@@ -108,7 +109,7 @@ const ISICModal = ({ visible, onClose }) => {
                         {isic.imagePath && (
                           <View style={styles.imageContainer}>
                             <Image
-                              source={require('../../assets/images/document/testImage.jpg')}
+                              source={{ uri: `${S3_URL}/uploads/${isic.imagePath}` }}
                               style={styles.image}
                             />
                           </View>

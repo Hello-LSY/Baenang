@@ -3,6 +3,7 @@ import { Modal, View, Text, Pressable, StyleSheet, Image, ActivityIndicator, Ani
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPassport } from '../../redux/documentItemSlice';
 import { Ionicons } from "@expo/vector-icons";
+import { S3_URL } from '../../constants/config';
 
 const PassportModal = ({ visible, onClose }) => {
   // Animated Value 생성
@@ -118,7 +119,7 @@ const PassportModal = ({ visible, onClose }) => {
                         {passport.imagePath && (
                           <View style={styles.imageContainer}>
                             <Image
-                              source={require('../../assets/images/document/testImage.jpg')}
+                              source={{ uri: `${S3_URL}/uploads/${passport.imagePath}` }}
                               style={styles.image}
                             />
                           </View>
