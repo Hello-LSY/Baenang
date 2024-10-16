@@ -52,7 +52,7 @@ const TravelCertificationModal = ({
   const latitude = convertToDMS(parseFloat(item.latitude), true);
   const longitude = convertToDMS(parseFloat(item.longitude), false);
 
-  console.log('Image URL:', imageUrl);
+  //console.log('Image URL:', imageUrl);
 
   return (
     <Modal

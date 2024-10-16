@@ -69,9 +69,9 @@ const ResidentRegistrationModal = ({ visible, onClose }) => {
             <View style={styles.topColor}></View>
             
             {/* 닫기 버튼 */}
-            <Pressable style={styles.closeButton} onPress={onClose}>
+            {/* <Pressable style={styles.closeButton} onPress={onClose}>
               <Ionicons name="close" size={24} color="black" />
-            </Pressable>
+            </Pressable> */}
 
             {/* 상세보기/간략보기 버튼 */}
             <Pressable style={styles.detailButton} onPress={startRotationAnimation}>

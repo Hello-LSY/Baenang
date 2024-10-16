@@ -243,10 +243,10 @@ const BusinessCardScreen = ({ navigation }) => {
   };
 
   const renderRightActions = (businessCardId) => {
-    console.log(
-      'Attempting to delete friend with businessCardId:',
-      businessCardId
-    ); // 확인용 로그
+    // console.log(
+    //   'Attempting to delete friend with businessCardId:',
+    //   businessCardId
+    // ); // 확인용 로그
     return (
       <TouchableOpacity
         style={styles.deleteButton}
