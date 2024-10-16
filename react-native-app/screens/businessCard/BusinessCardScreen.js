@@ -26,9 +26,33 @@ import {
 } from '../../redux/friendSlice';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera'; // Using expo-camera
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
-
+import Svg, {
+  Defs,
+  LinearGradient,
+  Stop,
+  Rect,
+  Circle,
+} from 'react-native-svg';
+const BackgroundSvg = ({ style }) => (
+  <Svg
+    height="100%"
+    width="100%"
+    style={[StyleSheet.absoluteFillObject, style]}
+  >
+    <Defs>
+      <LinearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <Stop offset="0%" stopColor="#FF6F91" />
+        <Stop offset="50%" stopColor="#6FD3F3" />
+        <Stop offset="100%" stopColor="#FFB3D9" />
+      </LinearGradient>
+    </Defs>
+    <Rect width="100%" height="100%" fill="#f0f0f0" />
+    <Circle cx="-5%" cy="50%" r="60%" fill="url(#gradient)" opacity="0.7" />
+  </Svg>
+);
 // SNS 아이콘 반환 함수
 const getSnsIcon = (platform) => {
   switch (platform.toLowerCase()) {
@@ -228,7 +252,9 @@ const BusinessCardScreen = ({ navigation }) => {
         style={styles.deleteButton}
         onPress={() => handleRemoveFriend(businessCardId)}
       >
-        <Text style={styles.deleteButtonText}>삭제</Text>
+        <View style={styles.deleteButtonContent}>
+          <Ionicons name="trash-outline" size={24} color="white" />
+        </View>
       </TouchableOpacity>
     );
   };
@@ -287,7 +313,6 @@ const BusinessCardScreen = ({ navigation }) => {
         <View>
           {/* 나의 여행 명함 영역 */}
           <View style={styles.titleContainer}>
-            <MaterialIcons name="badge" size={30} color="#34495e" />
             <Text style={styles.title}>나의 여행 명함</Text>
           </View>
 
@@ -347,14 +372,13 @@ const BusinessCardScreen = ({ navigation }) => {
           {/* 명함 수첩 영역 */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleContainer}>
-              <MaterialIcons name="book" size={24} color="#34495e" />
               <Text style={styles.sectionTitle}>명함 수첩</Text>
             </View>
             <TouchableOpacity
               style={styles.addFriendButton}
               onPress={openAddFriendModal}
             >
-              <FontAwesome name="plus" size={18} color="#000" />
+              <Ionicons name="add-circle-outline" size={24} color="#000" />
             </TouchableOpacity>
           </View>
 
@@ -459,39 +483,46 @@ const BusinessCardScreen = ({ navigation }) => {
           >
             <View style={styles.friendModalContainer}>
               <View style={styles.friendModalContent}>
-                <TouchableOpacity
-                  style={styles.closeIcon}
-                  onPress={() => setFriendModalVisible(false)}
-                >
-                  <AntDesign name="close" size={24} color="black" />
-                </TouchableOpacity>
-                {selectedFriend && (
-                  <>
-                    <Image
-                      source={{
-                        uri: `${S3_URL}/${selectedFriend.imageUrl}`,
-                      }}
-                      style={styles.modalFriendImage}
-                    />
-                    <View style={styles.modalNameSnsContainer}>
-                      <Text style={styles.modalFriendName}>
-                        {selectedFriend.name}
-                      </Text>
-                      <View style={styles.friendSnsContainer}>
-                        {getSnsIcon(parseSnsInfo(selectedFriend.sns).platform)}
-                        <Text style={styles.snsText}>
-                          {parseSnsInfo(selectedFriend.sns).snsId}
+                <BackgroundSvg />
+                <View style={styles.friendCardContainer}>
+                  <TouchableOpacity
+                    style={styles.closeIcon}
+                    onPress={() => setFriendModalVisible(false)}
+                  >
+                    <AntDesign name="close" size={24} color="black" />
+                  </TouchableOpacity>
+                  {selectedFriend && (
+                    <View style={styles.cardContent}>
+                      <View style={styles.imageContainer}>
+                        <Image
+                          source={{
+                            uri: `${S3_URL}/${selectedFriend.imageUrl}`,
+                          }}
+                          style={styles.modalFriendImage}
+                        />
+                      </View>
+                      <View style={styles.infoContainer}>
+                        <Text style={styles.modalFriendName}>
+                          {selectedFriend.name}
+                        </Text>
+                        <View style={styles.friendSnsContainer}>
+                          {getSnsIcon(
+                            parseSnsInfo(selectedFriend.sns).platform
+                          )}
+                          <Text style={styles.snsText}>
+                            {parseSnsInfo(selectedFriend.sns).snsId}
+                          </Text>
+                        </View>
+                        <Text style={styles.modalFriendInfo}>
+                          {selectedFriend.email}
+                        </Text>
+                        <Text style={styles.modalFriendInfo}>
+                          {selectedFriend.introduction}
                         </Text>
                       </View>
                     </View>
-                    <Text style={styles.modalFriendInfo}>
-                      {selectedFriend.email}
-                    </Text>
-                    <Text style={styles.modalFriendInfo}>
-                      {selectedFriend.introduction}
-                    </Text>
-                  </>
-                )}
+                  )}
+                </View>
               </View>
             </View>
           </Modal>
@@ -544,35 +575,39 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   titleContainer: {
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginLeft: 10,
-    color: '#2c3e50',
+    color: '#black',
   },
   cardContainer: {
     alignItems: 'center',
     marginTop: 20,
-    padding: 20,
+    paddingHorizontal: 16,
     backgroundColor: '#fff',
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
     marginBottom: 20,
   },
   businessCard: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
     flexDirection: 'column',
     justifyContent: 'flex-start',
     width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -635,9 +670,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   friendsSection: {
-    marginTop: 20,
-    padding: 20,
-    backgroundColor: '#fff',
+    marginTop: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#f4f9fff',
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -647,16 +682,15 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    paddingLeft: 16,
+    alignItems: 'flex-start',
   },
   sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   sectionTitle: {
-    marginLeft: 10,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#34495e',
   },
@@ -668,12 +702,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   friendCard: {
-    backgroundColor: '#f0f0f0',
-    padding: 15,
+    backgroundColor: 'white',
     borderRadius: 10,
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   friendImage: {
     width: 50,
@@ -770,45 +809,59 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   friendModalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    padding: 20,
+    width: '90%',
+    aspectRatio: 90 / 55,
+    maxWidth: 400,
+    backgroundColor: '#transparent',
+    overflow: 'hidden',
     borderRadius: 10,
   },
-  modalFriendImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 15,
+  friendCardContainer: {
+    flex: 1,
+    padding: 20,
   },
-  modalFriendName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 0,
-    lineHeight: 22,
+  closeIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
   },
-  modalFriendInfo: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    marginBottom: 5,
-    marginLeft: 5,
-  },
-  modalNameSnsContainer: {
+  cardContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginBottom: 10,
+  },
+  imageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalFriendImage: {
+    width: 120,
+    height: 120,
+    resizeMode: 'cover',
+    marginLeft: 40,
+    borderRadius: 60,
+  },
+  infoContainer: {
+    flex: 2,
+    marginLeft: 70,
+  },
+  modalFriendName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   friendSnsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 10,
+    marginBottom: 5,
   },
   snsText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginLeft: 4,
-    lineHeight: 22,
+    marginLeft: 5,
+  },
+  modalFriendInfo: {
+    marginBottom: 5,
   },
   myIdSection: {
     backgroundColor: '#E3F2FD',
@@ -896,6 +949,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 4,
     borderRightWidth: 4,
     borderColor: '#00ff00',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '88.5%',
+  },
+  deleteButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
