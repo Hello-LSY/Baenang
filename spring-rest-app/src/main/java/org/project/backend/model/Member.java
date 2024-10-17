@@ -1,9 +1,7 @@
 package org.project.backend.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,15 +15,52 @@ import java.util.Collections;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
+@Table(name = "member") // 테이블명은 소문자로
 public class Member implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
+
+    @Column(name = "username", nullable = false, length = 50)
     private String username;
+
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    // UserDetails 인터페이스 메서드 구현
+    @Column(name = "profile_id")
+    private Long profileId;
+
+    @Column(name = "full_name", length = 50)
+    private String fullName;
+
+    @Column(name = "nickname", length = 30)
+    private String nickname;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(name = "email", length = 50)
+    private String email;
+
+    @Column(name = "birthdate")
+    private String birthdate;
+
+    @Column(name = "registration_number", length = 14) // 주민등록번호
+    private String registrationNumber;
+
+    @OneToOne(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JsonIgnore  // 순환 참조 방지
+    private BusinessCard businessCard;
+
+    // 관계 해제 메서드
+    public void removeBusinessCard() {
+        if (this.businessCard != null) {
+            this.businessCard = null;
+        }
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
@@ -33,26 +68,26 @@ public class Member implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.username; // 인증에 사용할 필드
+        return this.username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // 계정이 만료되지 않았음을 반환
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // 계정이 잠기지 않았음을 반환
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 자격 증명이 만료되지 않았음을 반환
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // 계정이 활성화되었음을 반환
+        return true;
     }
 }

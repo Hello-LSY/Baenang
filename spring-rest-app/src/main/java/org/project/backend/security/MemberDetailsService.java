@@ -4,14 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.project.backend.model.Member;
 import org.project.backend.repository.MemberRepository;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
 
 /**
  * 사용자 세부 정보를 로드하는 서비스 클래스.
@@ -36,19 +32,12 @@ public class MemberDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 사용자 이름으로 Member 객체를 조회하거나 예외를 던진다.
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        // Member 객체에서 권한 정보를 가져온다.
-        Collection<? extends GrantedAuthority> authorities = member.getAuthorities();
+        // 로그에 사용자 이름을 기록
+//        log.debug("Loaded user: {}", member.getUsername());
 
-        // 로그에 사용자 이름과 비밀번호를 기록 (디버그용)
-        log.debug("Loaded user: {}, password: {}", member.getUsername(), member.getPassword());
-
-        // Spring Security의 User 객체를 생성하여 반환
-        return new User(
-                member.getUsername(),
-                member.getPassword(), // 암호화된 비밀번호 사용
-                authorities
-        );
+        // Member 객체 자체를 반환 (UserDetails 인터페이스를 구현하므로 가능)
+        return member;
     }
 }

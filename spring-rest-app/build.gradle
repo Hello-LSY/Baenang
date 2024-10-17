@@ -28,7 +28,7 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:5.6.15.Final'
 
     // MySQL 드라이버
-    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
     // Spring Web MVC
     implementation 'org.springframework:spring-webmvc:5.3.22'
@@ -42,12 +42,15 @@ dependencies {
     implementation 'org.springframework.security:spring-security-web:5.7.7'
     implementation 'org.springframework.security:spring-security-config:5.7.7'
 
+    // JWT API
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     // Logback 및 SLF4J
-    implementation 'ch.qos.logback:logback-classic:1.2.11'
+//    implementation 'ch.qos.logback:logback-classic:1.2.11'
 
     // HikariCP
     implementation 'com.zaxxer:HikariCP:5.0.1'
@@ -55,7 +58,6 @@ dependencies {
     // Hibernate Validator
     implementation 'org.hibernate.validator:hibernate-validator:6.0.13.Final'
     implementation 'javax.validation:validation-api:2.0.1.Final'
-
 
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
@@ -74,12 +76,39 @@ dependencies {
     // JSON 처리 라이브러리
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
 
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3'
+
     // Hamcrest
     testImplementation 'org.hamcrest:hamcrest:2.2'
+
+    // QR 라이브러리
+    implementation 'com.google.zxing:core:3.5.1'
+    implementation 'com.google.zxing:javase:3.5.1'
+
+    // Swagger (SpringFox 2.9.2 버전)
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+
+    // http 관련 라이브러리
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+
+    // 파일 업로드 관련 라이브러리
+    implementation 'commons-fileupload:commons-fileupload:1.4'
+
+    // JavaMailSender 이메일 인증 라이브러리
+    implementation 'org.springframework:spring-context-support:5.3.22'
+
+    // Javax Mail 의존성 추가
+    implementation 'com.sun.mail:javax.mail:1.6.2'
+
+    implementation 'software.amazon.awssdk:s3:2.17.28'
+    implementation 'software.amazon.awssdk:core:2.17.28'
+
 }
 
+
 war {
-    archiveFileName = 'backend.war'
+    archiveFileName = 'baenang.war'
 }
 
 test {
